@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Starter Site</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            display: inline-block;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to My Website</h1>
+        <p>This is a simple starter page with a PayPal button.</p>
+
+        <!-- PayPal button (sandbox mode for testing) -->
+        <form action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_blank">
+            <input type="hidden" name="cmd" value="_s-xclick">
+            <!-- Replace this hosted_button_id with your actual PayPal button ID -->
+            <input type="hidden" name="hosted_button_id" value="YOUR_BUTTON_ID_HERE">
+            <input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_buynow_LG.gif" 
+                   border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+            <img alt="" border="0" width="1" height="1" 
+                 src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" >
+        </form>
+
+        <p style="margin-top: 20px; font-size: 0.9em;">Replace <code>YOUR_BUTTON_ID_HERE</code> with your real PayPal button ID.</p>
+    </div>
+</body>
+</html>
