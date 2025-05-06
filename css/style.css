@@ -46,7 +46,7 @@ nav a:hover {
 
 .featured-books {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
     gap: 2rem;
     margin-bottom: 3rem;
 }
@@ -67,7 +67,7 @@ nav a:hover {
     max-width: 100%;
     height: auto;
     display: block;
-    margin-bottom: 1rem;
+    margin-bottom: 0 auto 1rem;
 }
 
 .book-info {
