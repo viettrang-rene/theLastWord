@@ -56,14 +56,19 @@ nav a:hover {
     padding: 1rem;
     border-radius: 5px;
     transition: transform 0.3s;
-    text-align: center; /* Centers text content too */
+    /* Flexbox centering */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centers horizontally */
+    justify-content: center; /* Centers vertically (if needed) */
+    text-align: center; /* Centers text */
 }
 
 .book-card img {
-    display: block;
     width: 200px; /* Control image size */
     height: auto;
-    margin: 0 auto 1rem; /* Center with space below */
+    margin-bottom: 1rem; /* Space below image */
+    /* No need for margin: 0 auto with Flexbox parent */
 }
 
 .book-card:hover {
