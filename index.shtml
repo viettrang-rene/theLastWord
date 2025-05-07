@@ -6,7 +6,7 @@
     <div class="book-grid">
         <div class="book-card">
             <a href="books/english-grammar-in-use.shtml">
-                <img src="images/english-grammar-in-use.jpg" alt="English Grammar in Use">
+                <img src="images/english-grammar-in-use.png" alt="English Grammar in Use">
                 <h3>English Grammar in Use</h3>
             </a>
             <p>Raymond Murphy's classic grammar reference</p>
