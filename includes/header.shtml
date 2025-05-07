@@ -14,7 +14,7 @@
     
     <nav>
         <ul>
-            <li><a href="../index.html">Home</a></li>
+            <li><a href="../index.shtml">Home</a></li>
             <li><a href="../books/">Books</a></li>
         </ul>
     </nav>
