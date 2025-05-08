@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Practice</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      color: #333;
+      text-align: center;
+      padding: 20px;
+    }
+    .dark-mode {
+      background-color: #222;
+      color: white;
+    }
+    .container {
+      max-width: 400px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .dark-mode .container {
+      background: #333;
+    }
+    button {
+      padding: 10px 20px;
+      margin: 10px;
+      font-size: 16px;
+    }
+    input[type="number"] {
+      font-size: 20px;
+      padding: 5px;
+      width: 100px;
+      margin: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Math Practice</h1>
+    <label><input type="radio" name="level" value="easy" checked> Easy</label>
+    <label><input type="radio" name="level" value="medium"> Medium</label>
+    <label><input type="radio" name="level" value="hard"> Hard</label>
+    <br><br>
+    <div id="equation">Press Start</div>
+    <input type="number" id="answer" placeholder="Your answer" />
+    <br>
+    <button onclick="checkAnswer()">Submit</button>
+    <button onclick="generateEquation()">Skip</button>
+    <br>
+    <label><input type="checkbox" id="ttsToggle" checked> Voice</label>
+    <label><input type="checkbox" id="darkModeToggle"> Dark Mode</label>
+    <p id="score">Score: 0</p>
+    <p id="timer">Time Left: 60s</p>
+    <button onclick="startGame()">Start</button>
+  </div>
+
+  <script>
+    let correctAnswer = 0;
+    let score = 0;
+    let timeLeft = 60;
+    let timerInterval = null;
+
+    const speak = (text) => {
+      if (document.getElementById('ttsToggle').checked) {
+        const msg = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(msg);
+      }
+    };
+
+    const generateEquation = () => {
+      const level = document.querySelector('input[name="level"]:checked').value;
+      let min, max;
+      if (level === 'easy') {
+        min = 0; max = 9;
+      } else if (level === 'medium') {
+        min = 10; max = 99;
+      } else {
+        min = 100; max = 999;
+      }
+      const a = Math.floor(Math.random() * (max - min + 1)) + min;
+      const b = Math.floor(Math.random() * (max - min + 1)) + min;
+      correctAnswer = a + b;
+      document.getElementById('equation').innerText = `${a} + ${b} = ?`;
+      speak(`${a} plus ${b}`);
+    };
+
+    const checkAnswer = () => {
+      const userAnswer = parseInt(document.getElementById('answer').value);
+      if (userAnswer === correctAnswer) {
+        score++;
+        document.getElementById('score').innerText = `Score: ${score}`;
+        generateEquation();
+      }
+      document.getElementById('answer').value = '';
+    };
+
+    const startGame = () => {
+      score = 0;
+      timeLeft = 60;
+      document.getElementById('score').innerText = `Score: ${score}`;
+      document.getElementById('timer').innerText = `Time Left: ${timeLeft}s`;
+      generateEquation();
+      clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById('timer').innerText = `Time Left: ${timeLeft}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          alert(`Time's up! Final Score: ${score}`);
+        }
+      }, 1000);
+    };
+
+    document.getElementById('darkModeToggle').addEventListener('change', (e) => {
+      document.body.classList.toggle('dark-mode', e.target.checked);
+    });
+  </script>
+</body>
+</html>
