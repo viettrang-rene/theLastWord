@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrepreneurial Public Speaking Club | ESL Study Guides</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/club.css">
+</head>
+<body>
+    <!--#include virtual="includes/header.html" -->
+
+    <main class="club-container">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Entrepreneurial Public Speaking Club</h1>
+                <h2>Ages 7–13 | Project-Based | Choose Your Path | Badge Awards</h2>
+                <p>Where young entrepreneurs learn by doing and gain confidence through public speaking!</p>
+                <div class="cta-buttons">
+                    <a href="#projects" class="btn primary">Explore Projects</a>
+                    <a href="#how-it-works" class="btn secondary">How It Works</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="images/club-hero.png" alt="Kids presenting and running lemonade stands">
+            </div>
+        </section>
+
+        <!-- Program Highlights -->
+        <section class="highlights">
+            <div class="highlight-card">
+                <i class="fas fa-project-diagram"></i>
+                <h3>Project-Based</h3>
+                <p>Kids pick projects they're excited about - no fixed order!</p>
+            </div>
+            <div class="highlight-card">
+                <i class="fas fa-microphone"></i>
+                <h3>Public Speaking</h3>
+                <p>Every project ends with a 2-3 minute presentation</p>
+            </div>
+            <div class="highlight-card">
+                <i class="fas fa-trophy"></i>
+                <h3>Badge Awards</h3>
+                <p>Earn electronic badges for each completed project</p>
+            </div>
+            <div class="highlight-card">
+                <i class="fas fa-users"></i>
+                <h3>Flexible Groups</h3>
+                <p>Present to club members, parents, or friends</p>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section id="how-it-works" class="how-it-works">
+            <h2>How Our Club Works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Choose a Project</h3>
+                    <p>Pick from our menu of exciting entrepreneurial projects</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Work on Your Task</h3>
+                    <p>Create, build, and prepare during "Work Time"</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Prepare Your Talk</h3>
+                    <p>Develop a 2-3 minute presentation about your project</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <h3>Share & Earn Badges</h3>
+                    <p>Present during "Talk Time" and earn your electronic badge</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Project Categories Carousel -->
+        <section id="projects" class="project-categories">
+            <h2>Project Categories</h2>
+            <p>Kids can pick and choose projects from these categories</p>
+            
+            <div class="category-carousel">
+                <div class="category-card active" data-category="business">
+                    <i class="fas fa-lemon"></i>
+                    <h3>Mini Business Creation</h3>
+                    <p>Launch small ventures like lemonade stands</p>
+                </div>
+                <div class="category-card" data-category="marketing">
+                    <i class="fas fa-bullhorn"></i>
+                    <h3>Marketing & Branding</h3>
+                    <p>Create ads, logos, and brand stories</p>
+                </div>
+                <div class="category-card" data-category="money">
+                    <i class="fas fa-coins"></i>
+                    <h3>Money & Business</h3>
+                    <p>Learn pricing, budgeting, and money skills</p>
+                </div>
+                <div class="category-card" data-category="leadership">
+                    <i class="fas fa-users"></i>
+                    <h3>Collaboration & Leadership</h3>
+                    <p>Work in teams and solve problems</p>
+                </div>
+                <div class="category-card" data-category="digital">
+                    <i class="fas fa-laptop"></i>
+                    <h3>Digital Projects</h3>
+                    <p>Create online shops and digital content</p>
+                </div>
+            </div>
+            <div class="carousel-nav">
+                <button class="carousel-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+
+        <!-- Projects Display -->
+        <section class="projects-display">
+            <h2 id="current-category">Mini Business Creation Projects</h2>
+            
+            <div class="projects-grid" id="business-projects">
+                <!-- Mini Business Creation Projects -->
+                <div class="project-card">
+                    <div class="project-badge">
+                        <img src="images/badges/lemonade.png" alt="Lemonade Legend Badge">
+                    </div>
+                    <h3>Lemonade Legend</h3>
+                    <p class="project-task">Set up and run a lemonade stand</p>
+                    <div class="speaking-challenge">
+                        <i class="fas fa-microphone"></i>
+                        <p>"Why my lemonade is the best!" (2-min talk)</p>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-badge">
+                        <img src="images/badges/craft.png" alt="Craft Creator Badge">
+                    </div>
+                    <h3>Craft Creator</h3>
+                    <p class="project-task">Make and sell a small craft product</p>
+                    <div class="speaking-challenge">
+                        <i class="fas fa-microphone"></i>
+                        <p>"How I made my product" (Show and tell)</p>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-badge">
+                        <img src="images/badges/fair.png" alt="Fair Manager Badge">
+                    </div>
+                    <h3>Mini-Fair Manager</h3>
+                    <p class="project-task">Organize a mini fair (at home, club, or online)</p>
+                    <div class="speaking-challenge">
+                        <i class="fas fa-microphone"></i>
+                        <p>"Welcome to our Mini-Fair!" (Plan and announce)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="projects-grid hidden" id="marketing-projects">
+                <!-- Marketing and Branding Projects -->
+                <div class="project-card">
+                    <div class="project-badge">
+                        <img src="images/badges/poster.png" alt="Poster Pro Badge">
+                    </div>
+                    <h3>Poster Pro</h3>
+                    <p class="project-task">Design a poster/flyer to advertise a product</p>
+                    <div class="speaking-challenge">
+                        <i class="fas fa-microphone"></i>
+                        <p>"Why my ad works" (Present your poster)</p>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-badge">
+                        <img src="images/badges/story.png" alt="Story Seller Badge">
+                    </div>
+                    <h3>Story Seller</h3>
+                    <p class="project-task">Create a story behind your product</p>
+                    <div class="speaking-challenge">
+                        <i class="fas fa-microphone"></i>
+                        <p>"The story of my business" (Storytelling session)</p>
+                    </div>
+                </div>
+                
+                <div class="project-card">
+                    <div class="project-badge">
+                        <img src="images/badges/logo.png" alt="Logo Legend Badge">
+                    </div>
+                    <h3>Logo Legend</h3>
+                    <p class="project-task">Design a logo and brand name</p>
+                    <div class="speaking-challenge">
+                        <i class="fas fa-microphone"></i>
+                        <p>"Why this logo fits my brand" (Pitch)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Additional project grids would follow the same pattern -->
+        </section>
+
+        <!-- Public Speaking Badges -->
+        <section class="speaking-badges">
+            <h2>Public Speaking Milestones</h2>
+            <p>Earn bonus badges for public speaking achievements</p>
+            
+            <div class="badges-grid">
+                <div class="badge-card">
+                    <img src="images/badges/first-speech.png" alt="First Speech Badge">
+                    <h3>First Speech Badge</h3>
+                    <p>Complete 1 speech</p>
+                </div>
+                <div class="badge-card">
+                    <img src="images/badges/confident.png" alt="Confident Speaker Badge">
+                    <h3>Confident Speaker</h3>
+                    <p>Complete 5 speeches</p>
+                </div>
+                <div class="badge-card">
+                    <img src="images/badges/storyteller.png" alt="Storyteller Badge">
+                    <h3>Storyteller</h3>
+                    <p>Give a speech with a story element</p>
+                </div>
+                <div class="badge-card">
+                    <img src="images/badges/persuader.png" alt="Persuader Badge">
+                    <h3>Persuader</h3>
+                    <p>Convince audience to buy or support</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Testimonials Carousel -->
+        <section class="testimonials">
+            <h2>What Parents & Kids Say</h2>
+            <div class="testimonial-carousel">
+                <div class="testimonial active">
+                    <p>"My daughter gained so much confidence presenting her lemonade stand project!"</p>
+                    <div class="testimonial-author">- Sarah, Parent</div>
+                </div>
+                <div class="testimonial">
+                    <p>"I earned 5 badges and now I'm not scared to talk in front of my class!"</p>
+                    <div class="testimonial-author">- Jason, Age 9</div>
+                </div>
+                <div class="testimonial">
+                    <p>"The projects make learning business skills so fun and practical."</p>
+                    <div class="testimonial-author">- Mr. Thompson, Teacher</div>
+                </div>
+            </div>
+            <div class="testimonial-nav">
+                <button class="testimonial-prev"><i class="fas fa-chevron-left"></i></button>
+                <div class="testimonial-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <button class="testimonial-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+
+        <!-- Call to Action -->
+        <section class="cta">
+            <h2>Ready to Join the Club?</h2>
+            <p>Help your child develop entrepreneurial skills and public speaking confidence</p>
+            <div class="cta-buttons">
+                <a href="#" class="btn primary">Sign Up Now</a>
+                <a href="#" class="btn secondary">Learn More</a>
+            </div>
+        </section>
+    </main>
+
+    <!--#include virtual="includes/footer.html" -->
+
+    <script src="js/club.js"></script>
+</body>
+</html>
