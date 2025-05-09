@@ -4,56 +4,136 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESL Study Guides</title>
-    <link rel="stylesheet" href="../theLastWord/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/club.css"> <!-- Add club styles -->
 </head>
 <body>
-    <header>
-        <h1>ESL Study Guides</h1>
-        <p>Comprehensive resources for popular English textbooks</p>
+    <!-- Updated Header to match club style -->
+    <header class="club-header">
+        <div class="header-content">
+            <h1>ESL Study Guides</h1>
+            <p>Comprehensive resources for English language learners</p>
+        </div>
+        <div class="header-image">
+            <img src="images/esl-hero.png" alt="Students learning English">
+        </div>
     </header>
     
-    <nav>
+    <nav class="club-nav">
         <ul>
-            <li><a href="../theLastWord/index.html">Home</a></li>
-            <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="books/">Books</a></li>
+            <li><a href="math-practice.html">Math Practice</a></li>
+            <li><a href="entrepreneur-club.html">Entrepreneur Club</a></li>
         </ul>
     </nav>
     
-    <main>
-        <section class="book-listing">
-            <h2>Available Study Guides</h2>
-            <div class="book-grid">
-                
-                <div class="book-card">
-                    <a href="/theLastWord/books/english-grammar-in-use.html">
-                        <img src="images/english-grammar-in-use.png" alt="English Grammar in Use">
+    <main class="club-main-container">
+        <!-- Hero Section Matching Club Style -->
+        <section class="hero">
+            <div class="hero-content">
+                <h2>Welcome to ESL Study Guides</h2>
+                <p>Your complete resource for English language learning tools and activities</p>
+                <div class="cta-buttons">
+                    <a href="books/" class="btn primary">Explore Study Guides</a>
+                    <a href="entrepreneur-club.html" class="btn secondary">Join Our Club</a>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Program Highlights Matching Club Style -->
+        <section class="highlights">
+            <div class="highlight-card">
+                <i class="fas fa-book-open"></i>
+                <h3>Comprehensive Guides</h3>
+                <p>Study materials for popular ESL textbooks</p>
+            </div>
+            <div class="highlight-card">
+                <i class="fas fa-calculator"></i>
+                <h3>Math Practice</h3>
+                <p>Interactive math learning tool</p>
+            </div>
+            <div class="highlight-card">
+                <i class="fas fa-microphone"></i>
+                <h3>Speaking Club</h3>
+                <p>Entrepreneurial public speaking activities</p>
+            </div>
+            <div class="highlight-card">
+                <i class="fas fa-trophy"></i>
+                <h3>Badge System</h3>
+                <p>Track your learning progress</p>
+            </div>
+        </section>
+        
+        <!-- Featured Content Carousel -->
+        <section class="featured-carousel">
+            <h2>Featured Resources</h2>
+            <div class="carousel-container">
+                <div class="carousel-track">
+                    <div class="carousel-card">
+                        <img src="images/english-grammar-in-use.jpg" alt="English Grammar in Use">
                         <h3>English Grammar in Use</h3>
-                    </a>
-                    <p>Raymond Murphy's classic grammar reference</p>
+                        <a href="books/english-grammar-in-use.html" class="btn">View Guide</a>
+                    </div>
+                    <div class="carousel-card">
+                        <img src="images/math-practice.jpg" alt="Math Practice">
+                        <h3>Math Practice Tool</h3>
+                        <a href="math-practice.html" class="btn">Try Now</a>
+                    </div>
+                    <div class="carousel-card">
+                        <img src="images/entrepreneur-club.jpg" alt="Entrepreneur Club">
+                        <h3>Entrepreneur Club</h3>
+                        <a href="entrepreneur-club.html" class="btn">Join Now</a>
+                    </div>
                 </div>
-                
-                <div class="book-card">
-                    <a href="books/cutting-edge.html">
-                        <img src="images/cutting-edge.jpg" alt="Cutting Edge">
-                        <h3>Cutting Edge</h3>
-                    </a>
-                    <p>Contemporary English course</p>
+            </div>
+            <div class="carousel-nav">
+                <button class="carousel-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </section>
+        
+        <!-- Testimonials Matching Club Style -->
+        <section class="testimonials">
+            <h2>What Students Say</h2>
+            <div class="testimonial-carousel">
+                <div class="testimonial active">
+                    <p>"The study guides helped me understand grammar much better!"</p>
+                    <div class="testimonial-author">- Maria, Age 12</div>
                 </div>
-                
-                <div class="book-card">
-                    <a href="books/new-headway.html">
-                        <img src="images/headway.jpg" alt="New Headway">
-                        <h3>New Headway</h3>
-                    </a>
-                    <p>World's most trusted English course</p>
+                <div class="testimonial">
+                    <p>"I love earning badges in the Entrepreneur Club!"</p>
+                    <div class="testimonial-author">- Ahmed, Age 10</div>
                 </div>
-
+                <div class="testimonial">
+                    <p>"Math Practice makes learning fun and interactive."</p>
+                    <div class="testimonial-author">- Li, Age 9</div>
+                </div>
+            </div>
+            <div class="testimonial-nav">
+                <button class="testimonial-prev"><i class="fas fa-chevron-left"></i></button>
+                <div class="testimonial-dots">
+                    <span class="dot active"></span>
+                    <span class="dot"></span>
+                    <span class="dot"></span>
+                </div>
+                <button class="testimonial-next"><i class="fas fa-chevron-right"></i></button>
             </div>
         </section>
     </main>
-
-    <footer>
-        <p>&copy; 2025 ESL Study Guides. This is an open-source project.</p>
+    
+    <footer class="club-footer">
+        <p>&copy; 2023 ESL Study Guides. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#"><i class="fab fa-facebook"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
     </footer>
+
+    <!-- JavaScript Files -->
+    <script src="js/main.js"></script>
+    <script src="js/club.js"></script> <!-- Reusing club.js components -->
 </body>
 </html>
