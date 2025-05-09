@@ -1,23 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESL Study Guides</title>
-    <link rel="stylesheet" href="../theLastWord/css/style.css">
-</head>
-<body>
-    <header>
-        <h1>ESL Study Guides</h1>
-        <p>Comprehensive resources for popular English textbooks</p>
-    </header>
-    
-    <nav>
-        <ul>
-            <li><a href="../theLastWord/index.html">Home</a></li>
-            <li><a href="../theLastWord/books/">Books</a></li>
-        </ul>
-    </nav>
+<!--#include virtual="includes/header.shtml" -->
     
     <main>
         <section class="book-listing">
