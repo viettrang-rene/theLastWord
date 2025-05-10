@@ -1,5 +1,3 @@
-##Template
-### Header ###
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -17,7 +15,10 @@
     <nav>
         <ul>
             <li><a href="../theLastWord/index.html">Home</a></li>
-            <li><a href="../theLastWord/books/">Books</a></li>
+            <li><a href="../theLastWord/club.html">Speaking Club</a></li>
+            <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</li>
+            <li><a href="../theLastWord/mathpractice.html">Math!</li>
+            <li><a href="../theLastWord/customercarebadge.html">Customer Care!</li>
         </ul>
     </nav>
 
