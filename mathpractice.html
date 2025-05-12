@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Math Practice</title>
   <style>
     :root {
@@ -32,6 +32,10 @@
       --border-color: #555;
     }
 
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: Arial, sans-serif;
       background-color: var(--bg-color);
@@ -41,12 +45,14 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
+      -webkit-text-size-adjust: 100%;
     }
 
     .container {
+      width: 100%;
       max-width: 800px;
-      margin: 20px auto;
-      padding: 20px;
+      margin: 0 auto;
+      padding: 15px;
       flex: 1;
     }
 
@@ -54,11 +60,12 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 30px;
+      margin-bottom: 20px;
+      padding: 0 10px;
     }
 
     h1 {
-      font-size: 24px;
+      font-size: clamp(18px, 5vw, 24px);
       font-weight: bold;
       margin: 0;
       color: navy;
@@ -68,61 +75,69 @@
       background-color: var(--equation-bg);
       border: 2px solid var(--border-color);
       border-radius: 8px;
-      padding: 40px 20px;
-      margin-bottom: 20px;
+      padding: 20px 15px;
+      margin-bottom: 15px;
       text-align: center;
-      min-height: 200px;
+      min-height: 150px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .equation {
-      font-size: 48px;
+      font-size: clamp(32px, 8vw, 48px);
       font-weight: bold;
       color: var(--equation-color);
+      word-break: break-word;
     }
 
     .answer-display {
-      font-size: 48px;
+      font-size: clamp(32px, 8vw, 48px);
       text-align: center;
-      margin-bottom: 20px;
+      margin-bottom: 15px;
       color: var(--correct-color);
-      min-height: 60px;
+      min-height: 50px;
+      word-break: break-word;
     }
 
     .controls {
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
     }
 
     .difficulty-selector {
       display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 15px;
     }
 
     .difficulty-option {
       display: flex;
       align-items: center;
+      white-space: nowrap;
     }
     
     button {
-     background-color: var(--button-bg);
-     color: var(--button-fg);
-     border: none;
-     padding: 12px 24px;
-     font-size: 16px;
-     border-radius: 6px;
-     cursor: pointer;
-     transition: background-color 0.3s;
-     font-weight: bold;
-     min-width: 180px; /* Ensures all buttons have same minimum width */
-     width: auto; /* Allows buttons to grow if needed */
-     box-sizing: border-box; /* Includes padding in width calculation */
-     display: inline-block; /* Ensures width property works correctly */
-     text-align: center; /* Centers text within button */
+      background-color: var(--button-bg);
+      color: var(--button-fg);
+      border: none;
+      padding: 10px 15px;
+      font-size: clamp(14px, 4vw, 16px);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: bold;
+      min-width: 120px;
+      width: 100%;
+      max-width: 180px;
+      box-sizing: border-box;
+      display: inline-block;
+      text-align: center;
     }
     
     button:hover {
@@ -145,23 +160,24 @@
     .progress-info {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 20px;
-      font-size: 16px;
+      margin-bottom: 15px;
+      font-size: clamp(14px, 4vw, 16px);
       font-weight: bold;
+      padding: 0 10px;
     }
 
     .status-bar {
       background-color: var(--highlight-color);
-      padding: 10px;
+      padding: 8px;
       border-radius: 4px;
-      margin-top: 20px;
-      font-size: 14px;
+      margin-top: 15px;
+      font-size: clamp(12px, 3.5vw, 14px);
     }
 
     /* Navigation styles */
     nav.club-nav {
       background-color: #4a6fa5;
-      padding: 15px;
+      padding: 10px;
     }
 
     nav.club-nav ul {
@@ -169,17 +185,19 @@
       margin: 0;
       padding: 0;
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
-      gap: 20px;
+      gap: 10px;
     }
 
     nav.club-nav a {
       color: white;
       text-decoration: none;
       font-weight: bold;
-      padding: 5px 10px;
+      padding: 5px 8px;
       border-radius: 4px;
       transition: background-color 0.3s;
+      font-size: clamp(12px, 3.5vw, 14px);
     }
 
     nav.club-nav a:hover {
@@ -198,32 +216,61 @@
       z-index: 100;
       justify-content: center;
       align-items: center;
+      padding: 15px;
     }
 
     .modal-content {
       background-color: var(--bg-color);
       padding: 20px;
       border-radius: 8px;
-      width: 300px;
+      width: 100%;
+      max-width: 300px;
     }
 
     .modal-title {
-      font-size: 20px;
-      margin-bottom: 20px;
+      font-size: clamp(18px, 5vw, 20px);
+      margin-bottom: 15px;
       color: var(--text-color);
     }
 
     .setting-option {
-      margin-bottom: 15px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+    }
+
+    .setting-option label {
+      margin-left: 8px;
+      font-size: clamp(14px, 4vw, 16px);
     }
 
     /* Confetti effect */
     .confetti {
       position: absolute;
-      width: 10px;
-      height: 10px;
+      width: 8px;
+      height: 8px;
       background-color: #f00;
       border-radius: 50%;
+    }
+
+    /* Media queries for larger screens */
+    @media (min-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+      
+      .equation-display {
+        padding: 30px 20px;
+        min-height: 200px;
+      }
+      
+      .controls {
+        gap: 15px;
+      }
+      
+      button {
+        padding: 12px 24px;
+      }
     }
   </style>
 </head>
@@ -321,6 +368,9 @@
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
+      // Check if mobile device
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
       // Event listeners
       newEquationBtn.addEventListener('click', generateEquation);
       showEquationBtn.addEventListener('click', showEquation);
@@ -330,13 +380,22 @@
       ttsToggle.addEventListener('change', (e) => ttsEnabled = e.target.checked);
       darkModeToggle.addEventListener('change', toggleDarkMode);
 
-      // Keyboard shortcuts
-      document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key === 'n') generateEquation();
-        if (e.ctrlKey && e.key === 's') showEquation();
-        if (e.ctrlKey && e.key === 'a') showAnswer();
-        if (e.key === 'F1') showHelp();
+      // Close modal when clicking outside
+      settingsModal.addEventListener('click', (e) => {
+        if (e.target === settingsModal) {
+          settingsModal.style.display = 'none';
+        }
       });
+
+      // Keyboard shortcuts (only enable for non-mobile)
+      if (!isMobile) {
+        document.addEventListener('keydown', (e) => {
+          if (e.ctrlKey && e.key === 'n') generateEquation();
+          if (e.ctrlKey && e.key === 's') showEquation();
+          if (e.ctrlKey && e.key === 'a') showAnswer();
+          if (e.key === 'F1') showHelp();
+        });
+      }
 
       // Generate first equation
       generateEquation();
@@ -406,6 +465,10 @@
         opWord: {
           '+': 'plus', '-': 'minus',
           '*': 'times', '/': 'divided by'
+        }[operation],
+        displayOp: {
+          '+': '+', '-': '-',
+          '*': '×', '/': '÷'
         }[operation]
       };
     }
@@ -425,7 +488,7 @@
       const equationDisplay = document.querySelector('.equation-display');
       const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
       
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 30; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
@@ -454,12 +517,7 @@
       alert(`Math Practice App Help:\n\n
 - Click 'New Equation' for a new math problem\n
 - Click 'Show' to reveal the spoken equation\n
-- Click 'Answer' to see the solution\n
-- Keyboard shortcuts:\n
-  Ctrl+N - New equation\n
-  Ctrl+S - Show equation\n
-  Ctrl+A - Show answer\n
-  F1 - This help dialog\n\n
+- Click 'Answer' to see the solution\n\n
 Adjust difficulty using the radio buttons.`);
     }
 
@@ -468,7 +526,7 @@ Adjust difficulty using the radio buttons.`);
       currentEquation = generateMathEquation();
       
       // Update UI
-      equationEl.textContent = '';
+      equationEl.textContent = `${currentEquation.num1} ${currentEquation.displayOp} ${currentEquation.num2} = ?`;
       answerEl.textContent = '';
       showEquationBtn.disabled = false;
       statusEl.textContent = 'New equation generated';
@@ -499,7 +557,7 @@ Adjust difficulty using the radio buttons.`);
       
       answerEl.textContent = `Answer: ${currentEquation.answer}`;
       equationEl.textContent = 
-        `${currentEquation.num1} ${currentEquation.operation} ${currentEquation.num2} = ${currentEquation.answer}`;
+        `${currentEquation.num1} ${currentEquation.displayOp} ${currentEquation.num2} = ${currentEquation.answer}`;
       
       showConfetti();
       statusEl.textContent = `Correct answer is ${currentEquation.answer}`;
