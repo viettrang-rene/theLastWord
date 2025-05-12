@@ -5,132 +5,501 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Math Practice</title>
   <style>
+    :root {
+      --bg-color: #ffffff;
+      --text-color: #333333;
+      --button-bg: #4a6fa5;
+      --button-active: #3a5a8a;
+      --button-fg: white;
+      --equation-color: #222222;
+      --correct-color: #2e8b57;
+      --incorrect-color: #d9534f;
+      --highlight-color: #e6f3ff;
+      --equation-bg: #f8f9fa;
+      --border-color: #ddd;
+    }
+
+    .dark-mode {
+      --bg-color: #2d2d2d;
+      --text-color: #f0f0f0;
+      --button-bg: #5a7db5;
+      --button-active: #4a6da5;
+      --equation-color: #ffffff;
+      --correct-color: #7cfc00;
+      --incorrect-color: #ff6347;
+      --highlight-color: #3a3a3a;
+      --equation-bg: #3a3a3a;
+      --border-color: #555;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      background-color: #f0f0f0;
-      color: #333;
-      text-align: center;
-      padding: 20px;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-    .dark-mode {
-      background-color: #222;
-      color: white;
-    }
+
     .container {
-      max-width: 400px;
-      margin: auto;
-      background: white;
+      max-width: 800px;
+      margin: 20px auto;
       padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      flex: 1;
     }
-    .dark-mode .container {
-      background: #333;
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
     }
+
+    h1 {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 0;
+      color: navy;
+    }
+
+    .equation-display {
+      background-color: var(--equation-bg);
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      padding: 40px 20px;
+      margin-bottom: 20px;
+      text-align: center;
+      min-height: 200px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .equation {
+      font-size: 48px;
+      font-weight: bold;
+      color: var(--equation-color);
+    }
+
+    .answer-display {
+      font-size: 48px;
+      text-align: center;
+      margin-bottom: 20px;
+      color: var(--correct-color);
+      min-height: 60px;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .difficulty-selector {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .difficulty-option {
+      display: flex;
+      align-items: center;
+    }
+
     button {
-      padding: 10px 20px;
-      margin: 10px;
+      background-color: var(--button-bg);
+      color: var(--button-fg);
+      border: none;
+      padding: 12px 24px;
       font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-weight: bold;
     }
-    input[type="number"] {
+
+    button:hover {
+      background-color: var(--button-active);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .primary-btn {
+      background-color: var(--button-bg);
+    }
+
+    .secondary-btn {
+      background-color: #5a8a5a;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .status-bar {
+      background-color: var(--highlight-color);
+      padding: 10px;
+      border-radius: 4px;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+
+    /* Navigation styles */
+    nav.club-nav {
+      background-color: #4a6fa5;
+      padding: 15px;
+    }
+
+    nav.club-nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    nav.club-nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 5px 10px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    nav.club-nav a:hover {
+      background-color: #3a5a8a;
+    }
+
+    /* Settings modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: var(--bg-color);
+      padding: 20px;
+      border-radius: 8px;
+      width: 300px;
+    }
+
+    .modal-title {
       font-size: 20px;
-      padding: 5px;
-      width: 100px;
-      margin: 10px;
+      margin-bottom: 20px;
+      color: var(--text-color);
+    }
+
+    .setting-option {
+      margin-bottom: 15px;
+    }
+
+    /* Confetti effect */
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      border-radius: 50%;
     }
   </style>
 </head>
 <body>
-    
   <nav class="club-nav">
-     <ul>
-          <li><a href="../theLastWord/index.html">Home</a></li>
-          <li><a href="../theLastWord/club.html">Speaking Club</a></li>
-          <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</li>
-          <li><a href="../theLastWord/mathpractice.html">Math</li>
-          <li><a href="../theLastWord/customercarebadge.html">Customer Care</li>
-      </ul>
+    <ul>
+      <li><a href="../theLastWord/index.html">Home</a></li>
+      <li><a href="../theLastWord/club.html">Speaking Club</a></li>
+      <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
+      <li><a href="../theLastWord/mathpractice.html">Math</a></li>
+      <li><a href="../theLastWord/customercarebadge.html">Customer Care</a></li>
+    </ul>
   </nav>
-  
+
   <div class="container">
-    <h1>Math Practice</h1>
-    <label><input type="radio" name="level" value="easy" checked> Easy</label>
-    <label><input type="radio" name="level" value="medium"> Medium</label>
-    <label><input type="radio" name="level" value="hard"> Hard</label>
-    <br><br>
-    <div id="equation">Press Start</div>
-    <input type="number" id="answer" placeholder="Your answer" />
-    <br>
-    <button onclick="checkAnswer()">Submit</button>
-    <button onclick="generateEquation()">Skip</button>
-    <br>
-    <label><input type="checkbox" id="ttsToggle" checked> Voice</label>
-    <label><input type="checkbox" id="darkModeToggle"> Dark Mode</label>
-    <p id="score">Score: 0</p>
-    <p id="timer">Time Left: 60s</p>
-    <button onclick="startGame()">Start</button>
+    <header>
+      <h1>Math Practice</h1>
+      <button id="settingsBtn" class="secondary-btn">⚙️ Settings</button>
+    </header>
+
+    <div class="equation-display">
+      <div id="equation" class="equation"></div>
+    </div>
+
+    <div id="answerDisplay" class="answer-display"></div>
+
+    <div class="progress-info">
+      <div id="score">Score: 0/0</div>
+      <div id="timer">Time: 0s</div>
+    </div>
+
+    <div class="difficulty-selector">
+      <div class="difficulty-option">
+        <input type="radio" id="easy" name="difficulty" value="easy" checked>
+        <label for="easy">Easy</label>
+      </div>
+      <div class="difficulty-option">
+        <input type="radio" id="medium" name="difficulty" value="medium">
+        <label for="medium">Medium</label>
+      </div>
+      <div class="difficulty-option">
+        <input type="radio" id="hard" name="difficulty" value="hard">
+        <label for="hard">Hard</label>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="newEquationBtn" class="primary-btn">New Equation</button>
+      <button id="showEquationBtn" class="secondary-btn" disabled>Show</button>
+      <button id="answerBtn">Answer</button>
+    </div>
+
+    <div id="statusBar" class="status-bar">Ready</div>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-title">Settings</div>
+      <div class="setting-option">
+        <input type="checkbox" id="ttsToggle" checked>
+        <label for="ttsToggle">Enable Text-to-Speech</label>
+      </div>
+      <div class="setting-option">
+        <input type="checkbox" id="darkModeToggle">
+        <label for="darkModeToggle">Dark Mode</label>
+      </div>
+      <button id="closeSettingsBtn" class="primary-btn">Close</button>
+    </div>
   </div>
 
   <script>
-    let correctAnswer = 0;
+    // Game state
     let score = 0;
-    let timeLeft = 60;
+    let totalQuestions = 0;
+    let startTime = 0;
     let timerInterval = null;
+    let currentEquation = null;
+    let ttsEnabled = true;
+    let darkMode = false;
 
-    const speak = (text) => {
-      if (document.getElementById('ttsToggle').checked) {
-        const msg = new SpeechSynthesisUtterance(text);
-        window.speechSynthesis.speak(msg);
-      }
-    };
+    // DOM elements
+    const equationEl = document.getElementById('equation');
+    const answerEl = document.getElementById('answerDisplay');
+    const scoreEl = document.getElementById('score');
+    const timerEl = document.getElementById('timer');
+    const statusEl = document.getElementById('statusBar');
+    const newEquationBtn = document.getElementById('newEquationBtn');
+    const showEquationBtn = document.getElementById('showEquationBtn');
+    const answerBtn = document.getElementById('answerBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsModal = document.getElementById('settingsModal');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const ttsToggle = document.getElementById('ttsToggle');
+    const darkModeToggle = document.getElementById('darkModeToggle');
 
-    const generateEquation = () => {
-      const level = document.querySelector('input[name="level"]:checked').value;
-      let min, max;
-      if (level === 'easy') {
-        min = 0; max = 9;
-      } else if (level === 'medium') {
-        min = 10; max = 99;
-      } else {
-        min = 100; max = 999;
-      }
-      const a = Math.floor(Math.random() * (max - min + 1)) + min;
-      const b = Math.floor(Math.random() * (max - min + 1)) + min;
-      correctAnswer = a + b;
-      document.getElementById('equation').innerText = `${a} + ${b} = ?`;
-      speak(`${a} plus ${b}`);
-    };
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      // Event listeners
+      newEquationBtn.addEventListener('click', generateEquation);
+      showEquationBtn.addEventListener('click', showEquation);
+      answerBtn.addEventListener('click', showAnswer);
+      settingsBtn.addEventListener('click', () => settingsModal.style.display = 'flex');
+      closeSettingsBtn.addEventListener('click', () => settingsModal.style.display = 'none');
+      ttsToggle.addEventListener('change', (e) => ttsEnabled = e.target.checked);
+      darkModeToggle.addEventListener('change', toggleDarkMode);
 
-    const checkAnswer = () => {
-      const userAnswer = parseInt(document.getElementById('answer').value);
-      if (userAnswer === correctAnswer) {
-        score++;
-        document.getElementById('score').innerText = `Score: ${score}`;
-        generateEquation();
-      }
-      document.getElementById('answer').value = '';
-    };
+      // Keyboard shortcuts
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'n') generateEquation();
+        if (e.ctrlKey && e.key === 's') showEquation();
+        if (e.ctrlKey && e.key === 'a') showAnswer();
+        if (e.key === 'F1') showHelp();
+      });
 
-    const startGame = () => {
-      score = 0;
-      timeLeft = 60;
-      document.getElementById('score').innerText = `Score: ${score}`;
-      document.getElementById('timer').innerText = `Time Left: ${timeLeft}s`;
+      // Generate first equation
       generateEquation();
-      clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        timeLeft--;
-        document.getElementById('timer').innerText = `Time Left: ${timeLeft}s`;
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          alert(`Time's up! Final Score: ${score}`);
-        }
-      }, 1000);
-    };
-
-    document.getElementById('darkModeToggle').addEventListener('change', (e) => {
-      document.body.classList.toggle('dark-mode', e.target.checked);
     });
+
+    // Helper functions
+    function numberToWords(n) {
+      const words = [
+        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
+        "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", 
+        "seventeen", "eighteen", "nineteen"
+      ];
+      const tens = ["", "", "twenty", "thirty", "forty", "fifty"];
+
+      if (n < 20) return words[n];
+      if (n < 60) {
+        const tensDigit = Math.floor(n / 10);
+        const onesDigit = n % 10;
+        return tens[tensDigit] + (onesDigit ? "-" + words[onesDigit] : "");
+      }
+      return n.toString();
+    }
+
+    function speak(text) {
+      if (ttsEnabled && window.speechSynthesis) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(utterance);
+      }
+    }
+
+    function getDifficultyParams() {
+      const difficulty = document.querySelector('input[name="difficulty"]:checked').value;
+      return {
+        'easy': { maxNumber: 10, operations: ['+', '-'] },
+        'medium': { maxNumber: 20, operations: ['+', '-', '*'] },
+        'hard': { maxNumber: 50, operations: ['+', '-', '*', '/'] }
+      }[difficulty];
+    }
+
+    function generateMathEquation() {
+      const params = getDifficultyParams();
+      const operation = params.operations[Math.floor(Math.random() * params.operations.length)];
+      let num1, num2, answer;
+
+      if (operation === '+') {
+        num1 = Math.floor(Math.random() * params.maxNumber) + 1;
+        num2 = Math.floor(Math.random() * params.maxNumber) + 1;
+        answer = num1 + num2;
+      } else if (operation === '-') {
+        num1 = Math.floor(Math.random() * params.maxNumber) + 2;
+        num2 = Math.floor(Math.random() * (num1 - 1)) + 1;
+        answer = num1 - num2;
+      } else if (operation === '*') {
+        num1 = Math.floor(Math.random() * 10) + 1;
+        num2 = Math.floor(Math.random() * 10) + 1;
+        answer = num1 * num2;
+      } else { // division
+        answer = Math.floor(Math.random() * 10) + 1;
+        num2 = Math.floor(Math.random() * 10) + 1;
+        num1 = answer * num2;
+      }
+
+      return {
+        num1, num2, operation, answer,
+        word1: numberToWords(num1),
+        word2: numberToWords(num2),
+        opWord: {
+          '+': 'plus', '-': 'minus',
+          '*': 'times', '/': 'divided by'
+        }[operation]
+      };
+    }
+
+    function updateScore() {
+      scoreEl.textContent = `Score: ${score}/${totalQuestions}`;
+    }
+
+    function updateTimer() {
+      if (startTime > 0) {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        timerEl.textContent = `Time: ${elapsed}s`;
+      }
+    }
+
+    function showConfetti() {
+      const equationDisplay = document.querySelector('.equation-display');
+      const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+      
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.left = `${Math.random() * 100}%`;
+        confetti.style.top = '0';
+        equationDisplay.appendChild(confetti);
+        
+        const animation = confetti.animate([
+          { top: '0', opacity: 1 },
+          { top: '100%', opacity: 0 }
+        ], {
+          duration: 1000 + Math.random() * 2000,
+          easing: 'cubic-bezier(0.1, 0.8, 0.9, 1)'
+        });
+        
+        animation.onfinish = () => confetti.remove();
+      }
+    }
+
+    function toggleDarkMode() {
+      darkMode = darkModeToggle.checked;
+      document.body.classList.toggle('dark-mode', darkMode);
+    }
+
+    function showHelp() {
+      alert(`Math Practice App Help:\n\n
+- Click 'New Equation' for a new math problem\n
+- Click 'Show' to reveal the spoken equation\n
+- Click 'Answer' to see the solution\n
+- Keyboard shortcuts:\n
+  Ctrl+N - New equation\n
+  Ctrl+S - Show equation\n
+  Ctrl+A - Show answer\n
+  F1 - This help dialog\n\n
+Adjust difficulty using the radio buttons.`);
+    }
+
+    // Main game functions
+    function generateEquation() {
+      currentEquation = generateMathEquation();
+      
+      // Update UI
+      equationEl.textContent = '';
+      answerEl.textContent = '';
+      showEquationBtn.disabled = false;
+      statusEl.textContent = 'New equation generated';
+      startTime = Date.now();
+      
+      // Start timer
+      clearInterval(timerInterval);
+      timerInterval = setInterval(updateTimer, 1000);
+      
+      // Speak equation
+      speak(`${currentEquation.word1} ${currentEquation.opWord} ${currentEquation.word2}`);
+    }
+
+    function showEquation() {
+      if (!currentEquation) return;
+      
+      equationEl.textContent = 
+        `${currentEquation.word1} ${currentEquation.opWord} ${currentEquation.word2} = ?`;
+      showEquationBtn.disabled = true;
+      statusEl.textContent = 'Equation shown';
+    }
+
+    function showAnswer() {
+      if (!currentEquation) return;
+      
+      totalQuestions++;
+      updateScore();
+      
+      answerEl.textContent = `Answer: ${currentEquation.answer}`;
+      equationEl.textContent = 
+        `${currentEquation.num1} ${currentEquation.operation} ${currentEquation.num2} = ${currentEquation.answer}`;
+      
+      showConfetti();
+      statusEl.textContent = `Correct answer is ${currentEquation.answer}`;
+    }
   </script>
 </body>
 </html>
