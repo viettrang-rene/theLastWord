@@ -107,19 +107,24 @@
       display: flex;
       align-items: center;
     }
-
+    
     button {
-      background-color: var(--button-bg);
-      color: var(--button-fg);
-      border: none;
-      padding: 12px 24px;
-      font-size: 16px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      font-weight: bold;
+     background-color: var(--button-bg);
+     color: var(--button-fg);
+     border: none;
+     padding: 12px 24px;
+     font-size: 16px;
+     border-radius: 6px;
+     cursor: pointer;
+     transition: background-color 0.3s;
+     font-weight: bold;
+     min-width: 180px; /* Ensures all buttons have same minimum width */
+     width: auto; /* Allows buttons to grow if needed */
+     box-sizing: border-box; /* Includes padding in width calculation */
+     display: inline-block; /* Ensures width property works correctly */
+     text-align: center; /* Centers text within button */
     }
-
+    
     button:hover {
       background-color: var(--button-active);
     }
