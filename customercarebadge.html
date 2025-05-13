@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/club.css" />
-  <style>
+<style>
     /* Navigation styles to match your preferred style */
     nav.club-nav {
       background-color: #4a6fa5;
@@ -38,13 +38,90 @@
       background-color: #3a5a8a;
     }
 
+    /* Improved CTA Buttons */
+    .cta-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px 24px;
+      border-radius: 6px;
+      font-weight: bold;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      min-width: 160px;
+      text-align: center;
+    }
+
+    .btn.primary {
+      background-color: #4a6fa5;
+      color: white;
+      border: 2px solid #4a6fa5;
+    }
+
+    .btn.secondary {
+      background-color: transparent;
+      color: #4a6fa5;
+      border: 2px solid #4a6fa5;
+    }
+
+    .btn.primary:hover {
+      background-color: #3a5a8a;
+      border-color: #3a5a8a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .btn.secondary:hover {
+      background-color: #f8f9fa;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    /* Desktop-specific improvements */
+    @media (min-width: 768px) {
+      .cta-buttons {
+        justify-content: flex-start;
+      }
+      
+      .hero .cta-buttons {
+        justify-content: center;
+      }
+      
+      .cta .cta-buttons {
+        justify-content: center;
+        margin-top: 30px;
+      }
+      
+      .btn {
+        padding: 14px 28px;
+        font-size: 1.1rem;
+      }
+    }
+
     @media (max-width: 768px) {
       nav.club-nav ul {
         flex-direction: column;
         text-align: center;
       }
+      
+      .cta-buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+      
+      .btn {
+        width: 100%;
+      }
     }
   </style>
+
 </head>
 <body>
   <nav class="club-nav">
