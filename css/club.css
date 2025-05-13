@@ -412,11 +412,11 @@
 /* CTA */
 .cta {
     text-align: center;
-    padding: 40px;
+    padding: 10px;
     background: #4a6fa5;
     color: white;
     border-radius: 10px;
-    margin-bottom: 60px;
+    margin-bottom: 20px;
 }
 
 .cta h2 {
