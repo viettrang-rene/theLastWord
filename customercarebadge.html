@@ -1,39 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESL Study Guides</title>
-    <link rel="stylesheet" href="../theLastWord/css/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Entrepreneurial Public Speaking Club | ESL Study Guides</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/club.css" />
+  <style>
+    /* Navigation styles to match your preferred style */
+    nav.club-nav {
+      background-color: #4a6fa5;
+      padding: 10px;
+    }
+
+    nav.club-nav ul {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    nav.club-nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      padding: 5px 8px;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      font-size: clamp(12px, 3.5vw, 14px);
+    }
+
+    nav.club-nav a:hover {
+      background-color: #3a5a8a;
+    }
+
+    @media (max-width: 768px) {
+      nav.club-nav ul {
+        flex-direction: column;
+        text-align: center;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>ESL Study Guides</h1>
-        <p>Comprehensive resources for popular English textbooks</p>
-    </header>
-    
-    <nav>
-        <ul>
-            <li><a href="../theLastWord/index.html">Home</a></li>
-            <li><a href="../theLastWord/club.html">Speaking Club</a></li>
-            <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</li>
-            <li><a href="../theLastWord/mathpractice.html">Math</li>
-            <li><a href="../theLastWord/customercarebadge.html">Customer Care</li>
-        </ul>
-    </nav>
+  <nav class="club-nav">
+    <ul>
+      <li><a href="../theLastWord/index.html">Home</a></li>
+      <li><a href="../theLastWord/club.html">Speaking Club</a></li>
+      <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
+      <li><a href="../theLastWord/mathpractice.html">Math!</a></li>
+      <li><a href="../theLastWord/customercarebadge.html">Customer Care!</a></li>
+    </ul>
+  </nav>
   
-  <div class="project-card">
-      <div class="project-badge">
-          <img src="images/badges/customer.png" alt="Customer Creator Badge">
+  <main class="club-container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <h1>Entrepreneurial Public Speaking Club</h1>
+        <h2>Ages 7–13 | Project-Based | Choose Your Path | Badge Awards</h2>
+        <p>Watch your child turn ideas into action, build confidence on stage, and speak with purpose.</p>
+        <div class="cta-buttons">
+          <a href="#projects" class="btn primary">Explore Projects</a>
+          <a href="#how-it-works" class="btn secondary">How It Works</a>
+        </div>
       </div>
-      <h3>Customer Creator</h3>
-      <p class="project-task">Design a clean cold-cut fruit cart for your neighborhood</p>
-      <div class="speaking-challenge">
-          <i class="fas fa-microphone"></i>
-          <p>"How my fruit cart helps people eat safe, fresh food" (2–3 min pitch)</p>
+      <div class="hero-image">
+        <img src="images/club-hero.png" alt="Kids presenting and running lemonade stands" loading="lazy" />
       </div>
-  </div>
+    </section>
 
-<footer>
-        <p>© 2025 ESL Study Guides. This is an open-source project.</p>
-    </footer>  
+    <!-- Program Highlights -->
+    <section class="highlights">
+      <div class="highlight-card">
+        <i class="fas fa-project-diagram" aria-hidden="true"></i>
+        <h3>Choose What You Love</h3>
+        <p>Every child explores what excites them, from lemonade stands to digital shops</p>
+      </div>
+      <div class="highlight-card">
+        <i class="fas fa-microphone" aria-hidden="true"></i>
+        <h3>Find Your Voice</h3>
+        <p>Kids speak proudly about their creations in fun, low-pressure talks</p>
+      </div>
+      <div class="highlight-card">
+        <i class="fas fa-trophy" aria-hidden="true"></i>
+        <h3>Celebrate Progress</h3>
+        <p>Kids earn badges that recognize their real accomplishments</p>
+      </div>
+      <div class="highlight-card">
+        <i class="fas fa-users" aria-hidden="true"></i>
+        <h3>Share with Pride</h3>
+        <p>Present to friends, family, or fellow creators — their choice!</p>
+      </div>
+    </section>
+    
+    <!-- Call to Action -->
+    <section class="cta">
+      <h2>Create your own success.</h2>
+      <p>Strategy leads to results.</p>
+      <div class="cta-buttons">
+        <a href="#" class="btn secondary">Learn More</a>
+      </div>
+    </section>
+    
+    <!-- How It Works -->
+    <section id="how-it-works" class="how-it-works">
+      <h2>How Our Club Works</h2>
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Pick Your Path</h3>
+          <p>Start a business, design a logo, or invent something new</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Build It Your Way</h3>
+          <p>Use creativity and teamwork to bring it to life</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Speak With Confidence</h3>
+          <p>Tell your story in your own words</p>
+        </div>
+        <div class="step">
+          <div class="step-number">4</div>
+          <h3>Be Recognized</h3>
+          <p>Earn a badge and applause for your effort</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <section class="cta">
+      <h2>Ready to Join the Club?</h2>
+      <p>Grow and become a confident communicator and creative thinker</p>
+      <div class="cta-buttons">
+        <a href="#" class="btn primary">Sign Up Now</a>
+      </div>
+    </section>
+    
+    <section class="cta">
+      <div class="cta-buttons">
+        <a href="/index.html" class="btn primary">Home</a>
+      </div>
+    </section>
+  </main>
+
+  <!--#include virtual="includes/footer.html" -->
+
+  <script src="js/club.js" defer></script>
+</body>
+</html>
