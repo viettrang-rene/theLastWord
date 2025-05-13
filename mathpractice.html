@@ -291,7 +291,7 @@
     </header>
 
     <div class="equation-display">
-      <div id="equation" class="equation"></div>
+      <div id="equation" class="equation">New equation ready</div>
     </div>
 
     <div id="answerDisplay" class="answer-display"></div>
@@ -337,6 +337,10 @@
         <input type="checkbox" id="darkModeToggle">
         <label for="darkModeToggle">Dark Mode</label>
       </div>
+      <div class="setting-option">
+        <input type="checkbox" id="autoShowToggle">
+        <label for="autoShowToggle">Show equation automatically</label>
+      </div>
       <button id="closeSettingsBtn" class="primary-btn">Close</button>
     </div>
   </div>
@@ -350,6 +354,7 @@
     let currentEquation = null;
     let ttsEnabled = true;
     let darkMode = false;
+    let autoShowEnabled = false;
 
     // DOM elements
     const equationEl = document.getElementById('equation');
@@ -365,6 +370,7 @@
     const closeSettingsBtn = document.getElementById('closeSettingsBtn');
     const ttsToggle = document.getElementById('ttsToggle');
     const darkModeToggle = document.getElementById('darkModeToggle');
+    const autoShowToggle = document.getElementById('autoShowToggle');
 
     // Initialize
     document.addEventListener('DOMContentLoaded', () => {
@@ -379,6 +385,7 @@
       closeSettingsBtn.addEventListener('click', () => settingsModal.style.display = 'none');
       ttsToggle.addEventListener('change', (e) => ttsEnabled = e.target.checked);
       darkModeToggle.addEventListener('change', toggleDarkMode);
+      autoShowToggle.addEventListener('change', (e) => autoShowEnabled = e.target.checked);
 
       // Close modal when clicking outside
       settingsModal.addEventListener('click', (e) => {
@@ -526,7 +533,7 @@ Adjust difficulty using the radio buttons.`);
       currentEquation = generateMathEquation();
       
       // Update UI
-      equationEl.textContent = `${currentEquation.num1} ${currentEquation.displayOp} ${currentEquation.num2} = ?`;
+      equationEl.textContent = "New equation ready";
       answerEl.textContent = '';
       showEquationBtn.disabled = false;
       statusEl.textContent = 'New equation generated';
@@ -538,6 +545,11 @@ Adjust difficulty using the radio buttons.`);
       
       // Speak equation
       speak(`${currentEquation.word1} ${currentEquation.opWord} ${currentEquation.word2}`);
+      
+      // Auto-show if enabled
+      if (autoShowEnabled) {
+        setTimeout(showEquation, 500);
+      }
     }
 
     function showEquation() {
