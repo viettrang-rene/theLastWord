@@ -8,12 +8,11 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="stylesheet" href="css/club.css" />
 <style>
-    /* Navigation styles to match your preferred style */
+    /* Navigation styles remain the same */
     nav.club-nav {
       background-color: #4a6fa5;
       padding: 10px;
     }
-
     nav.club-nav ul {
       list-style-type: none;
       margin: 0;
@@ -23,7 +22,6 @@
       justify-content: center;
       gap: 10px;
     }
-
     nav.club-nav a {
       color: white;
       text-decoration: none;
@@ -33,30 +31,32 @@
       transition: background-color 0.3s;
       font-size: clamp(12px, 3.5vw, 14px);
     }
-
     nav.club-nav a:hover {
       background-color: #3a5a8a;
     }
 
-    /* Improved CTA Buttons */
+    /* Improved Button Styles for All Devices */
     .cta-buttons {
       display: flex;
       gap: 15px;
       justify-content: center;
       margin-top: 20px;
+      flex-wrap: wrap;
     }
 
     .btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      padding: 12px 24px;
-      border-radius: 6px;
+      padding: 12px 20px;
+      border-radius: 8px;
       font-weight: bold;
       text-decoration: none;
       transition: all 0.3s ease;
-      min-width: 160px;
+      min-width: 140px;
       text-align: center;
+      font-size: 16px;
+      white-space: nowrap;
     }
 
     .btn.primary {
@@ -71,57 +71,53 @@
       border: 2px solid #4a6fa5;
     }
 
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
     .btn.primary:hover {
       background-color: #3a5a8a;
       border-color: #3a5a8a;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
     .btn.secondary:hover {
       background-color: #f8f9fa;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
 
-    /* Desktop-specific improvements */
+    /* Mobile-first responsive adjustments */
+    @media (max-width: 767px) {
+      .cta-buttons {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+      }
+      
+      .btn {
+        width: 100%;
+        padding: 14px 20px;
+        font-size: 17px;
+      }
+    }
+
+    /* Desktop enhancements */
     @media (min-width: 768px) {
       .cta-buttons {
-        justify-content: flex-start;
+        justify-content: center;
+        gap: 20px;
       }
       
       .hero .cta-buttons {
         justify-content: center;
       }
       
-      .cta .cta-buttons {
-        justify-content: center;
-        margin-top: 30px;
-      }
-      
       .btn {
+        min-width: 160px;
         padding: 14px 28px;
-        font-size: 1.1rem;
       }
     }
-
-    @media (max-width: 768px) {
-      nav.club-nav ul {
-        flex-direction: column;
-        text-align: center;
-      }
-      
-      .cta-buttons {
-        flex-direction: column;
-        gap: 10px;
-      }
-      
-      .btn {
-        width: 100%;
-      }
-    }
-  </style>
-
+</style>
+  
 </head>
 <body>
   <nav class="club-nav">
