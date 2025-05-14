@@ -23,7 +23,7 @@
             border: 2px solid #4a89dc;
             border-collapse: collapse;
             margin: 0 auto;
-            background-color: #04224a;
+            background-color: #e6f2ff;
         }
         .word-search td {
             width: 30px;
@@ -32,14 +32,19 @@
             font-size: 20px;
             font-weight: bold;
             border: 1px solid #b3d1ff;
-            background-color: #04224a;
-            color: #ffffff;
+            background-color: #e6f2ff;
+            color: #2c3e50;
             cursor: pointer;
             user-select: none;
             transition: all 0.3s ease;
         }
         .word-search td:hover {
             background-color: #cce0ff;
+        }
+        .word-search td.found-word {
+            background-color: #ffebee !important;
+            color: #c62828 !important;
+            border-color: #ef9a9a !important;
         }
         .word-list {
             margin: 20px 0;
@@ -84,7 +89,7 @@
             transform: translateY(-50%);
         }
         button {
-            background-color: #04224a;
+            background-color: #4a89dc;
             color: white;
             border: none;
             padding: 12px 24px;
@@ -100,12 +105,6 @@
         }
         .highlight {
             background-color: #fff3e0;
-        }
-        .found-word {
-            background-color: #ffebee;
-            color: #c62828;
-            border: 1px solid #ef9a9a;
-            position: relative;
         }
         .stats {
             margin: 20px 0;
@@ -337,7 +336,9 @@
                 const positions = wordPositions[word].letters;
                 positions.forEach(pos => {
                     const cell = document.querySelector(`#wordSearch td[data-row="${pos.row}"][data-col="${pos.col}"]`);
-                    cell.classList.add('found-word');
+                    if (cell) {
+                        cell.classList.add('found-word');
+                    }
                 });
             }
             
