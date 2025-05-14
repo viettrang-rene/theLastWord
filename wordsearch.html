@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fruit Word Search</title>
+    <title>Interactive Word Search</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -31,6 +31,12 @@
             font-weight: bold;
             border: 1px solid #ddd;
             background-color: #f9f9f9;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+        .word-search td:hover {
+            background-color: #e0e0e0;
         }
         .word-list {
             margin: 20px 0;
@@ -53,6 +59,13 @@
         .word-list li {
             font-size: 18px;
             font-weight: bold;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .word-list li.found {
+            background-color: #2ecc71;
+            color: white;
+            text-decoration: line-through;
         }
         button {
             background-color: #3498db;
@@ -63,6 +76,7 @@
             border-radius: 5px;
             cursor: pointer;
             margin: 10px;
+            transition: background-color 0.3s;
         }
         button:hover {
             background-color: #2980b9;
@@ -70,18 +84,31 @@
         .highlight {
             background-color: #f1c40f;
         }
+        .found-word {
+            background-color: #2ecc71;
+            color: white;
+            transform: scale(1.1);
+        }
+        .stats {
+            margin: 20px 0;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
     <h1>Fruit Word Search</h1>
     
+    <div class="stats">
+        Found: <span id="found-count">0</span> of <span id="total-words">4</span> words
+    </div>
+    
     <div class="word-list">
-        <h3>Find these words:</h3>
+        <h3>Words to find:</h3>
         <ul id="words-to-find">
-            <li>APPLE</li>
-            <li>BANANA</li>
-            <li>ORANGE</li>
-            <li>PINEAPPLE</li>
+            <li data-word="APPLE">APPLE</li>
+            <li data-word="BANANA">BANANA</li>
+            <li data-word="ORANGE">ORANGE</li>
+            <li data-word="PINEAPPLE">PINEAPPLE</li>
         </ul>
     </div>
     
@@ -97,16 +124,39 @@
             const words = ['APPLE', 'BANANA', 'ORANGE', 'PINEAPPLE'];
             let gridSize = 15;
             let grid = [];
+            let wordPositions = {}; // Stores the positions of each word
+            let foundWords = new Set(); // Tracks found words
             
             // Initialize the grid
             function initializeGrid() {
                 grid = [];
+                wordPositions = {};
+                foundWords.clear();
+                updateFoundCount();
+                
                 for (let i = 0; i < gridSize; i++) {
                     grid[i] = [];
                     for (let j = 0; j < gridSize; j++) {
                         grid[i][j] = '';
                     }
                 }
+                
+                // Reset found words in the list
+                document.querySelectorAll('#words-to-find li').forEach(li => {
+                    li.classList.remove('found');
+                });
+                
+                // Reset any highlighted cells
+                const cells = document.querySelectorAll('#wordSearch td');
+                cells.forEach(cell => {
+                    cell.classList.remove('found-word');
+                });
+            }
+            
+            // Update the found words counter
+            function updateFoundCount() {
+                document.getElementById('found-count').textContent = foundWords.size;
+                document.getElementById('total-words').textContent = words.length;
             }
             
             // Directions: [row, col] adjustments
@@ -177,11 +227,19 @@
                     
                     // Check if word can be placed here
                     if (canPlaceWord(word, row, col, direction)) {
+                        // Store word positions
+                        wordPositions[word] = {
+                            start: {row, col},
+                            direction: [rowDir, colDir],
+                            letters: []
+                        };
+                        
                         // Place the word
                         for (let i = 0; i < word.length; i++) {
                             const r = row + i * rowDir;
                             const c = col + i * colDir;
                             grid[r][c] = word[i];
+                            wordPositions[word].letters.push({row: r, col: c});
                         }
                         placed = true;
                     }
@@ -220,6 +278,64 @@
                     
                     table.appendChild(row);
                 }
+                
+                // Add click event listeners to cells
+                addCellClickListeners();
+            }
+            
+            // Add click event listeners to grid cells
+            function addCellClickListeners() {
+                const cells = document.querySelectorAll('#wordSearch td');
+                cells.forEach(cell => {
+                    cell.addEventListener('click', handleCellClick);
+                });
+            }
+            
+            // Handle cell click
+            function handleCellClick(event) {
+                const cell = event.target;
+                const row = parseInt(cell.dataset.row);
+                const col = parseInt(cell.dataset.col);
+                
+                // Check if this cell is part of any word
+                for (const word in wordPositions) {
+                    const positions = wordPositions[word].letters;
+                    const isPartOfWord = positions.some(pos => pos.row === row && pos.col === col);
+                    
+                    if (isPartOfWord && !foundWords.has(word)) {
+                        // Highlight all letters of this word
+                        highlightWord(word);
+                        // Mark the word as found
+                        foundWords.add(word);
+                        // Update the word list
+                        markWordAsFound(word);
+                        // Update the counter
+                        updateFoundCount();
+                        return;
+                    }
+                }
+                
+                // If not part of any word, just highlight this cell temporarily
+                cell.classList.add('highlight');
+                setTimeout(() => {
+                    cell.classList.remove('highlight');
+                }, 500);
+            }
+            
+            // Highlight all letters of a word
+            function highlightWord(word) {
+                const positions = wordPositions[word].letters;
+                
+                positions.forEach(pos => {
+                    const cell = document.querySelector(`#wordSearch td[data-row="${pos.row}"][data-col="${pos.col}"]`);
+                    cell.classList.add('found-word');
+                });
+            }
+            
+            // Mark word as found in the list
+            function markWordAsFound(word) {
+                const wordElement = document.querySelector(`#words-to-find li[data-word="${word}"]`);
+                wordElement.classList.add('found');
             }
             
             // Generate a new word search
