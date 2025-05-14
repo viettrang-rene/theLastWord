@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fruit Word Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+        .word-search-container {
+            margin: 30px auto;
+        }
+        .word-search {
+            border: 2px solid #34495e;
+            border-collapse: collapse;
+            margin: 0 auto;
+        }
+        .word-search td {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+        }
+        .word-list {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f0f8ff;
+            border-radius: 5px;
+        }
+        .word-list h3 {
+            margin-top: 0;
+            color: #2980b9;
+        }
+        .word-list ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        .word-list li {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .highlight {
+            background-color: #f1c40f;
+        }
+    </style>
+</head>
+<body>
+    <h1>Fruit Word Search</h1>
+    
+    <div class="word-list">
+        <h3>Find these words:</h3>
+        <ul id="words-to-find">
+            <li>APPLE</li>
+            <li>BANANA</li>
+            <li>ORANGE</li>
+            <li>PINEAPPLE</li>
+        </ul>
+    </div>
+    
+    <div class="word-search-container">
+        <table class="word-search" id="wordSearch"></table>
+    </div>
+    
+    <button id="newPuzzle">Generate New Puzzle</button>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Words to include in the word search
+            const words = ['APPLE', 'BANANA', 'ORANGE', 'PINEAPPLE'];
+            let gridSize = 15;
+            let grid = [];
+            
+            // Initialize the grid
+            function initializeGrid() {
+                grid = [];
+                for (let i = 0; i < gridSize; i++) {
+                    grid[i] = [];
+                    for (let j = 0; j < gridSize; j++) {
+                        grid[i][j] = '';
+                    }
+                }
+            }
+            
+            // Directions: [row, col] adjustments
+            const directions = [
+                [1, 0],   // down
+                [0, 1],   // right
+                [1, 1],   // down-right
+                [-1, 1],  // up-right
+                [-1, 0], // up
+                [0, -1],  // left
+                [-1, -1],// up-left
+                [1, -1]   // down-left
+            ];
+            
+            // Check if a word can be placed at a specific position and direction
+            function canPlaceWord(word, row, col, direction) {
+                const [rowDir, colDir] = direction;
+                
+                // Check boundaries
+                const endRow = row + (word.length - 1) * rowDir;
+                const endCol = col + (word.length - 1) * colDir;
+                
+                if (endRow < 0 || endRow >= gridSize || endCol < 0 || endCol >= gridSize) {
+                    return false;
+                }
+                
+                // Check if word fits without conflicting letters
+                for (let i = 0; i < word.length; i++) {
+                    const r = row + i * rowDir;
+                    const c = col + i * colDir;
+                    
+                    if (grid[r][c] !== '' && grid[r][c] !== word[i]) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            }
+            
+            // Place a word in the grid
+            function placeWord(word) {
+                let placed = false;
+                let attempts = 0;
+                
+                while (!placed && attempts < 100) {
+                    attempts++;
+                    const direction = directions[Math.floor(Math.random() * directions.length)];
+                    const [rowDir, colDir] = direction;
+                    
+                    // Choose random starting position based on direction
+                    let row, col;
+                    
+                    if (rowDir === 1) {  // down
+                        row = Math.floor(Math.random() * (gridSize - word.length));
+                    } else if (rowDir === -1) {  // up
+                        row = Math.floor(Math.random() * (gridSize - word.length)) + word.length - 1;
+                    } else {
+                        row = Math.floor(Math.random() * gridSize);
+                    }
+                    
+                    if (colDir === 1) {  // right
+                        col = Math.floor(Math.random() * (gridSize - word.length));
+                    } else if (colDir === -1) {  // left
+                        col = Math.floor(Math.random() * (gridSize - word.length)) + word.length - 1;
+                    } else {
+                        col = Math.floor(Math.random() * gridSize);
+                    }
+                    
+                    // Check if word can be placed here
+                    if (canPlaceWord(word, row, col, direction)) {
+                        // Place the word
+                        for (let i = 0; i < word.length; i++) {
+                            const r = row + i * rowDir;
+                            const c = col + i * colDir;
+                            grid[r][c] = word[i];
+                        }
+                        placed = true;
+                    }
+                }
+                
+                return placed;
+            }
+            
+            // Fill empty spaces with random letters
+            function fillEmptySpaces() {
+                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        if (grid[i][j] === '') {
+                            grid[i][j] = letters.charAt(Math.floor(Math.random() * letters.length));
+                        }
+                    }
+                }
+            }
+            
+            // Render the grid to the HTML table
+            function renderGrid() {
+                const table = document.getElementById('wordSearch');
+                table.innerHTML = '';
+                
+                for (let i = 0; i < gridSize; i++) {
+                    const row = document.createElement('tr');
+                    
+                    for (let j = 0; j < gridSize; j++) {
+                        const cell = document.createElement('td');
+                        cell.textContent = grid[i][j];
+                        cell.dataset.row = i;
+                        cell.dataset.col = j;
+                        row.appendChild(cell);
+                    }
+                    
+                    table.appendChild(row);
+                }
+            }
+            
+            // Generate a new word search
+            function generateWordSearch() {
+                initializeGrid();
+                
+                // Place each word
+                words.forEach(word => {
+                    placeWord(word);
+                });
+                
+                // Fill remaining spaces
+                fillEmptySpaces();
+                
+                // Render the grid
+                renderGrid();
+            }
+            
+            // Initialize the first puzzle
+            generateWordSearch();
+            
+            // Add event listener for new puzzle button
+            document.getElementById('newPuzzle').addEventListener('click', generateWordSearch);
+        });
+    </script>
+</body>
+</html>
