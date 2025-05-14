@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Image Search Viewer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input, button {
+      padding: 10px;
+      font-size: 16px;
+    }
+    img {
+      margin-top: 20px;
+      max-width: 90%;
+      height: auto;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Search for an Image</h1>
+  <input type="text" id="searchInput" placeholder="Enter a keyword">
+  <button onclick="showImage()">Search</button>
+
+  <div id="imageContainer"></div>
+
+  <script>
+    function showImage() {
+      const keyword = document.getElementById('searchInput').value.trim();
+      const container = document.getElementById('imageContainer');
+
+      if (!keyword) {
+        container.innerHTML = "<p>Please enter a search term.</p>";
+        return;
+      }
+
+      const imageUrl = `https://source.unsplash.com/800x500/?${encodeURIComponent(keyword)}`;
+
+      container.innerHTML = `<img src="${imageUrl}" alt="Image for ${keyword}">`;
+    }
+  </script>
+</body>
+</html>
+
