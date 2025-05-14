@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fruit Word Search</title>
+    <title>Custom Word Search</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -15,6 +15,26 @@
         }
         h1 {
             color: #2c3e50;
+        }
+        .input-area {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e6f2ff;
+            border-radius: 8px;
+            border: 1px solid #b3d1ff;
+        }
+        .word-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .word-inputs input {
+            padding: 8px;
+            border: 1px solid #b3d1ff;
+            border-radius: 4px;
+            width: 120px;
         }
         .word-search-container {
             margin: 30px auto;
@@ -127,39 +147,75 @@
     </style>
 </head>
 <body>
-    <h1>Fruit Word Search</h1>
+    <h1>Custom Word Search</h1>
     
-    <div class="stats">
-        Found: <span id="found-count">0</span> of <span id="total-words">4</span> words
+    <div class="input-area">
+        <h3>Enter up to 10 words (3-12 letters each):</h3>
+        <div class="word-inputs" id="word-inputs">
+            <input type="text" maxlength="12" placeholder="Word 1">
+            <input type="text" maxlength="12" placeholder="Word 2">
+            <input type="text" maxlength="12" placeholder="Word 3">
+            <input type="text" maxlength="12" placeholder="Word 4">
+            <input type="text" maxlength="12" placeholder="Word 5">
+            <input type="text" maxlength="12" placeholder="Word 6">
+            <input type="text" maxlength="12" placeholder="Word 7">
+            <input type="text" maxlength="12" placeholder="Word 8">
+            <input type="text" maxlength="12" placeholder="Word 9">
+            <input type="text" maxlength="12" placeholder="Word 10">
+        </div>
+        <button id="generate-btn">Generate Word Search</button>
+    </div>
+    
+    <div class="stats" style="display: none;">
+        Found: <span id="found-count">0</span> of <span id="total-words">0</span> words
     </div>
     
     <div class="congrats" id="congrats-message">
         Congratulations! You found all the words!
     </div>
     
-    <div class="word-list">
+    <div class="word-list" style="display: none;">
         <h3>Words to find:</h3>
-        <ul id="words-to-find">
-            <li data-word="APPLE">APPLE</li>
-            <li data-word="BANANA">BANANA</li>
-            <li data-word="ORANGE">ORANGE</li>
-            <li data-word="PINEAPPLE">PINEAPPLE</li>
-        </ul>
+        <ul id="words-to-find"></ul>
     </div>
     
     <div class="word-search-container">
         <table class="word-search" id="wordSearch"></table>
     </div>
     
-    <button id="newPuzzle">Generate New Puzzle</button>
-    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const words = ['APPLE', 'BANANA', 'ORANGE', 'PINEAPPLE'];
+            const maxWords = 10;
             let gridSize = 15;
             let grid = [];
             let wordPositions = {};
             let foundWords = new Set();
+            let activeWords = [];
+            
+            // Initialize word inputs
+            const wordInputs = document.querySelectorAll('.word-inputs input');
+            const generateBtn = document.getElementById('generate-btn');
+            const statsDiv = document.querySelector('.stats');
+            const wordListDiv = document.querySelector('.word-list');
+            
+            generateBtn.addEventListener('click', function() {
+                activeWords = [];
+                wordInputs.forEach(input => {
+                    const word = input.value.trim().toUpperCase();
+                    if (word.length >= 3 && word.length <= 12) {
+                        activeWords.push(word);
+                    }
+                });
+                
+                if (activeWords.length > 0) {
+                    generateWordSearch();
+                    statsDiv.style.display = 'block';
+                    wordListDiv.style.display = 'block';
+                    document.getElementById('total-words').textContent = activeWords.length;
+                } else {
+                    alert('Please enter at least one valid word (3-12 letters)');
+                }
+            });
             
             function initializeGrid() {
                 grid = [];
@@ -175,8 +231,13 @@
                     }
                 }
                 
-                document.querySelectorAll('#words-to-find li').forEach(li => {
-                    li.classList.remove('found');
+                const wordsList = document.getElementById('words-to-find');
+                wordsList.innerHTML = '';
+                activeWords.forEach(word => {
+                    const li = document.createElement('li');
+                    li.textContent = word;
+                    li.dataset.word = word;
+                    wordsList.appendChild(li);
                 });
                 
                 const cells = document.querySelectorAll('#wordSearch td');
@@ -187,7 +248,7 @@
             
             function updateFoundCount() {
                 const foundCount = foundWords.size;
-                const totalWords = words.length;
+                const totalWords = activeWords.length;
                 document.getElementById('found-count').textContent = foundCount;
                 document.getElementById('total-words').textContent = totalWords;
                 
@@ -344,18 +405,33 @@
             
             function markWordAsFound(word) {
                 const wordElement = document.querySelector(`#words-to-find li[data-word="${word}"]`);
-                wordElement.classList.add('found');
+                if (wordElement) {
+                    wordElement.classList.add('found');
+                }
             }
             
             function generateWordSearch() {
                 initializeGrid();
-                words.forEach(word => placeWord(word));
+                
+                // Sort words by length (longest first) for better placement
+                activeWords.sort((a, b) => b.length - a.length);
+                
+                // Try to place each word
+                let allPlaced = true;
+                activeWords.forEach(word => {
+                    if (!placeWord(word)) {
+                        console.warn(`Could not place word: ${word}`);
+                        allPlaced = false;
+                    }
+                });
+                
+                if (!allPlaced) {
+                    alert("Some words couldn't be placed. Try with fewer or shorter words.");
+                }
+                
                 fillEmptySpaces();
                 renderGrid();
             }
-            
-            generateWordSearch();
-            document.getElementById('newPuzzle').addEventListener('click', generateWordSearch);
         });
     </script>
 </body>
