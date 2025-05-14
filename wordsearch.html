@@ -11,6 +11,7 @@
             margin: 0 auto;
             padding: 20px;
             text-align: center;
+            background-color: #f5f9ff;
         }
         h1 {
             color: #2c3e50;
@@ -19,9 +20,10 @@
             margin: 30px auto;
         }
         .word-search {
-            border: 2px solid #34495e;
+            border: 2px solid #4a89dc;
             border-collapse: collapse;
             margin: 0 auto;
+            background-color: #e6f2ff;
         }
         .word-search td {
             width: 30px;
@@ -29,24 +31,26 @@
             text-align: center;
             font-size: 20px;
             font-weight: bold;
-            background-color: #e6f2ff; /* Light blue background */
-            border: 1px solid #b3d1ff; /* Blue border */
+            border: 1px solid #b3d1ff;
+            background-color: #e6f2ff;
+            color: #2c3e50;
             cursor: pointer;
             user-select: none;
             transition: all 0.3s ease;
         }
         .word-search td:hover {
-            background-color: #e0e0e0;
+            background-color: #cce0ff;
         }
         .word-list {
             margin: 20px 0;
-            padding: 10px;
-            background-color: #f0f8ff;
-            border-radius: 5px;
+            padding: 15px;
+            background-color: #e6f2ff;
+            border-radius: 8px;
+            border: 1px solid #b3d1ff;
         }
         .word-list h3 {
             margin-top: 0;
-            color: #2980b9;
+            color: #2c3e50;
         }
         .word-list ul {
             list-style-type: none;
@@ -59,71 +63,66 @@
         .word-list li {
             font-size: 18px;
             font-weight: bold;
-            padding: 5px 10px;
-            border-radius: 4px;
-            background-color: #e8f4fc;
+            padding: 8px 15px;
+            border-radius: 6px;
+            background-color: #d9e6ff;
+            color: #2c3e50;
         }
         .word-list li.found {
-            background-color: #d4edda;
-            color: #155724;
+            background-color: #ffebee;
+            color: #c62828;
             position: relative;
         }
         .word-list li.found::after {
             content: "";
             position: absolute;
-            left: 0;
+            left: 10%;
             top: 50%;
-            width: 100%;
+            width: 80%;
             height: 2px;
-            background-color: #155724;
+            background-color: #c62828;
             transform: translateY(-50%);
         }
         button {
-            background-color: #3498db;
+            background-color: #4a89dc;
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 16px;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            margin: 10px;
-            transition: background-color 0.3s;
+            margin: 15px;
+            transition: all 0.3s;
         }
         button:hover {
-            background-color: #2980b9;
+            background-color: #3a70c2;
+            transform: translateY(-2px);
         }
         .highlight {
-            background-color: #fff3cd;
+            background-color: #fff3e0;
         }
         .found-word {
-            background-color: #ffebee; /* Very light red */
-            color: #c62828; /* Dark red text */
-            border: 1px solid #ef9a9a; /* Light red border */
+            background-color: #ffebee;
+            color: #c62828;
+            border: 1px solid #ef9a9a;
             position: relative;
-        }
-        .found-word::after {
-            content: "";
-            position: absolute;
-            left: 0;
-            top: 50%;
-            width: 100%;
-            height: 2px;
-            background-color: #155724;
-            transform: translateY(-50%);
-            display: none;
         }
         .stats {
             margin: 20px 0;
             font-size: 18px;
-            background-color: #f8f9fa;
-            padding: 10px;
-            border-radius: 5px;
+            background-color: #e6f2ff;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #b3d1ff;
         }
         .congrats {
-            color: #28a745;
+            color: #c62828;
             font-weight: bold;
             font-size: 20px;
             margin: 20px 0;
+            padding: 15px;
+            background-color: #ffebee;
+            border-radius: 8px;
             display: none;
         }
     </style>
@@ -157,14 +156,12 @@
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Words to include in the word search
             const words = ['APPLE', 'BANANA', 'ORANGE', 'PINEAPPLE'];
             let gridSize = 15;
             let grid = [];
-            let wordPositions = {}; // Stores the positions of each word
-            let foundWords = new Set(); // Tracks found words
+            let wordPositions = {};
+            let foundWords = new Set();
             
-            // Initialize the grid
             function initializeGrid() {
                 grid = [];
                 wordPositions = {};
@@ -179,19 +176,16 @@
                     }
                 }
                 
-                // Reset found words in the list
                 document.querySelectorAll('#words-to-find li').forEach(li => {
                     li.classList.remove('found');
                 });
                 
-                // Reset any highlighted cells
                 const cells = document.querySelectorAll('#wordSearch td');
                 cells.forEach(cell => {
                     cell.classList.remove('found-word');
                 });
             }
             
-            // Update the found words counter
             function updateFoundCount() {
                 const foundCount = foundWords.size;
                 const totalWords = words.length;
@@ -203,23 +197,13 @@
                 }
             }
             
-            // Directions: [row, col] adjustments
             const directions = [
-                [1, 0],   // down
-                [0, 1],   // right
-                [1, 1],   // down-right
-                [-1, 1],  // up-right
-                [-1, 0], // up
-                [0, -1],  // left
-                [-1, -1],// up-left
-                [1, -1]   // down-left
+                [1, 0], [0, 1], [1, 1], [-1, 1],
+                [-1, 0], [0, -1], [-1, -1], [1, -1]
             ];
             
-            // Check if a word can be placed at a specific position and direction
             function canPlaceWord(word, row, col, direction) {
                 const [rowDir, colDir] = direction;
-                
-                // Check boundaries
                 const endRow = row + (word.length - 1) * rowDir;
                 const endCol = col + (word.length - 1) * colDir;
                 
@@ -227,7 +211,6 @@
                     return false;
                 }
                 
-                // Check if word fits without conflicting letters
                 for (let i = 0; i < word.length; i++) {
                     const r = row + i * rowDir;
                     const c = col + i * colDir;
@@ -240,7 +223,6 @@
                 return true;
             }
             
-            // Place a word in the grid
             function placeWord(word) {
                 let placed = false;
                 let attempts = 0;
@@ -250,35 +232,31 @@
                     const direction = directions[Math.floor(Math.random() * directions.length)];
                     const [rowDir, colDir] = direction;
                     
-                    // Choose random starting position based on direction
                     let row, col;
                     
-                    if (rowDir === 1) {  // down
+                    if (rowDir === 1) {
                         row = Math.floor(Math.random() * (gridSize - word.length));
-                    } else if (rowDir === -1) {  // up
+                    } else if (rowDir === -1) {
                         row = Math.floor(Math.random() * (gridSize - word.length)) + word.length - 1;
                     } else {
                         row = Math.floor(Math.random() * gridSize);
                     }
                     
-                    if (colDir === 1) {  // right
+                    if (colDir === 1) {
                         col = Math.floor(Math.random() * (gridSize - word.length));
-                    } else if (colDir === -1) {  // left
+                    } else if (colDir === -1) {
                         col = Math.floor(Math.random() * (gridSize - word.length)) + word.length - 1;
                     } else {
                         col = Math.floor(Math.random() * gridSize);
                     }
                     
-                    // Check if word can be placed here
                     if (canPlaceWord(word, row, col, direction)) {
-                        // Store word positions
                         wordPositions[word] = {
                             start: {row, col},
                             direction: [rowDir, colDir],
                             letters: []
                         };
                         
-                        // Place the word
                         for (let i = 0; i < word.length; i++) {
                             const r = row + i * rowDir;
                             const c = col + i * colDir;
@@ -292,7 +270,6 @@
                 return placed;
             }
             
-            // Fill empty spaces with random letters
             function fillEmptySpaces() {
                 const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
                 for (let i = 0; i < gridSize; i++) {
@@ -304,7 +281,6 @@
                 }
             }
             
-            // Render the grid to the HTML table
             function renderGrid() {
                 const table = document.getElementById('wordSearch');
                 table.innerHTML = '';
@@ -323,11 +299,9 @@
                     table.appendChild(row);
                 }
                 
-                // Add click event listeners to cells
                 addCellClickListeners();
             }
             
-            // Add click event listeners to grid cells
             function addCellClickListeners() {
                 const cells = document.querySelectorAll('#wordSearch td');
                 cells.forEach(cell => {
@@ -335,73 +309,51 @@
                 });
             }
             
-            // Handle cell click
             function handleCellClick(event) {
                 const cell = event.target;
                 const row = parseInt(cell.dataset.row);
                 const col = parseInt(cell.dataset.col);
                 
-                // Check if this cell is part of any word
                 for (const word in wordPositions) {
                     const positions = wordPositions[word].letters;
                     const isPartOfWord = positions.some(pos => pos.row === row && pos.col === col);
                     
                     if (isPartOfWord && !foundWords.has(word)) {
-                        // Highlight all letters of this word
                         highlightWord(word);
-                        // Mark the word as found
                         foundWords.add(word);
-                        // Update the word list
                         markWordAsFound(word);
-                        // Update the counter
                         updateFoundCount();
                         return;
                     }
                 }
                 
-                // If not part of any word, just highlight this cell temporarily
                 cell.classList.add('highlight');
                 setTimeout(() => {
                     cell.classList.remove('highlight');
                 }, 500);
             }
             
-            // Highlight all letters of a word
             function highlightWord(word) {
                 const positions = wordPositions[word].letters;
-                
                 positions.forEach(pos => {
                     const cell = document.querySelector(`#wordSearch td[data-row="${pos.row}"][data-col="${pos.col}"]`);
                     cell.classList.add('found-word');
                 });
             }
             
-            // Mark word as found in the list
             function markWordAsFound(word) {
                 const wordElement = document.querySelector(`#words-to-find li[data-word="${word}"]`);
                 wordElement.classList.add('found');
             }
             
-            // Generate a new word search
             function generateWordSearch() {
                 initializeGrid();
-                
-                // Place each word
-                words.forEach(word => {
-                    placeWord(word);
-                });
-                
-                // Fill remaining spaces
+                words.forEach(word => placeWord(word));
                 fillEmptySpaces();
-                
-                // Render the grid
                 renderGrid();
             }
             
-            // Initialize the first puzzle
             generateWordSearch();
-            
-            // Add event listener for new puzzle button
             document.getElementById('newPuzzle').addEventListener('click', generateWordSearch);
         });
     </script>
