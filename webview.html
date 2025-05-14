@@ -2,47 +2,30 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Image Search Viewer</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      margin-top: 50px;
-    }
-    input, button {
-      padding: 10px;
-      font-size: 16px;
-    }
-    img {
-      margin-top: 20px;
-      max-width: 90%;
-      height: auto;
-      border-radius: 10px;
-    }
-  </style>
+  <title>Image Search</title>
 </head>
 <body>
   <h1>Search for an Image</h1>
-  <input type="text" id="searchInput" placeholder="Enter a keyword">
-  <button onclick="showImage()">Search</button>
-
-  <div id="imageContainer"></div>
+  <input type="text" id="keyword" placeholder="e.g., cat">
+  <button onclick="loadImage()">Search</button>
+  <br><br>
+  <img id="resultImage" style="max-width: 90%; display: none;" />
 
   <script>
-    function showImage() {
-      const keyword = document.getElementById('searchInput').value.trim();
-      const container = document.getElementById('imageContainer');
+    function loadImage() {
+      const keyword = document.getElementById("keyword").value.trim();
+      const img = document.getElementById("resultImage");
 
       if (!keyword) {
-        container.innerHTML = "<p>Please enter a search term.</p>";
+        alert("Please enter a keyword.");
         return;
       }
 
-      const imageUrl = `https://source.unsplash.com/800x500/?${encodeURIComponent(keyword)}`;
+      const url = `https://source.unsplash.com/800x500/?${encodeURIComponent(keyword)}`;
 
-      container.innerHTML = `<img src="${imageUrl}" alt="Image for ${keyword}">`;
+      img.src = url;
+      img.style.display = "block";
     }
   </script>
 </body>
 </html>
-
