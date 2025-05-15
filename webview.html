@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farm Scene Labeling</title>
+    <title>Farm Scene Labeling Tool</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,6 +12,12 @@
             align-items: center;
             margin: 0;
             padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
         }
         
         .container {
@@ -20,6 +26,10 @@
             max-width: 1000px;
             justify-content: space-between;
             align-items: center;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .labels {
@@ -31,20 +41,30 @@
         
         .label-box {
             padding: 10px;
-            background-color: #f0f0f0;
-            border: 2px solid #333;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
             border-radius: 5px;
             text-align: center;
             cursor: pointer;
             user-select: none;
+            font-weight: bold;
+            transition: all 0.2s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         .label-box:hover {
-            background-color: #e0e0e0;
+            background-color: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .label-box:active {
+            transform: translateY(0);
         }
         
         .image-container {
             position: relative;
+            display: inline-block;
             margin: 0 20px;
         }
         
@@ -52,22 +72,30 @@
             max-width: 500px;
             max-height: 500px;
             border: 2px solid #333;
+            display: block;
         }
         
-        canvas {
+        #drawing-canvas {
             position: absolute;
             top: 0;
             left: 0;
-            pointer-events: none;
+            pointer-events: auto;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            color: #666;
+            font-style: italic;
+            text-align: center;
         }
     </style>
 </head>
 <body>
-    <h1>Farm Scene Labeling</h1>
+    <h1>Farm Scene Labeling Tool</h1>
     <div class="container">
         <div class="labels" id="left-labels">
-            <div class="label-box" draggable="false" data-label="cat">cat</div>
-            <div class="label-box" draggable="false" data-label="cow">cow</div>
+            <div class="label-box" draggable="false" data-label="cat">CAT</div>
+            <div class="label-box" draggable="false" data-label="cow">COW</div>
         </div>
         
         <div class="image-container">
@@ -76,10 +104,15 @@
         </div>
         
         <div class="labels" id="right-labels">
-            <div class="label-box" draggable="false" data-label="sheep">sheep</div>
-            <div class="label-box" draggable="false" data-label="duck">duck</div>
+            <div class="label-box" draggable="false" data-label="sheep">SHEEP</div>
+            <div class="label-box" draggable="false" data-label="duck">DUCK</div>
         </div>
     </div>
+    
+    <p class="instructions">
+        Click and drag from labels to image to create lines.<br>
+        Double-click on lines to delete them.
+    </p>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -88,44 +121,44 @@
             const ctx = canvas.getContext('2d');
             const labelBoxes = document.querySelectorAll('.label-box');
             
-            // Set canvas size to match image
-            function resizeCanvas() {
-                canvas.width = image.offsetWidth;
-                canvas.height = image.offsetHeight;
-            }
-            
-            // Initial setup
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            
             // Store lines that have been drawn
             const lines = [];
-            
-            // Current line being drawn
             let currentLine = null;
             
-            // Get position of a label box
-            function getLabelPosition(label) {
-                const rect = label.getBoundingClientRect();
-                return {
-                    x: rect.left + rect.width / 2,
-                    y: rect.top + rect.height / 2
-                };
+            // Set canvas size to match image
+            function resizeCanvas() {
+                const rect = image.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                canvas.style.width = rect.width + 'px';
+                canvas.style.height = rect.height + 'px';
+                drawLines();
             }
             
             // Draw all lines on canvas
             function drawLines() {
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.strokeStyle = '#000';
-                ctx.lineWidth = 2;
+                
+                // Draw existing lines
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 3;
+                ctx.lineCap = 'round';
                 
                 lines.forEach(line => {
                     ctx.beginPath();
                     ctx.moveTo(line.startX, line.startY);
                     ctx.lineTo(line.endX, line.endY);
                     ctx.stroke();
+                    
+                    // Draw label at midpoint
+                    const midX = (line.startX + line.endX) / 2;
+                    const midY = (line.startY + line.endY) / 2;
+                    ctx.fillStyle = 'black';
+                    ctx.font = 'bold 14px Arial';
+                    ctx.fillText(line.label, midX + 5, midY);
                 });
                 
+                // Draw current line being dragged
                 if (currentLine) {
                     ctx.beginPath();
                     ctx.moveTo(currentLine.startX, currentLine.startY);
@@ -134,48 +167,95 @@
                 }
             }
             
-            // Event listeners for label boxes
-            labelBoxes.forEach(label => {
-                label.addEventListener('mousedown', function(e) {
-                    const labelPos = getLabelPosition(label);
-                    const imageRect = image.getBoundingClientRect();
-                    
-                    currentLine = {
-                        startX: labelPos.x - imageRect.left,
-                        startY: labelPos.y - imageRect.top,
-                        endX: labelPos.x - imageRect.left,
-                        endY: labelPos.y - imageRect.top,
-                        label: label.getAttribute('data-label')
-                    };
-                    
-                    drawLines();
-                });
-            });
+            // Get position of a label box relative to image
+            function getLabelPosition(label) {
+                const labelRect = label.getBoundingClientRect();
+                const imageRect = image.getBoundingClientRect();
+                
+                return {
+                    x: labelRect.left + labelRect.width / 2 - imageRect.left,
+                    y: labelRect.top + labelRect.height / 2 - imageRect.top
+                };
+            }
             
-            // Track mouse movement on image
-            image.addEventListener('mousemove', function(e) {
-                if (currentLine) {
-                    const rect = image.getBoundingClientRect();
-                    currentLine.endX = e.clientX - rect.left;
-                    currentLine.endY = e.clientY - rect.top;
-                    drawLines();
-                }
-            });
+            // Check if point is near a line
+            function isPointNearLine(px, py, line) {
+                const d = Math.abs((line.endY-line.startY)*px - (line.endX-line.startX)*py + 
+                           line.endX*line.startY - line.endY*line.startX) / 
+                          Math.sqrt(Math.pow(line.endY-line.startY,2) + Math.pow(line.endX-line.startX,2));
+                return d < 10; // 10px tolerance
+            }
             
-            // Finalize line on mouse up
-            document.addEventListener('mouseup', function() {
-                if (currentLine) {
-                    lines.push({
-                        startX: currentLine.startX,
-                        startY: currentLine.startY,
-                        endX: currentLine.endX,
-                        endY: currentLine.endY,
-                        label: currentLine.label
+            // Initialize when image loads
+            image.onload = function() {
+                resizeCanvas();
+                
+                // Handle window resize
+                window.addEventListener('resize', resizeCanvas);
+                new ResizeObserver(resizeCanvas).observe(image);
+                
+                // Event listeners for label boxes
+                labelBoxes.forEach(label => {
+                    label.addEventListener('mousedown', function(e) {
+                        const labelPos = getLabelPosition(label);
+                        
+                        currentLine = {
+                            startX: labelPos.x,
+                            startY: labelPos.y,
+                            endX: labelPos.x,
+                            endY: labelPos.y,
+                            label: label.getAttribute('data-label')
+                        };
+                        
+                        drawLines();
                     });
-                    currentLine = null;
-                    drawLines();
-                }
-            });
+                });
+                
+                // Track mouse movement on image
+                canvas.addEventListener('mousemove', function(e) {
+                    if (currentLine) {
+                        const rect = canvas.getBoundingClientRect();
+                        currentLine.endX = e.clientX - rect.left;
+                        currentLine.endY = e.clientY - rect.top;
+                        drawLines();
+                    }
+                });
+                
+                // Finalize line on mouse up
+                document.addEventListener('mouseup', function() {
+                    if (currentLine) {
+                        // Snap to edge if close
+                        const snapMargin = 15;
+                        if (currentLine.endX < snapMargin) currentLine.endX = 0;
+                        if (currentLine.endY < snapMargin) currentLine.endY = 0;
+                        if (currentLine.endX > canvas.width - snapMargin) currentLine.endX = canvas.width;
+                        if (currentLine.endY > canvas.height - snapMargin) currentLine.endY = canvas.height;
+                        
+                        lines.push(currentLine);
+                        currentLine = null;
+                        drawLines();
+                    }
+                });
+                
+                // Delete line on double-click
+                canvas.addEventListener('dblclick', function(e) {
+                    const rect = canvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Find and remove closest line
+                    for (let i = lines.length - 1; i >= 0; i--) {
+                        if (isPointNearLine(x, y, lines[i])) {
+                            lines.splice(i, 1);
+                            drawLines();
+                            break;
+                        }
+                    }
+                });
+            };
+            
+            // Handle case where image is already loaded
+            if (image.complete) image.onload();
         });
     </script>
 </body>
