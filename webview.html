@@ -3,104 +3,179 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Finder</title>
+    <title>Farm Scene Labeling</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
             padding: 20px;
-            text-align: center;
         }
+        
         .container {
-            margin-top: 30px;
+            display: flex;
+            width: 100%;
+            max-width: 1000px;
+            justify-content: space-between;
+            align-items: center;
         }
-        input {
+        
+        .labels {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 150px;
+        }
+        
+        .label-box {
             padding: 10px;
-            width: 300px;
-            font-size: 16px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
+            background-color: #f0f0f0;
+            border: 2px solid #333;
+            border-radius: 5px;
+            text-align: center;
             cursor: pointer;
-            font-size: 16px;
+            user-select: none;
         }
-        button:hover {
-            background-color: #45a049;
+        
+        .label-box:hover {
+            background-color: #e0e0e0;
         }
-        #imageContainer {
-            margin-top: 30px;
+        
+        .image-container {
+            position: relative;
+            margin: 0 20px;
         }
-        #displayedImage {
-            max-width: 100%;
-            max-height: 400px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 5px;
+        
+        #farm-image {
+            max-width: 500px;
+            max-height: 500px;
+            border: 2px solid #333;
         }
-        .error {
-            color: red;
-            margin-top: 20px;
+        
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            pointer-events: none;
         }
     </style>
 </head>
 <body>
-    <h1>Image Finder</h1>
-    <p>Enter a search term to display a related image from the web:</p>
-    
+    <h1>Farm Scene Labeling</h1>
     <div class="container">
-        <input type="text" id="searchInput" placeholder="e.g., sunset, mountains, cat...">
-        <button onclick="displayImage()">Show Image</button>
-    </div>
-    
-    <div id="imageContainer">
-        <!-- Image will be displayed here -->
-    </div>
-    
-    <script>
-        function displayImage() {
-            const searchTerm = document.getElementById('searchInput').value.trim();
-            const imageContainer = document.getElementById('imageContainer');
-            
-            if (!searchTerm) {
-                imageContainer.innerHTML = '<p class="error">Please enter a search term</p>';
-                return;
-            }
-            
-            // Clear previous content
-            imageContainer.innerHTML = '<p>Loading image...</p>';
-            
-            // Using Unsplash API for demonstration (requires registration for production use)
-            // Note: This is a simple demo. For production, you should use proper API keys.
-            const apiUrl = `https://source.unsplash.com/600x400/?${encodeURIComponent(searchTerm)}`;
-            
-            // Create image element
-            const img = document.createElement('img');
-            img.id = 'displayedImage';
-            img.alt = searchTerm;
-            img.src = apiUrl;
-            
-            // Handle image load
-            img.onload = function() {
-                imageContainer.innerHTML = '';
-                imageContainer.appendChild(img);
-                imageContainer.innerHTML += `<p>Image of: ${searchTerm}</p>`;
-            };
-            
-            // Handle error
-            img.onerror = function() {
-                imageContainer.innerHTML = `<p class="error">Could not load image for "${searchTerm}". Please try another term.</p>`;
-            };
-        }
+        <div class="labels" id="left-labels">
+            <div class="label-box" draggable="false" data-label="cat">cat</div>
+            <div class="label-box" draggable="false" data-label="cow">cow</div>
+        </div>
         
-        // Allow pressing Enter key to submit
-        document.getElementById('searchInput').addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                displayImage();
+        <div class="image-container">
+            <img id="farm-image" src="d:\downloads\farmscene.jpg" alt="Farm Scene">
+            <canvas id="drawing-canvas"></canvas>
+        </div>
+        
+        <div class="labels" id="right-labels">
+            <div class="label-box" draggable="false" data-label="sheep">sheep</div>
+            <div class="label-box" draggable="false" data-label="duck">duck</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const image = document.getElementById('farm-image');
+            const canvas = document.getElementById('drawing-canvas');
+            const ctx = canvas.getContext('2d');
+            const labelBoxes = document.querySelectorAll('.label-box');
+            
+            // Set canvas size to match image
+            function resizeCanvas() {
+                canvas.width = image.offsetWidth;
+                canvas.height = image.offsetHeight;
             }
+            
+            // Initial setup
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Store lines that have been drawn
+            const lines = [];
+            
+            // Current line being drawn
+            let currentLine = null;
+            
+            // Get position of a label box
+            function getLabelPosition(label) {
+                const rect = label.getBoundingClientRect();
+                return {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+            }
+            
+            // Draw all lines on canvas
+            function drawLines() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                
+                lines.forEach(line => {
+                    ctx.beginPath();
+                    ctx.moveTo(line.startX, line.startY);
+                    ctx.lineTo(line.endX, line.endY);
+                    ctx.stroke();
+                });
+                
+                if (currentLine) {
+                    ctx.beginPath();
+                    ctx.moveTo(currentLine.startX, currentLine.startY);
+                    ctx.lineTo(currentLine.endX, currentLine.endY);
+                    ctx.stroke();
+                }
+            }
+            
+            // Event listeners for label boxes
+            labelBoxes.forEach(label => {
+                label.addEventListener('mousedown', function(e) {
+                    const labelPos = getLabelPosition(label);
+                    const imageRect = image.getBoundingClientRect();
+                    
+                    currentLine = {
+                        startX: labelPos.x - imageRect.left,
+                        startY: labelPos.y - imageRect.top,
+                        endX: labelPos.x - imageRect.left,
+                        endY: labelPos.y - imageRect.top,
+                        label: label.getAttribute('data-label')
+                    };
+                    
+                    drawLines();
+                });
+            });
+            
+            // Track mouse movement on image
+            image.addEventListener('mousemove', function(e) {
+                if (currentLine) {
+                    const rect = image.getBoundingClientRect();
+                    currentLine.endX = e.clientX - rect.left;
+                    currentLine.endY = e.clientY - rect.top;
+                    drawLines();
+                }
+            });
+            
+            // Finalize line on mouse up
+            document.addEventListener('mouseup', function() {
+                if (currentLine) {
+                    lines.push({
+                        startX: currentLine.startX,
+                        startY: currentLine.startY,
+                        endX: currentLine.endX,
+                        endY: currentLine.endY,
+                        label: currentLine.label
+                    });
+                    currentLine = null;
+                    drawLines();
+                }
+            });
         });
     </script>
 </body>
