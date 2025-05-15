@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Farm Scene Labeling Tool</title>
+    <title>Farm Scene Labeling Tool with Verification</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -88,10 +88,87 @@
             font-style: italic;
             text-align: center;
         }
+        
+        .validation-panel {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 800px;
+            text-align: center;
+        }
+        
+        .check-btn {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+        }
+        
+        .check-btn:hover {
+            background-color: #0069d9;
+        }
+        
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .correct {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .incorrect {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        
+        .target-zones {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+        
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .coordinate-finder {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            font-family: monospace;
+        }
+        
+        .debug-mode {
+            background-color: #ffeb3b;
+            padding: 5px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <h1>Farm Scene Labeling Tool</h1>
+    <h1>Farm Scene Labeling Tool with Verification</h1>
     <div class="container">
         <div class="labels" id="left-labels">
             <div class="label-box" draggable="false" data-label="cat">CAT</div>
@@ -111,19 +188,71 @@
     
     <p class="instructions">
         Click and drag from labels to image to create lines.<br>
-        Double-click on lines to delete them.
+        Double-click on lines to delete them. Click "Check Labels" to verify.
     </p>
+
+    <div class="validation-panel">
+        <button class="check-btn" id="validate-btn">Check Labels</button>
+        <button class="check-btn" id="debug-btn">Toggle Coordinate Finder</button>
+        <div class="stats">
+            <div>Attempts: <span id="attempt-counter">0</span></div>
+            <div>Time: <span id="time-counter">0</span>s</div>
+            <div>Score: <span id="score-display">0</span>%</div>
+        </div>
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <div id="coordinate-finder" class="coordinate-finder" style="display: none;">
+        <div class="debug-mode">DEBUG MODE</div>
+        <div>Click on image to get coordinates:</div>
+        <div>X: <span id="coord-x">0</span>, Y: <span id="coord-y">0</span></div>
+    </div>
+
+    <script type="application/json" id="correct-answers">
+        {
+            "cat": {"x": 150, "y": 200, "tolerance": 30},
+            "cow": {"x": 300, "y": 250, "tolerance": 40},
+            "sheep": {"x": 200, "y": 350, "tolerance": 35},
+            "duck": {"x": 100, "y": 400, "tolerance": 25}
+        }
+    </script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
             const image = document.getElementById('farm-image');
             const canvas = document.getElementById('drawing-canvas');
             const ctx = canvas.getContext('2d');
             const labelBoxes = document.querySelectorAll('.label-box');
+            const validateBtn = document.getElementById('validate-btn');
+            const debugBtn = document.getElementById('debug-btn');
+            const feedback = document.getElementById('feedback');
+            const attemptCounter = document.getElementById('attempt-counter');
+            const timeCounter = document.getElementById('time-counter');
+            const scoreDisplay = document.getElementById('score-display');
+            const coordinateFinder = document.getElementById('coordinate-finder');
+            const coordX = document.getElementById('coord-x');
+            const coordY = document.getElementById('coord-y');
             
-            // Store lines that have been drawn
+            // Game State
             const lines = [];
             let currentLine = null;
+            let attempts = 0;
+            let startTime = Date.now();
+            let timerInterval;
+            let debugMode = false;
+            const correctAnswers = JSON.parse(document.getElementById('correct-answers').textContent);
+            
+            // Initialize timer
+            function startTimer() {
+                timerInterval = setInterval(() => {
+                    timeCounter.textContent = getTimeSpent();
+                }, 1000);
+            }
+            
+            function getTimeSpent() {
+                return Math.floor((Date.now() - startTime) / 1000);
+            }
             
             // Set canvas size to match image
             function resizeCanvas() {
@@ -183,12 +312,140 @@
                 const d = Math.abs((line.endY-line.startY)*px - (line.endX-line.startX)*py + 
                            line.endX*line.startY - line.endY*line.startX) / 
                           Math.sqrt(Math.pow(line.endY-line.startY,2) + Math.pow(line.endX-line.startX,2));
-                return d < 10; // 10px tolerance
+                return d < 10;
+            }
+            
+            // Check if point is near target
+            function isPointNearTarget(x, y, target) {
+                const distance = Math.sqrt(
+                    Math.pow(x - target.x, 2) + 
+                    Math.pow(y - target.y, 2)
+                );
+                return distance <= target.tolerance;
+            }
+            
+            // Calculate score
+            function calculateScore(results) {
+                const totalPossible = Object.keys(correctAnswers).length;
+                const correct = results.correct.length;
+                return Math.round((correct / totalPossible) * 100);
+            }
+            
+            // Validate labels
+            function checkLabels() {
+                const results = {
+                    correct: [],
+                    incorrect: [],
+                    missing: [],
+                    extra: []
+                };
+                
+                // Check each correct answer
+                Object.keys(correctAnswers).forEach(label => {
+                    const target = correctAnswers[label];
+                    const foundLine = lines.find(line => 
+                        line.label === label && 
+                        isPointNearTarget(line.endX, line.endY, target)
+                    );
+                    
+                    if (foundLine) {
+                        results.correct.push(label);
+                    } else {
+                        results.missing.push(label);
+                    }
+                });
+                
+                // Check for extra labels
+                lines.forEach(line => {
+                    if (!correctAnswers[line.label] || 
+                        !isPointNearTarget(line.endX, line.endY, correctAnswers[line.label])) {
+                        results.extra.push(line.label);
+                    }
+                });
+                
+                return results;
+            }
+            
+            // Show feedback
+            function showFeedback(results) {
+                feedback.style.display = 'block';
+                const score = calculateScore(results);
+                scoreDisplay.textContent = score;
+                
+                if (results.missing.length === 0 && results.extra.length === 0) {
+                    feedback.className = 'feedback correct';
+                    feedback.innerHTML = `
+                        <h3>✓ Perfect! 100% Score</h3>
+                        <p>All labels are correctly placed!</p>
+                        <p>Time: ${getTimeSpent()} seconds, Attempts: ${attempts}</p>
+                    `;
+                } else {
+                    feedback.className = 'feedback incorrect';
+                    let html = `<h3>Score: ${score}%</h3>`;
+                    
+                    if (results.missing.length > 0) {
+                        html += `<p>Missing labels: ${results.missing.join(', ')}</p>`;
+                    }
+                    
+                    if (results.extra.length > 0) {
+                        html += `<p>Incorrect labels: ${results.extra.join(', ')}</p>`;
+                    }
+                    
+                    if (results.correct.length > 0) {
+                        html += `<p>Correct labels: ${results.correct.join(', ')}</p>`;
+                    }
+                    
+                    showTargetZones(results.missing);
+                    feedback.innerHTML = html;
+                }
+            }
+            
+            // Show target zones
+            function showTargetZones(missingLabels) {
+                const oldZones = document.querySelectorAll('.target-zone');
+                oldZones.forEach(zone => zone.remove());
+                
+                missingLabels.forEach(label => {
+                    if (correctAnswers[label]) {
+                        const target = correctAnswers[label];
+                        const zone = document.createElement('div');
+                        zone.className = 'target-zone';
+                        zone.style.position = 'absolute';
+                        zone.style.left = `${target.x - target.tolerance}px`;
+                        zone.style.top = `${target.y - target.tolerance}px`;
+                        zone.style.width = `${target.tolerance * 2}px`;
+                        zone.style.height = `${target.tolerance * 2}px`;
+                        zone.style.border = '2px dashed green';
+                        zone.style.borderRadius = '50%';
+                        zone.style.pointerEvents = 'none';
+                        zone.title = `Correct area for ${label}`;
+                        
+                        const labelElement = document.createElement('div');
+                        labelElement.textContent = label;
+                        labelElement.style.position = 'absolute';
+                        labelElement.style.bottom = '-25px';
+                        labelElement.style.left = '50%';
+                        labelElement.style.transform = 'translateX(-50%)';
+                        labelElement.style.fontWeight = 'bold';
+                        labelElement.style.color = 'green';
+                        
+                        zone.appendChild(labelElement);
+                        canvas.parentElement.appendChild(zone);
+                    }
+                });
+            }
+            
+            // Toggle debug mode
+            function toggleDebugMode() {
+                debugMode = !debugMode;
+                coordinateFinder.style.display = debugMode ? 'block' : 'none';
+                debugBtn.textContent = debugMode ? 'Hide Coordinate Finder' : 'Show Coordinate Finder';
             }
             
             // Initialize when image loads
             image.onload = function() {
                 resizeCanvas();
+                startTimer();
                 
                 // Handle window resize
                 window.addEventListener('resize', resizeCanvas);
@@ -224,7 +481,6 @@
                 // Finalize line on mouse up
                 document.addEventListener('mouseup', function() {
                     if (currentLine) {
-                        // Snap to edge if close
                         const snapMargin = 15;
                         if (currentLine.endX < snapMargin) currentLine.endX = 0;
                         if (currentLine.endY < snapMargin) currentLine.endY = 0;
@@ -243,7 +499,6 @@
                     const x = e.clientX - rect.left;
                     const y = e.clientY - rect.top;
                     
-                    // Find and remove closest line
                     for (let i = lines.length - 1; i >= 0; i--) {
                         if (isPointNearLine(x, y, lines[i])) {
                             lines.splice(i, 1);
@@ -252,6 +507,28 @@
                         }
                     }
                 });
+                
+                // Coordinate finder
+                canvas.addEventListener('click', function(e) {
+                    if (debugMode) {
+                        const rect = canvas.getBoundingClientRect();
+                        const x = e.clientX - rect.left;
+                        const y = e.clientY - rect.top;
+                        coordX.textContent = Math.round(x);
+                        coordY.textContent = Math.round(y);
+                    }
+                });
+                
+                // Validation button
+                validateBtn.addEventListener('click', function() {
+                    attempts++;
+                    attemptCounter.textContent = attempts;
+                    const results = checkLabels();
+                    showFeedback(results);
+                });
+                
+                // Debug button
+                debugBtn.addEventListener('click', toggleDebugMode);
             };
             
             // Handle case where image is already loaded
