@@ -34,10 +34,17 @@
             padding: 0 15px;
             box-sizing: border-box;
             transition: all 0.3s ease;
+            opacity: 0.7;
+            transform: scale(0.95);
+        }
+        
+        .carousel-card.active {
+            opacity: 1;
+            transform: scale(1);
         }
         
         .carousel-card:hover {
-            transform: translateY(-5px);
+            transform: translateY(-5px) scale(1);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
         
@@ -48,6 +55,7 @@
             border-radius: 8px;
             margin-bottom: 1rem;
             border: 1px solid #eee;
+            transition: opacity 0.3s ease;
         }
         
         .carousel-nav {
@@ -55,6 +63,7 @@
             justify-content: center;
             margin-top: 1.5rem;
             gap: 1rem;
+            align-items: center;
         }
         
         .carousel-nav button {
@@ -79,6 +88,28 @@
             padding: 0.6rem 1.2rem;
         }
         
+        /* Pagination Indicators */
+        .carousel-pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        
+        .carousel-pagination-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-pagination-dot.active {
+            background: #4a6fa5;
+            transform: scale(1.2);
+        }
+        
         @media (min-width: 768px) {
             .carousel-card {
                 flex: 0 0 50%;
@@ -95,6 +126,21 @@
         .carousel-nav button:focus {
             outline: 2px solid #4a6fa5;
             outline-offset: 2px;
+        }
+        
+        /* Loading animation */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .carousel-card img.loading {
+            opacity: 0;
+            background: #f0f0f0;
+        }
+        
+        .carousel-card img.loaded {
+            animation: fadeIn 0.5s ease-in-out;
         }
     </style>
 </head>
@@ -137,25 +183,30 @@
             <h2>Featured Resources</h2>
             <div class="carousel-container">
                 <div class="carousel-track">
-                    <div class="carousel-card">
-                        <img src="/images/english-grammar-in-use.png" alt="English Grammar in Use book cover">
+                    <div class="carousel-card active">
+                        <img src="/images/english-grammar-in-use.png" alt="English Grammar in Use book cover" loading="lazy" class="loading">
                         <h3>English Grammar in Use</h3>
                         <p>Master English grammar with our comprehensive guide</p>
                         <a href="books/english-grammar-in-use.html" class="btn"><i class="fas fa-book-reader"></i> View Guide</a>
                     </div>
                     <div class="carousel-card">
-                        <img src="/images/math-practice.jpg" alt="Math practice materials">
+                        <img src="/images/math-practice.jpg" alt="Math practice materials" loading="lazy" class="loading">
                         <h3>Math Practice Tool</h3>
                         <p>Interactive exercises for all skill levels</p>
                         <a href="math-practice.html" class="btn"><i class="fas fa-play-circle"></i> Try Now</a>
                     </div>
                     <div class="carousel-card">
-                        <img src="/images/entrepreneur-club.jpg" alt="Entrepreneur club meeting">
+                        <img src="/images/entrepreneur-club.jpg" alt="Entrepreneur club meeting" loading="lazy" class="loading">
                         <h3>Entrepreneur Club</h3>
                         <p>Develop business and speaking skills</p>
                         <a href="entrepreneur-club.html" class="btn"><i class="fas fa-sign-in-alt"></i> Join Now</a>
                     </div>
                 </div>
+            </div>
+            <div class="carousel-pagination">
+                <span class="carousel-pagination-dot active" data-index="0"></span>
+                <span class="carousel-pagination-dot" data-index="1"></span>
+                <span class="carousel-pagination-dot" data-index="2"></span>
             </div>
             <div class="carousel-nav">
                 <button class="carousel-prev" aria-label="Previous resource"><i class="fas fa-chevron-left"></i></button>
@@ -209,10 +260,33 @@
             const cards = document.querySelectorAll('.carousel-card');
             const prevBtn = document.querySelector('.carousel-prev');
             const nextBtn = document.querySelector('.carousel-next');
+            const dots = document.querySelectorAll('.carousel-pagination-dot');
             const cardCount = cards.length;
             let currentIndex = 0;
             let cardWidth = 100;
             let autoRotateInterval;
+            let touchStartX = 0;
+            let touchEndX = 0;
+            
+            // Lazy load images
+            const lazyLoadImages = () => {
+                const images = document.querySelectorAll('.carousel-card img.loading');
+                
+                images.forEach(img => {
+                    if (img.getBoundingClientRect().top < window.innerHeight + 100) {
+                        img.src = img.getAttribute('src');
+                        img.onload = () => {
+                            img.classList.remove('loading');
+                            img.classList.add('loaded');
+                        };
+                    }
+                });
+            };
+            
+            // Initialize image loading
+            lazyLoadImages();
+            window.addEventListener('scroll', lazyLoadImages);
+            window.addEventListener('resize', lazyLoadImages);
             
             function updateCardWidth() {
                 if (window.innerWidth >= 992) {
@@ -228,6 +302,16 @@
             function updateCarousel() {
                 const translateX = -currentIndex * cardWidth;
                 track.style.transform = `translateX(${translateX}%)`;
+                
+                // Update active card classes
+                cards.forEach((card, index) => {
+                    card.classList.toggle('active', index === currentIndex);
+                });
+                
+                // Update pagination dots
+                dots.forEach((dot, index) => {
+                    dot.classList.toggle('active', index === currentIndex);
+                });
             }
             
             function moveToNext() {
@@ -241,7 +325,13 @@
                 updateCarousel();
             }
             
+            function goToIndex(index) {
+                currentIndex = index;
+                updateCarousel();
+            }
+            
             function startAutoRotate() {
+                clearInterval(autoRotateInterval);
                 autoRotateInterval = setInterval(moveToNext, 5000);
             }
             
@@ -251,46 +341,95 @@
             
             // Event Listeners
             window.addEventListener('resize', updateCardWidth);
-            nextBtn.addEventListener('click', moveToNext);
-            prevBtn.addEventListener('click', moveToPrev);
+            nextBtn.addEventListener('click', () => {
+                moveToNext();
+                startAutoRotate();
+            });
+            prevBtn.addEventListener('click', () => {
+                moveToPrev();
+                startAutoRotate();
+            });
+            
+            // Pagination dots
+            dots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    const index = parseInt(dot.getAttribute('data-index'));
+                    goToIndex(index);
+                    startAutoRotate();
+                });
+            });
             
             // Pause on hover
             const carousel = document.querySelector('.featured-carousel');
             carousel.addEventListener('mouseenter', () => clearInterval(autoRotateInterval));
             carousel.addEventListener('mouseleave', startAutoRotate);
             
+            // Touch events for mobile swipe
+            carousel.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+                clearInterval(autoRotateInterval);
+            }, {passive: true});
+            
+            carousel.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+                startAutoRotate();
+            }, {passive: true});
+            
+            function handleSwipe() {
+                const threshold = 50; // Minimum swipe distance
+                const difference = touchStartX - touchEndX;
+                
+                if (difference > threshold) {
+                    moveToNext(); // Swipe left
+                } else if (difference < -threshold) {
+                    moveToPrev(); // Swipe right
+                }
+            }
+            
             // Testimonial Carousel
             const testimonials = document.querySelectorAll('.testimonial');
-            const dots = document.querySelectorAll('.dot');
+            const tDots = document.querySelectorAll('.dot');
             const tPrevBtn = document.querySelector('.testimonial-prev');
             const tNextBtn = document.querySelector('.testimonial-next');
             let tCurrentIndex = 0;
+            let tAutoRotateInterval;
             
             function showTestimonial(index) {
                 testimonials.forEach(t => t.classList.remove('active'));
-                dots.forEach(d => d.classList.remove('active'));
+                tDots.forEach(d => d.classList.remove('active'));
                 
                 testimonials[index].classList.add('active');
-                dots[index].classList.add('active');
+                tDots[index].classList.add('active');
                 tCurrentIndex = index;
+            }
+            
+            function startTestimonialAutoRotate() {
+                clearInterval(tAutoRotateInterval);
+                tAutoRotateInterval = setInterval(() => {
+                    showTestimonial((tCurrentIndex + 1) % testimonials.length);
+                }, 7000);
             }
             
             tNextBtn.addEventListener('click', () => {
                 showTestimonial((tCurrentIndex + 1) % testimonials.length);
+                startTestimonialAutoRotate();
             });
             
             tPrevBtn.addEventListener('click', () => {
                 showTestimonial((tCurrentIndex - 1 + testimonials.length) % testimonials.length);
+                startTestimonialAutoRotate();
             });
             
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => showTestimonial(index));
+            tDots.forEach((dot, index) => {
+                dot.addEventListener('click', () => {
+                    showTestimonial(index);
+                    startTestimonialAutoRotate();
+                });
             });
             
             // Auto-rotate testimonials
-            setInterval(() => {
-                showTestimonial((tCurrentIndex + 1) % testimonials.length);
-            }, 7000);
+            startTestimonialAutoRotate();
         });
     </script>
 </body>
