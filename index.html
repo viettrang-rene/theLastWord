@@ -11,13 +11,12 @@
 <body>
     <nav class="club-nav">
        <ul>
-            <li><a href="../theLastWord/index.html">Home</a></li>
-            <li><a href="../theLastWord/club.html">Speaking Club</a></li>
-            <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
-            <li><a href="../theLastWord/mathpractice.html">Math</a></li>
-            <li><a href="../theLastWord/wordsearch.html">Word Search</a></li>
-            <li><a href="../theLastWord/webview.html">Web View</a></li>
-            <li><a href="../theLastWord/wordsearch.html">Word Search</a></li>
+            <li><a href="../theLastWord/index.html"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="../theLastWord/club.html"><i class="fas fa-users"></i> Speaking Club</a></li>
+            <li><a href="../theLastWord/kidpreneur.html"><i class="fas fa-lightbulb"></i> Kidpreneur</a></li>
+            <li><a href="../theLastWord/mathpractice.html"><i class="fas fa-calculator"></i> Math</a></li>
+            <li><a href="../theLastWord/wordsearch.html"><i class="fas fa-search"></i> Word Search</a></li>
+            <li><a href="../theLastWord/webview.html"><i class="fas fa-globe"></i> Web View</a></li>
         </ul>
     </nav>
     
@@ -25,6 +24,8 @@
         <!-- Hero Section Matching Club Style Empty-->
         <section class="hero">
             <div class="hero-content">
+                <h1><i class="fas fa-language"></i> ESL Study Guides</h1>
+                <p>Your comprehensive resource for English learning</p>
             </div>
         </section>
         
@@ -46,31 +47,31 @@
                 <p>Entrepreneurial public speaking activities</p>
             </div>
             <div class="highlight-card">
-                <i class="fas fa-trophy"></i>
-                <h3>Badge System</h3>
-                <p>Track your learning progress</p>
+                <i class="fas fa-chart-line"></i>
+                <h3>Progress Tracker</h3>
+                <p>Track your learning journey</p>
             </div>
         </section>
         
         <!-- Featured Content Carousel -->
         <section class="featured-carousel">
-            <h2>Featured Resources</h2>
+            <h2><i class="fas fa-star"></i> Featured Resources</h2>
             <div class="carousel-container">
                 <div class="carousel-track">
                     <div class="carousel-card">
-                        <img src="images/english-grammar-in-use.jpg" alt="English Grammar in Use">
+                        <img src="/images/english-grammar-in-use.jpg" alt="English Grammar in Use">
                         <h3>English Grammar in Use</h3>
-                        <a href="books/english-grammar-in-use.html" class="btn">View Guide</a>
+                        <a href="books/english-grammar-in-use.html" class="btn"><i class="fas fa-book-reader"></i> View Guide</a>
                     </div>
                     <div class="carousel-card">
-                        <img src="images/math-practice.jpg" alt="Math Practice">
+                        <img src="/images/math-practice.jpg" alt="Math Practice">
                         <h3>Math Practice Tool</h3>
-                        <a href="math-practice.html" class="btn">Try Now</a>
+                        <a href="math-practice.html" class="btn"><i class="fas fa-play-circle"></i> Try Now</a>
                     </div>
                     <div class="carousel-card">
-                        <img src="images/entrepreneur-club.jpg" alt="Entrepreneur Club">
+                        <img src="/images/entrepreneur-club.jpg" alt="Entrepreneur Club">
                         <h3>Entrepreneur Club</h3>
-                        <a href="entrepreneur-club.html" class="btn">Join Now</a>
+                        <a href="entrepreneur-club.html" class="btn"><i class="fas fa-sign-in-alt"></i> Join Now</a>
                     </div>
                 </div>
             </div>
@@ -82,18 +83,18 @@
         
         <!-- Testimonials Matching Club Style -->
         <section class="testimonials">
-            <h2>What Students Say</h2>
+            <h2><i class="fas fa-comment-alt"></i> What Students Say</h2>
             <div class="testimonial-carousel">
                 <div class="testimonial active">
-                    <p>"The study guides helped me understand grammar much better!"</p>
+                    <p><i class="fas fa-quote-left"></i> The study guides helped me understand grammar much better! <i class="fas fa-quote-right"></i></p>
                     <div class="testimonial-author">- Maria, Age 12</div>
                 </div>
                 <div class="testimonial">
-                    <p>"I love earning badges in the Entrepreneur Club!"</p>
+                    <p><i class="fas fa-quote-left"></i> I love tracking my progress in the Entrepreneur Club! <i class="fas fa-quote-right"></i></p>
                     <div class="testimonial-author">- Ahmed, Age 10</div>
                 </div>
                 <div class="testimonial">
-                    <p>"Math Practice makes learning fun and interactive."</p>
+                    <p><i class="fas fa-quote-left"></i> Math Practice makes learning fun and interactive. <i class="fas fa-quote-right"></i></p>
                     <div class="testimonial-author">- Li, Age 9</div>
                 </div>
             </div>
@@ -110,16 +111,58 @@
     </main>
     
     <footer class="club-footer">
-        <p>&copy; 2023 ESL Study Guides. All rights reserved.</p>
+        <p><i class="far fa-copyright"></i> 2023 ESL Study Guides. All rights reserved.</p>
         <div class="social-links">
             <a href="#"><i class="fab fa-facebook"></i></a>
             <a href="#"><i class="fab fa-twitter"></i></a>
             <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-youtube"></i></a>
         </div>
     </footer>
 
     <!-- JavaScript Files -->
     <script src="js/main.js"></script>
-    <script src="js/club.js"></script> <!-- Reusing club.js components -->
+    <script src="js/club.js"></script>
+    
+    <script>
+        // Testimonial Carousel Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const testimonials = document.querySelectorAll('.testimonial');
+            const dots = document.querySelectorAll('.dot');
+            const prevBtn = document.querySelector('.testimonial-prev');
+            const nextBtn = document.querySelector('.testimonial-next');
+            let currentIndex = 0;
+
+            function showTestimonial(index) {
+                testimonials.forEach(testimonial => testimonial.classList.remove('active'));
+                dots.forEach(dot => dot.classList.remove('active'));
+                
+                testimonials[index].classList.add('active');
+                dots[index].classList.add('active');
+                currentIndex = index;
+            }
+
+            function nextTestimonial() {
+                let newIndex = (currentIndex + 1) % testimonials.length;
+                showTestimonial(newIndex);
+            }
+
+            function prevTestimonial() {
+                let newIndex = (currentIndex - 1 + testimonials.length) % testimonials.length;
+                showTestimonial(newIndex);
+            }
+
+            nextBtn.addEventListener('click', nextTestimonial);
+            prevBtn.addEventListener('click', prevTestimonial);
+
+            // Add click event for dots
+            dots.forEach((dot, index) => {
+                dot.addEventListener('click', () => showTestimonial(index));
+            });
+
+            // Auto-rotate testimonials
+            setInterval(nextTestimonial, 5000);
+        });
+    </script>
 </body>
 </html>
