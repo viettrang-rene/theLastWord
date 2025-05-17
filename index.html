@@ -6,7 +6,97 @@
     <title>ESL Study Guides</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/club.css"> <!-- Add club styles -->
+    <link rel="stylesheet" href="css/club.css">
+    <style>
+        /* Enhanced Carousel Styles */
+        .featured-carousel {
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 0;
+            margin: 2rem 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .carousel-container {
+            overflow: hidden;
+            width: 100%;
+            padding: 0 30px;
+        }
+        
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        
+        .carousel-card {
+            flex: 0 0 100%;
+            padding: 0 15px;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        
+        .carousel-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            border: 1px solid #eee;
+        }
+        
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+            gap: 1rem;
+        }
+        
+        .carousel-nav button {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.2rem;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .carousel-nav button:hover {
+            background: #3a5a80;
+            transform: scale(1.1);
+        }
+        
+        .carousel-card .btn {
+            display: inline-block;
+            margin-top: 0.5rem;
+            padding: 0.6rem 1.2rem;
+        }
+        
+        @media (min-width: 768px) {
+            .carousel-card {
+                flex: 0 0 50%;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .carousel-card {
+                flex: 0 0 33.33%;
+            }
+        }
+        
+        /* Accessibility improvements */
+        .carousel-nav button:focus {
+            outline: 2px solid #4a6fa5;
+            outline-offset: 2px;
+        }
+    </style>
 </head>
 <body>
     <nav class="club-nav">
@@ -21,7 +111,6 @@
     </nav>
     
     <main class="club-main-container">
-        <!-- Hero Section Matching Club Style Empty-->
         <section class="hero">
             <div class="hero-content">
                 <h1><i class="fas fa-language"></i> ESL Study Guides</h1>
@@ -29,7 +118,6 @@
             </div>
         </section>
         
-        <!-- Program Highlights Matching Club Style -->
         <section class="highlights">
             <div class="highlight-card">
                 <i class="fas fa-book-open"></i>
@@ -53,35 +141,37 @@
             </div>
         </section>
         
-        <!-- Featured Content Carousel -->
+        <!-- Fixed Featured Content Carousel -->
         <section class="featured-carousel">
             <h2><i class="fas fa-star"></i> Featured Resources</h2>
             <div class="carousel-container">
                 <div class="carousel-track">
                     <div class="carousel-card">
-                        <img src="/images/english-grammar-in-use.jpg" alt="English Grammar in Use">
+                        <img src="/images/english-grammar-in-use.jpg" alt="English Grammar in Use book cover">
                         <h3>English Grammar in Use</h3>
+                        <p>Master English grammar with our comprehensive guide</p>
                         <a href="books/english-grammar-in-use.html" class="btn"><i class="fas fa-book-reader"></i> View Guide</a>
                     </div>
                     <div class="carousel-card">
-                        <img src="/images/math-practice.jpg" alt="Math Practice">
+                        <img src="/images/math-practice.jpg" alt="Math practice materials">
                         <h3>Math Practice Tool</h3>
+                        <p>Interactive exercises for all skill levels</p>
                         <a href="math-practice.html" class="btn"><i class="fas fa-play-circle"></i> Try Now</a>
                     </div>
                     <div class="carousel-card">
-                        <img src="/images/entrepreneur-club.jpg" alt="Entrepreneur Club">
+                        <img src="/images/entrepreneur-club.jpg" alt="Entrepreneur club meeting">
                         <h3>Entrepreneur Club</h3>
+                        <p>Develop business and speaking skills</p>
                         <a href="entrepreneur-club.html" class="btn"><i class="fas fa-sign-in-alt"></i> Join Now</a>
                     </div>
                 </div>
             </div>
             <div class="carousel-nav">
-                <button class="carousel-prev"><i class="fas fa-chevron-left"></i></button>
-                <button class="carousel-next"><i class="fas fa-chevron-right"></i></button>
+                <button class="carousel-prev" aria-label="Previous resource"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-next" aria-label="Next resource"><i class="fas fa-chevron-right"></i></button>
             </div>
         </section>
         
-        <!-- Testimonials Matching Club Style -->
         <section class="testimonials">
             <h2><i class="fas fa-comment-alt"></i> What Students Say</h2>
             <div class="testimonial-carousel">
@@ -113,55 +203,103 @@
     <footer class="club-footer">
         <p><i class="far fa-copyright"></i> 2023 ESL Study Guides. All rights reserved.</p>
         <div class="social-links">
-            <a href="#"><i class="fab fa-facebook"></i></a>
-            <a href="#"><i class="fab fa-twitter"></i></a>
-            <a href="#"><i class="fab fa-instagram"></i></a>
-            <a href="#"><i class="fab fa-youtube"></i></a>
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
         </div>
     </footer>
 
-    <!-- JavaScript Files -->
-    <script src="js/main.js"></script>
-    <script src="js/club.js"></script>
-    
     <script>
-        // Testimonial Carousel Functionality
+        // Enhanced Carousel Functionality
         document.addEventListener('DOMContentLoaded', function() {
+            // Featured Resources Carousel
+            const track = document.querySelector('.carousel-track');
+            const cards = document.querySelectorAll('.carousel-card');
+            const prevBtn = document.querySelector('.carousel-prev');
+            const nextBtn = document.querySelector('.carousel-next');
+            const cardCount = cards.length;
+            let currentIndex = 0;
+            let cardWidth = 100;
+            let autoRotateInterval;
+            
+            function updateCardWidth() {
+                if (window.innerWidth >= 992) {
+                    cardWidth = 33.33; // Show 3 cards
+                } else if (window.innerWidth >= 768) {
+                    cardWidth = 50; // Show 2 cards
+                } else {
+                    cardWidth = 100; // Show 1 card
+                }
+                updateCarousel();
+            }
+            
+            function updateCarousel() {
+                const translateX = -currentIndex * cardWidth;
+                track.style.transform = `translateX(${translateX}%)`;
+            }
+            
+            function moveToNext() {
+                currentIndex = (currentIndex + 1) % Math.ceil(cardCount / (100 / cardWidth));
+                updateCarousel();
+            }
+            
+            function moveToPrev() {
+                currentIndex = (currentIndex - 1 + Math.ceil(cardCount / (100 / cardWidth))) % 
+                              Math.ceil(cardCount / (100 / cardWidth));
+                updateCarousel();
+            }
+            
+            function startAutoRotate() {
+                autoRotateInterval = setInterval(moveToNext, 5000);
+            }
+            
+            // Initialize
+            updateCardWidth();
+            startAutoRotate();
+            
+            // Event Listeners
+            window.addEventListener('resize', updateCardWidth);
+            nextBtn.addEventListener('click', moveToNext);
+            prevBtn.addEventListener('click', moveToPrev);
+            
+            // Pause on hover
+            const carousel = document.querySelector('.featured-carousel');
+            carousel.addEventListener('mouseenter', () => clearInterval(autoRotateInterval));
+            carousel.addEventListener('mouseleave', startAutoRotate);
+            
+            // Testimonial Carousel
             const testimonials = document.querySelectorAll('.testimonial');
             const dots = document.querySelectorAll('.dot');
-            const prevBtn = document.querySelector('.testimonial-prev');
-            const nextBtn = document.querySelector('.testimonial-next');
-            let currentIndex = 0;
-
+            const tPrevBtn = document.querySelector('.testimonial-prev');
+            const tNextBtn = document.querySelector('.testimonial-next');
+            let tCurrentIndex = 0;
+            
             function showTestimonial(index) {
-                testimonials.forEach(testimonial => testimonial.classList.remove('active'));
-                dots.forEach(dot => dot.classList.remove('active'));
+                testimonials.forEach(t => t.classList.remove('active'));
+                dots.forEach(d => d.classList.remove('active'));
                 
                 testimonials[index].classList.add('active');
                 dots[index].classList.add('active');
-                currentIndex = index;
+                tCurrentIndex = index;
             }
-
-            function nextTestimonial() {
-                let newIndex = (currentIndex + 1) % testimonials.length;
-                showTestimonial(newIndex);
-            }
-
-            function prevTestimonial() {
-                let newIndex = (currentIndex - 1 + testimonials.length) % testimonials.length;
-                showTestimonial(newIndex);
-            }
-
-            nextBtn.addEventListener('click', nextTestimonial);
-            prevBtn.addEventListener('click', prevTestimonial);
-
-            // Add click event for dots
+            
+            tNextBtn.addEventListener('click', () => {
+                showTestimonial((tCurrentIndex + 1) % testimonials.length);
+            });
+            
+            tPrevBtn.addEventListener('click', () => {
+                showTestimonial((tCurrentIndex - 1 + testimonials.length) % testimonials.length);
+            });
+            
             dots.forEach((dot, index) => {
                 dot.addEventListener('click', () => showTestimonial(index));
             });
-
+            
             // Auto-rotate testimonials
-            setInterval(nextTestimonial, 5000);
+            setInterval(() => {
+                showTestimonial((tCurrentIndex + 1) % testimonials.length);
+            }, 7000);
         });
     </script>
 </body>
