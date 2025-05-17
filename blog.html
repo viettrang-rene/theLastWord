@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animal Tower Defense</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css"> <!-- Your CSS provided above -->
+  <style>
+    canvas {
+      background: #e6f3ff;
+      display: block;
+      margin: 0 auto 20px;
+      border: 2px solid #4a6fa5;
+    }
+    .tower-btns {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .tower-btns button {
+      font-size: 2rem;
+      margin: 0 10px;
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+    .tower-btns button:hover {
+      color: #4a6fa5;
+    }
+  </style>
+</head>
+<body>
+  <div class="club-container">
+    <h1 class="hero">Animal Tower Defense</h1>
+
+    <div class="tower-btns">
+      <button onclick="selectTower('cat')"><i class="fas fa-cat"></i></button>
+      <button onclick="selectTower('dog')"><i class="fas fa-dog"></i></button>
+      <button onclick="selectTower('dragon')"><i class="fas fa-dragon"></i></button>
+    </div>
+
+    <canvas id="gameCanvas" width="800" height="400"></canvas>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const towers = [];
+    const enemies = [];
+    let selectedTower = 'cat';
+
+    function selectTower(type) {
+      selectedTower = type;
+    }
+
+    canvas.addEventListener('click', (e) => {
+      const x = e.offsetX;
+      const y = e.offsetY;
+      towers.push({ x, y, type: selectedTower });
+    });
+
+    function spawnEnemy() {
+      enemies.push({ x: 0, y: Math.random() * 350 + 25, hp: 100 });
+    }
+
+    function drawTower(tower) {
+      ctx.font = '24px FontAwesome';
+      let icon;
+      if (tower.type === 'cat') icon = '\uf6be';
+      if (tower.type === 'dog') icon = '\uf6d3';
+      if (tower.type === 'dragon') icon = '\uf6d5';
+      ctx.fillText(icon, tower.x, tower.y);
+    }
+
+    function drawEnemy(enemy) {
+      ctx.fillStyle = 'red';
+      ctx.beginPath();
+      ctx.arc(enemy.x, enemy.y, 10, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    function updateGame() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      towers.forEach(drawTower);
+
+      for (let i = enemies.length - 1; i >= 0; i--) {
+        let enemy = enemies[i];
+        enemy.x += 1;
+        drawEnemy(enemy);
+
+        // Check collision with towers
+        towers.forEach(tower => {
+          let dx = tower.x - enemy.x;
+          let dy = tower.y - enemy.y;
+          let distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance < 50) {
+            enemy.hp -= 1;
+          }
+        });
+
+        if (enemy.hp <= 0 || enemy.x > canvas.width) {
+          enemies.splice(i, 1);
+        }
+      }
+    }
+
+    setInterval(updateGame, 30);
+    setInterval(spawnEnemy, 2000);
+  </script>
+</body>
+</html>
 
