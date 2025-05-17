@@ -8,17 +8,12 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/club.css">
     <style>
-        /* Enhanced Carousel Styles */
-        .featured-carousel {
-            position: relative;
-            overflow: hidden;
-            padding: 2rem 0;
-            margin: 2rem 0;
-            background: #f8f9fa;
-            border-radius: 10px;
+        /* Navigation Styles */
+        .club-nav {
+            background-color: #4a6fa5;
+            padding: 1rem;
         }
         
-        /* Dropdown Menu Styles */
         .club-nav ul {
             list-style: none;
             display: flex;
@@ -35,12 +30,13 @@
             display: block;
             padding: 0.5rem 1rem;
             text-decoration: none;
-            color: #333;
+            color: white;
             transition: all 0.3s ease;
         }
         
         .club-nav li a:hover {
-            color: #4a6fa5;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 4px;
         }
         
         /* Dropdown specific styles */
@@ -61,7 +57,6 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.1);
             z-index: 1;
             border-radius: 4px;
-            padding: 0.5rem 0;
             top: 100%;
             left: 0;
         }
@@ -82,6 +77,16 @@
         
         .dropdown-content a:hover {
             background-color: #f1f1f1;
+        }
+
+        /* Enhanced Carousel Styles */
+        .featured-carousel {
+            position: relative;
+            overflow: hidden;
+            padding: 2rem 0;
+            margin: 2rem 0;
+            background: #f8f9fa;
+            border-radius: 10px;
         }
         
         .carousel-container {
