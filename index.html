@@ -1,17 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- ==============================================
+        META SECTION
+    =============================================== -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ESL Study Guides</title>
+    
+    <!-- ==============================================
+        CSS LINKS
+    =============================================== -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/club.css">
+    
+    <!-- ==============================================
+        INLINE STYLES
+    =============================================== -->
     <style>
-        /* Navigation Styles */
+        /* ==============================================
+            NAVIGATION STYLES
+        =============================================== */
         .club-nav {
             background-color: #4a6fa5;
             padding: 1rem;
+            position: relative;
+            z-index: 1000;
+        }
+        
+        .club-nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
         .club-nav > ul {
@@ -20,6 +43,8 @@
             gap: 1rem;
             padding: 0;
             margin: 0;
+            justify-content: center;
+            flex-wrap: wrap;
         }
         
         .club-nav li {
@@ -28,25 +53,42 @@
         
         .club-nav li a {
             display: block;
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.25rem;
             text-decoration: none;
             color: white;
             transition: all 0.3s ease;
-        }
-        
-        .club-nav li a:hover {
-            background-color: rgba(255,255,255,0.2);
             border-radius: 4px;
+            font-weight: 500;
         }
         
-        /* Dropdown specific styles */
+        .club-nav li a:hover,
+        .club-nav li a:focus {
+            background-color: rgba(255,255,255,0.2);
+            outline: none;
+        }
+        
+        /* ==============================================
+            DROPDOWN SPECIFIC STYLES
+        =============================================== */
         .dropdown {
             position: relative;
         }
         
+        .dropdown > a {
+            padding-right: 1.75rem;
+        }
+        
         .dropdown > a::after {
             content: "▾";
-            margin-left: 5px;
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            transition: transform 0.3s ease;
+        }
+        
+        .dropdown.active > a::after {
+            transform: translateY(-50%) rotate(180deg);
         }
         
         .dropdown .dropdown-content {
@@ -55,16 +97,16 @@
             background-color: white;
             min-width: 200px;
             box-shadow: 0 8px 16px rgba(0,0,0,0.1);
-            z-index: 1;
+            z-index: 100;
             border-radius: 4px;
             top: 100%;
             left: 0;
-            padding: 0;
+            padding: 0.5rem 0;
             margin: 0;
             list-style: none;
         }
         
-        .dropdown:hover .dropdown-content {
+        .dropdown.active .dropdown-content {
             display: block;
         }
         
@@ -73,16 +115,114 @@
         }
         
         .dropdown-content a {
-            padding: 0.5rem 1rem;
+            padding: 0.75rem 1.25rem;
             display: block;
             color: #333;
+            white-space: nowrap;
         }
         
-        .dropdown-content a:hover {
+        .dropdown-content a:hover,
+        .dropdown-content a:focus {
             background-color: #f1f1f1;
         }
 
-        /* Enhanced Carousel Styles */
+        /* ==============================================
+            MOBILE MENU STYLES
+        =============================================== */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0.5rem;
+        }
+
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        /* ==============================================
+            RESPONSIVE STYLES
+        =============================================== */
+        @media (max-width: 768px) {
+            .club-nav > ul {
+                flex-direction: column;
+                display: none;
+                gap: 0.5rem;
+                width: 100%;
+            }
+            
+            .club-nav > ul.active {
+                display: flex;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .dropdown .dropdown-content {
+                position: static;
+                box-shadow: none;
+                border-radius: 0;
+                border-left: 3px solid #4a6fa5;
+                margin-left: 1rem;
+            }
+        }
+
+        /* ==============================================
+            HIGHLIGHTS SECTION STYLES
+        =============================================== */
+        .highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .highlight-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .highlight-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .highlight-card i {
+            font-size: 2rem;
+            color: #4a6fa5;
+            margin-bottom: 1rem;
+        }
+        
+        .highlight-card h3 {
+            margin: 0.5rem 0;
+            color: #333;
+        }
+        
+        .highlight-card p {
+            color: #666;
+            margin: 0;
+        }
+
+        /* ==============================================
+            CAROUSEL STYLES
+        =============================================== */
         .featured-carousel {
             position: relative;
             overflow: hidden;
@@ -90,6 +230,9 @@
             margin: 2rem 0;
             background: #f8f9fa;
             border-radius: 10px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
         }
         
         .carousel-container {
@@ -160,9 +303,20 @@
             display: inline-block;
             margin-top: 0.5rem;
             padding: 0.6rem 1.2rem;
+            background: #4a6fa5;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background 0.3s ease;
         }
         
-        /* Pagination Indicators */
+        .carousel-card .btn:hover {
+            background: #3a5a80;
+        }
+        
+        /* ==============================================
+            PAGINATION STYLES
+        =============================================== */
         .carousel-pagination {
             display: flex;
             justify-content: center;
@@ -184,9 +338,139 @@
             transform: scale(1.2);
         }
         
+        /* ==============================================
+            TESTIMONIALS STYLES
+        =============================================== */
+        .testimonials {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .testimonial-carousel {
+            position: relative;
+            margin: 2rem 0;
+            min-height: 200px;
+        }
+        
+        .testimonial {
+            display: none;
+            padding: 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .testimonial.active {
+            display: block;
+        }
+        
+        .testimonial p {
+            font-style: italic;
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .testimonial p i:first-child {
+            margin-right: 0.5rem;
+            opacity: 0.5;
+        }
+        
+        .testimonial p i:last-child {
+            margin-left: 0.5rem;
+            opacity: 0.5;
+        }
+        
+        .testimonial-author {
+            font-weight: bold;
+            color: #4a6fa5;
+        }
+        
+        .testimonial-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .testimonial-nav button {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .testimonial-nav button:hover {
+            background: #3a5a80;
+        }
+        
+        .testimonial-dots {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .testimonial-dots .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .testimonial-dots .dot.active {
+            background: #4a6fa5;
+            transform: scale(1.2);
+        }
+        
+        /* ==============================================
+            FOOTER STYLES
+        =============================================== */
+        .club-footer {
+            background-color: #4a6fa5;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        .club-footer p {
+            margin: 0 0 1rem 0;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+        
+        .social-links a {
+            color: white;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            transform: translateY(-3px);
+        }
+        
+        /* ==============================================
+            RESPONSIVE BREAKPOINTS
+        =============================================== */
         @media (min-width: 768px) {
             .carousel-card {
                 flex: 0 0 50%;
+            }
+            
+            .testimonial {
+                padding: 2rem;
             }
         }
         
@@ -196,13 +480,19 @@
             }
         }
         
-        /* Accessibility improvements */
-        .carousel-nav button:focus {
+        /* ==============================================
+            ACCESSIBILITY IMPROVEMENTS
+        =============================================== */
+        .carousel-nav button:focus,
+        .testimonial-nav button:focus,
+        .mobile-menu-toggle:focus {
             outline: 2px solid #4a6fa5;
             outline-offset: 2px;
         }
         
-        /* Loading animation */
+        /* ==============================================
+            ANIMATIONS
+        =============================================== */
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -219,21 +509,38 @@
     </style>
 </head>
 <body>
-    <nav class="club-nav">
-       <ul>
-            <li><a href="../theLastWord/index.html">Home</a></li>
-            <li><a href="../theLastWord/club.html">Speaking Club</a></li>
-            <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
-            <li class="dropdown">
-                <a href="#">For Teachers</a>
-                <ul class="dropdown-content">
-                    <li><a href="../theLastWord/mathpractice.html">Math</a></li>
-                    <li><a href="../theLastWord/wordsearch.html">Word Search</a></li>
-                    <li><a href="../theLastWord/label.html">Labeling</a></li>
-                </ul>
-            </li>
-        </ul>
-    </nav> 
+    <!-- ==============================================
+        MAIN NAVIGATION
+    =============================================== -->
+    <nav class="club-nav" aria-label="Main navigation">
+        <div class="club-nav-container">
+            <button class="mobile-menu-toggle" aria-expanded="false" aria-controls="primary-navigation">
+                <i class="fas fa-bars"></i>
+                <span class="sr-only">Menu</span>
+            </button>
+            <ul id="primary-navigation">
+                <li><a href="../theLastWord/index.html">Home</a></li>
+                <li><a href="../theLastWord/club.html">Speaking Club</a></li>
+                <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
+                <li class="dropdown">
+                    <a href="#" aria-haspopup="true" aria-expanded="false">For Teachers</a>
+                    <ul class="dropdown-content" role="menu">
+                        <li><a href="../theLastWord/mathpractice.html">Math</a></li>
+                        <li><a href="../theLastWord/wordsearch.html">Word Search</a></li>
+                        <li><a href="../theLastWord/label.html">Labeling</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ==============================================
+        MAIN CONTENT
+    =============================================== -->
+    <main>
+        <!-- ==============================================
+            HIGHLIGHTS SECTION
+        =============================================== -->
         <section class="highlights">
             <div class="highlight-card">
                 <i class="fas fa-book-open"></i>
@@ -257,7 +564,9 @@
             </div>
         </section>
         
-        <!-- Fixed Featured Content Carousel -->
+        <!-- ==============================================
+            FEATURED CAROUSEL SECTION
+        =============================================== -->
         <section class="featured-carousel">
             <h2>Featured Resources</h2>
             <div class="carousel-container">
@@ -293,6 +602,9 @@
             </div>
         </section>
         
+        <!-- ==============================================
+            TESTIMONIALS SECTION
+        =============================================== -->
         <section class="testimonials">
             <h2>What Students Say</h2>
             <div class="testimonial-carousel">
@@ -321,6 +633,9 @@
         </section>
     </main>
     
+    <!-- ==============================================
+        FOOTER SECTION
+    =============================================== -->
     <footer class="club-footer">
         <p><i class="far fa-copyright"></i> 2023 ESL Study Guides. All rights reserved.</p>
         <div class="social-links">
@@ -331,10 +646,61 @@
         </div>
     </footer>
 
+    <!-- ==============================================
+        JAVASCRIPT
+    =============================================== -->
     <script>
-        // Enhanced Carousel Functionality
+        // ==============================================
+        // NAVIGATION FUNCTIONALITY
+        // ==============================================
         document.addEventListener('DOMContentLoaded', function() {
-            // Featured Resources Carousel
+            // Mobile menu toggle functionality
+            const mobileToggle = document.querySelector('.mobile-menu-toggle');
+            const primaryNav = document.querySelector('#primary-navigation');
+            
+            mobileToggle.addEventListener('click', function() {
+                const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                this.setAttribute('aria-expanded', !isExpanded);
+                primaryNav.classList.toggle('active');
+            });
+            
+            // Dropdown functionality
+            const dropdowns = document.querySelectorAll('.dropdown');
+            
+            dropdowns.forEach(dropdown => {
+                const toggle = dropdown.querySelector('a');
+                
+                toggle.addEventListener('click', function(e) {
+                    if (window.innerWidth <= 768) {
+                        e.preventDefault();
+                        dropdown.classList.toggle('active');
+                        toggle.setAttribute('aria-expanded', dropdown.classList.contains('active'));
+                    }
+                });
+                
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!dropdown.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                        toggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            });
+            
+            // Close mobile menu when clicking a link (for single page applications)
+            const navLinks = document.querySelectorAll('.club-nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth <= 768 && !this.parentElement.classList.contains('dropdown')) {
+                        primaryNav.classList.remove('active');
+                        mobileToggle.setAttribute('aria-expanded', 'false');
+                    }
+                });
+            });
+            
+            // ==============================================
+            // CAROUSEL FUNCTIONALITY
+            // ==============================================
             const track = document.querySelector('.carousel-track');
             const cards = document.querySelectorAll('.carousel-card');
             const prevBtn = document.querySelector('.carousel-prev');
@@ -414,11 +780,11 @@
                 autoRotateInterval = setInterval(moveToNext, 5000);
             }
             
-            // Initialize
+            // Initialize carousel
             updateCardWidth();
             startAutoRotate();
             
-            // Event Listeners
+            // Event Listeners for carousel
             window.addEventListener('resize', updateCardWidth);
             nextBtn.addEventListener('click', () => {
                 moveToNext();
@@ -466,7 +832,9 @@
                 }
             }
             
-            // Testimonial Carousel
+            // ==============================================
+            // TESTIMONIAL CAROUSEL FUNCTIONALITY
+            // ==============================================
             const testimonials = document.querySelectorAll('.testimonial');
             const tDots = document.querySelectorAll('.dot');
             const tPrevBtn = document.querySelector('.testimonial-prev');
