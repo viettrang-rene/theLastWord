@@ -18,6 +18,72 @@
             border-radius: 10px;
         }
         
+        /* Dropdown Menu Styles */
+        .club-nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1rem;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .club-nav li {
+            position: relative;
+        }
+        
+        .club-nav li a {
+            display: block;
+            padding: 0.5rem 1rem;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.3s ease;
+        }
+        
+        .club-nav li a:hover {
+            color: #4a6fa5;
+        }
+        
+        /* Dropdown specific styles */
+        .dropdown {
+            position: relative;
+        }
+        
+        .dropdown > a::after {
+            content: "▾";
+            margin-left: 5px;
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: white;
+            min-width: 200px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            z-index: 1;
+            border-radius: 4px;
+            padding: 0.5rem 0;
+            top: 100%;
+            left: 0;
+        }
+        
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+        
+        .dropdown-content li {
+            padding: 0;
+        }
+        
+        .dropdown-content a {
+            padding: 0.5rem 1rem;
+            display: block;
+            color: #333;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+        
         .carousel-container {
             overflow: hidden;
             width: 100%;
@@ -150,9 +216,14 @@
             <li><a href="../theLastWord/index.html">Home</a></li>
             <li><a href="../theLastWord/club.html">Speaking Club</a></li>
             <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
-            <li><a href="../theLastWord/mathpractice.html">Math</a></li>
-            <li><a href="../theLastWord/wordsearch.html">Word Search</a></li>
-            <li><a href="../theLastWord/label.html">Labeling</a></li>
+            <li class="dropdown">
+                <a href="#">For Teachers</a>
+                <ul class="dropdown-content">
+                    <li><a href="../theLastWord/mathpractice.html">Math</a></li>
+                    <li><a href="../theLastWord/wordsearch.html">Word Search</a></li>
+                    <li><a href="../theLastWord/label.html">Labeling</a></li>
+                </ul>
+            </li>
         </ul>
     </nav>     
         <section class="highlights">
