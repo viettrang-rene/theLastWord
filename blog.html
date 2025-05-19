@@ -23,6 +23,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none;
         }
 
         body {
@@ -112,12 +113,15 @@
             padding: 15px;
             display: none;
             pointer-events: auto;
+            backdrop-filter: blur(5px);
         }
 
         #question-text {
             margin-bottom: 15px;
             font-size: 1.2rem;
             text-align: center;
+            color: white;
+            text-shadow: 1px 1px 2px black;
         }
 
         .answer-option {
@@ -129,6 +133,8 @@
             cursor: pointer;
             transition: all 0.2s ease;
             text-align: center;
+            color: white;
+            text-shadow: 1px 1px 1px black;
         }
 
         .answer-option:hover {
@@ -166,7 +172,7 @@
             height: 100%;
             width: 100%;
             background: linear-gradient(to right, var(--accent), #ff4500);
-            transition: width 0.1s linear;
+            transition: width 0.05s linear;
         }
 
         #defender-selection {
@@ -192,6 +198,7 @@
             font-size: 1.5rem;
             cursor: pointer;
             transition: all 0.2s ease;
+            color: white;
         }
 
         .defender-btn:hover {
@@ -217,6 +224,7 @@
             align-items: center;
             z-index: 100;
             pointer-events: auto;
+            backdrop-filter: blur(5px);
         }
 
         .menu-container {
@@ -233,6 +241,7 @@
             font-size: 2.5rem;
             margin-bottom: 20px;
             color: var(--accent);
+            text-shadow: 2px 2px 4px black;
         }
 
         .menu-btn {
@@ -267,6 +276,7 @@
             pointer-events: auto;
             max-height: 80vh;
             overflow-y: auto;
+            backdrop-filter: blur(5px);
         }
 
         .upgrade-item {
@@ -276,6 +286,7 @@
             margin: 10px 0;
             padding: 10px;
             border-bottom: 1px solid var(--secondary);
+            color: white;
         }
 
         .upgrade-btn {
@@ -308,6 +319,9 @@
             z-index: 50;
             pointer-events: none;
             animation: wavePulse 1.5s infinite;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+            backdrop-filter: blur(5px);
         }
 
         @keyframes wavePulse {
@@ -364,6 +378,7 @@
             cursor: pointer;
             pointer-events: auto;
             z-index: 20;
+            color: white;
         }
 
         #mobile-controls {
@@ -386,6 +401,19 @@
             align-items: center;
             font-size: 1.5rem;
             cursor: pointer;
+            color: white;
+        }
+
+        /* Castle icon styling */
+        .castle-icon {
+            font-size: 2rem;
+            color: gold;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* Smooth animations */
+        .smooth-move {
+            transition: transform 0.1s linear;
         }
 
         @media (max-width: 768px) {
@@ -518,7 +546,8 @@
             castle: {
                 maxHealth: 100,
                 position: { x: 0.9, y: 0.5 }, // Relative to canvas width/height
-                size: 80
+                size: 40,
+                icon: 'fas fa-chess-rook' // Castle icon
             },
             defenders: {
                 melee: {
@@ -556,21 +585,24 @@
                     speed: 1.5,
                     damage: 5,
                     gold: 10,
-                    color: '#ff6347'
+                    color: '#ff6347',
+                    icon: 'fas fa-bug'
                 },
                 fast: {
                     health: 15,
                     speed: 3,
                     damage: 3,
                     gold: 15,
-                    color: '#32cd32'
+                    color: '#32cd32',
+                    icon: 'fas fa-running'
                 },
                 tank: {
                     health: 60,
                     speed: 0.8,
                     damage: 10,
                     gold: 25,
-                    color: '#4682b4'
+                    color: '#4682b4',
+                    icon: 'fas fa-shield-alt'
                 },
                 flying: {
                     health: 25,
@@ -578,7 +610,8 @@
                     damage: 4,
                     gold: 20,
                     color: '#9370db',
-                    flying: true
+                    flying: true,
+                    icon: 'fas fa-dove'
                 },
                 boss: {
                     health: 150,
@@ -586,7 +619,8 @@
                     damage: 20,
                     gold: 100,
                     color: '#8b0000',
-                    scale: 1.5
+                    scale: 1.5,
+                    icon: 'fas fa-skull'
                 }
             },
             wave: {
@@ -606,7 +640,8 @@
                 startingGold: 100,
                 goldPerWave: 50,
                 damageMultiplier: 1, // Based on answer speed/accuracy
-                maxStreak: 10
+                maxStreak: 10,
+                targetFPS: 60
             }
         };
 
@@ -627,6 +662,9 @@
             particles: [],
             floatingTexts: [],
             lastTime: 0,
+            lastFrameTime: 0,
+            frameCount: 0,
+            fps: 0,
             waveStartTime: 0,
             betweenWaves: false,
             quizActive: false,
@@ -638,7 +676,7 @@
                 aoe: { level: 0, damage: 0, range: 0, speed: 0, radius: 0 }
             },
             questions: {
-                // Sample questions - in a real game, you'd have hundreds or load from an API
+                // Expanded questions
                 Science: [
                     {
                         question: "What is the chemical symbol for gold?",
@@ -649,6 +687,16 @@
                         question: "Which planet is known as the Red Planet?",
                         answers: ["Venus", "Mars", "Jupiter", "Saturn"],
                         correct: 1
+                    },
+                    {
+                        question: "What is the hardest natural substance on Earth?",
+                        answers: ["Gold", "Iron", "Diamond", "Quartz"],
+                        correct: 2
+                    },
+                    {
+                        question: "What is the main gas that makes up the Earth's atmosphere?",
+                        answers: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
+                        correct: 2
                     }
                 ],
                 History: [
@@ -661,6 +709,16 @@
                         question: "Who was the first president of the United States?",
                         answers: ["Thomas Jefferson", "John Adams", "George Washington", "Abraham Lincoln"],
                         correct: 2
+                    },
+                    {
+                        question: "Which ancient civilization built the pyramids?",
+                        answers: ["Greeks", "Romans", "Egyptians", "Mayans"],
+                        correct: 2
+                    },
+                    {
+                        question: "When did the Berlin Wall fall?",
+                        answers: ["1985", "1989", "1991", "1995"],
+                        correct: 1
                     }
                 ],
                 "Pop Culture": [
@@ -672,6 +730,16 @@
                     {
                         question: "Which TV show features the characters Ross, Rachel, and Chandler?",
                         answers: ["How I Met Your Mother", "Seinfeld", "Friends", "The Office"],
+                        correct: 2
+                    },
+                    {
+                        question: "Who played Iron Man in the Marvel Cinematic Universe?",
+                        answers: ["Chris Evans", "Robert Downey Jr.", "Chris Hemsworth", "Mark Ruffalo"],
+                        correct: 1
+                    },
+                    {
+                        question: "Which video game features the character Mario?",
+                        answers: ["Sonic the Hedgehog", "The Legend of Zelda", "Super Mario Bros.", "Donkey Kong"],
                         correct: 2
                     }
                 ],
@@ -685,6 +753,16 @@
                         question: "Which is the longest river in the world?",
                         answers: ["Amazon", "Nile", "Yangtze", "Mississippi"],
                         correct: 1
+                    },
+                    {
+                        question: "Which country has the largest population?",
+                        answers: ["India", "United States", "China", "Indonesia"],
+                        correct: 2
+                    },
+                    {
+                        question: "What is the largest ocean on Earth?",
+                        answers: ["Atlantic", "Indian", "Arctic", "Pacific"],
+                        correct: 3
                     }
                 ],
                 Math: [
@@ -696,6 +774,16 @@
                     {
                         question: "If x + 5 = 10, what is the value of x?",
                         answers: ["2", "3", "5", "10"],
+                        correct: 2
+                    },
+                    {
+                        question: "What is 3 to the power of 3?",
+                        answers: ["6", "9", "27", "81"],
+                        correct: 2
+                    },
+                    {
+                        question: "What is the area of a square with side length 4?",
+                        answers: ["8", "12", "16", "20"],
                         correct: 2
                     }
                 ]
@@ -748,6 +836,8 @@
             
             // Start the game loop
             gameState.initialized = true;
+            gameState.lastTime = performance.now();
+            gameState.lastFrameTime = performance.now();
             requestAnimationFrame(gameLoop);
         }
 
@@ -832,6 +922,7 @@
             } else {
                 elements.pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
                 gameState.lastTime = performance.now();
+                gameState.lastFrameTime = performance.now();
                 requestAnimationFrame(gameLoop);
             }
         }
@@ -852,6 +943,14 @@
             // Calculate delta time for smooth animations
             const deltaTime = timestamp - gameState.lastTime;
             gameState.lastTime = timestamp;
+            
+            // Calculate FPS
+            gameState.frameCount++;
+            if (timestamp >= gameState.lastFrameTime + 1000) {
+                gameState.fps = gameState.frameCount;
+                gameState.frameCount = 0;
+                gameState.lastFrameTime = timestamp;
+            }
             
             // Update game state
             updateGame(deltaTime);
@@ -924,7 +1023,7 @@
                 // Check if projectile reached target or max distance
                 if (projectile.reachedTarget()) {
                     // Apply damage
-                    if (projectile.target.health > 0) {
+                    if (projectile.target && projectile.target.health > 0) {
                         const damage = projectile.damage * config.game.damageMultiplier;
                         projectile.target.health -= damage;
                         createDamageText(projectile.target.x, projectile.target.y, `-${Math.round(damage)}`);
@@ -970,6 +1069,7 @@
                 text.update(deltaTime);
                 
                 if (text.lifetime <= 0) {
+                    text.destroy();
                     gameState.floatingTexts.splice(i, 1);
                 }
             }
@@ -996,13 +1096,21 @@
             drawEnemies();
             drawProjectiles();
             drawParticles();
-            drawFloatingTexts();
             drawCastle();
             
             // Draw selected defender preview
             if (gameState.selectedDefender && !gameState.quizActive) {
                 drawSelectedDefenderPreview();
             }
+            
+            // Draw FPS counter (for debugging)
+            // drawFPS();
+        }
+
+        function drawFPS() {
+            elements.ctx.fillStyle = 'white';
+            elements.ctx.font = '16px Arial';
+            elements.ctx.fillText(`FPS: ${gameState.fps}`, 10, 20);
         }
 
         function drawCastle() {
@@ -1011,6 +1119,8 @@
             const castleSize = config.castle.size * (1 + gameState.castleHealth / config.castle.maxHealth);
             
             elements.ctx.save();
+            
+            // Draw castle base
             elements.ctx.fillStyle = `hsl(${gameState.castleHealth * 1.2}, 70%, 50%)`;
             elements.ctx.beginPath();
             elements.ctx.arc(castleX, castleY, castleSize, 0, Math.PI * 2);
@@ -1018,6 +1128,14 @@
             elements.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
             elements.ctx.lineWidth = 5;
             elements.ctx.stroke();
+            
+            // Draw castle icon
+            elements.ctx.fillStyle = 'gold';
+            elements.ctx.font = `${castleSize * 1.5}px FontAwesome`;
+            elements.ctx.textAlign = 'center';
+            elements.ctx.textBaseline = 'middle';
+            elements.ctx.fillText('♜', castleX, castleY); // Using chess rook as castle icon
+            
             elements.ctx.restore();
         }
 
@@ -1043,10 +1161,6 @@
             gameState.particles.forEach(particle => {
                 particle.draw(elements.ctx);
             });
-        }
-
-        function drawFloatingTexts() {
-            // Floating texts are drawn as part of the UI overlay via CSS
         }
 
         function drawSelectedDefenderPreview() {
@@ -1128,7 +1242,8 @@
                 enemyConfig.gold,
                 enemyConfig.color,
                 scale,
-                enemyConfig.flying || false
+                enemyConfig.flying || false,
+                enemyConfig.icon
             );
             
             gameState.activeEnemies.push(enemy);
@@ -1180,7 +1295,31 @@
         }
 
         function checkAnswer(isCorrect) {
-            endQuiz(isCorrect);
+            // Highlight the selected answer
+            const answerOptions = document.querySelectorAll('.answer-option');
+            answerOptions.forEach(option => {
+                option.style.pointerEvents = 'none'; // Disable further clicks
+            });
+            
+            // Find the correct answer element
+            const correctAnswer = Array.from(answerOptions).find(
+                (option, index) => index === gameState.quizCorrectAnswer
+            );
+            
+            if (isCorrect) {
+                // Highlight selected correct answer
+                event.target.classList.add('correct-answer');
+            } else {
+                // Highlight selected wrong answer
+                event.target.classList.add('incorrect-answer');
+                // Also show the correct answer
+                correctAnswer.classList.add('correct-answer');
+            }
+            
+            // Delay the quiz end to show feedback
+            setTimeout(() => {
+                endQuiz(isCorrect);
+            }, 1000);
         }
 
         function endQuiz(isCorrect) {
@@ -1426,7 +1565,7 @@
 
         // Game Entities
         class Enemy {
-            constructor(type, x, y, speed, health, damage, gold, color, scale, flying) {
+            constructor(type, x, y, speed, health, damage, gold, color, scale, flying, icon) {
                 this.type = type;
                 this.x = x;
                 this.y = y;
@@ -1441,6 +1580,9 @@
                 this.size = 20 * scale;
                 this.pathProgress = 0;
                 this.path = this.generatePath();
+                this.icon = icon;
+                this.lastX = x;
+                this.lastY = y;
             }
             
             generatePath() {
@@ -1478,6 +1620,9 @@
             }
             
             update(deltaTime) {
+                this.lastX = this.x;
+                this.lastY = this.y;
+                
                 // Move along path
                 const speed = this.speed * (deltaTime / 16); // Normalize speed to 60fps
                 this.pathProgress = Math.min(this.pathProgress + speed, this.path.length - 1);
@@ -1520,6 +1665,25 @@
                 ctx.fillStyle = healthPercentage > 0.6 ? 'lime' : healthPercentage > 0.3 ? 'yellow' : 'red';
                 ctx.fillRect(this.x - this.size, this.y - this.size - 10, this.size * 2 * healthPercentage, 5);
                 
+                // Draw enemy icon
+                ctx.fillStyle = 'white';
+                ctx.font = `${this.size}px FontAwesome`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                // Use the specified icon
+                let iconChar = '';
+                switch (this.icon) {
+                    case 'fas fa-bug': iconChar = '🐛'; break;
+                    case 'fas fa-running': iconChar = '🏃'; break;
+                    case 'fas fa-shield-alt': iconChar = '🛡'; break;
+                    case 'fas fa-dove': iconChar = '🕊'; break;
+                    case 'fas fa-skull': iconChar = '💀'; break;
+                    default: iconChar = '👾'; // Fallback
+                }
+                
+                ctx.fillText(iconChar, this.x, this.y);
+                
                 // Draw special indicators
                 if (this.type === ENEMY_TYPES.BOSS) {
                     ctx.strokeStyle = 'gold';
@@ -1527,12 +1691,6 @@
                     ctx.beginPath();
                     ctx.arc(this.x, this.y, this.size + 5, 0, Math.PI * 2);
                     ctx.stroke();
-                } else if (this.flying) {
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-                    ctx.beginPath();
-                    ctx.arc(this.x - this.size * 0.5, this.y - this.size * 0.3, this.size * 0.4, 0, Math.PI * 2);
-                    ctx.arc(this.x + this.size * 0.5, this.y - this.size * 0.3, this.size * 0.4, 0, Math.PI * 2);
-                    ctx.fill();
                 }
                 
                 ctx.restore();
@@ -1669,19 +1827,19 @@
                 ctx.lineWidth = 2;
                 ctx.stroke();
                 
-                // Draw icon (using Unicode as fallback)
+                // Draw icon
                 ctx.fillStyle = 'white';
                 ctx.font = `${this.size}px FontAwesome`;
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 
-                // This would ideally use the FontAwesome icon
-                // For this example, we'll use simple text
+                // Use the specified icon
                 let iconChar = '';
-                switch (this.type) {
-                    case DEFENDER_TYPES.MELEE: iconChar = '🐾'; break;
-                    case DEFENDER_TYPES.RANGED: iconChar = '🏹'; break;
-                    case DEFENDER_TYPES.AOE: iconChar = '🔥'; break;
+                switch (this.icon) {
+                    case 'fas fa-paw': iconChar = '🐾'; break;
+                    case 'fas fa-feather': iconChar = '🏹'; break;
+                    case 'fas fa-dragon': iconChar = '🐉'; break;
+                    default: iconChar = '🛡'; // Fallback
                 }
                 
                 ctx.fillText(iconChar, this.x, this.y);
