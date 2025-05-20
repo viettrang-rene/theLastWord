@@ -1,2181 +1,440 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Knowledge Defender</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        :root {
-            --primary: #6a5acd;
-            --secondary: #9370db;
-            --accent: #ff8c00;
-            --text: #f8f8ff;
-            --correct: #7cfc00;
-            --incorrect: #ff4500;
-            --health: #ff0000;
-            --boss: #8b0000;
-            --background: #1a1a2e;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-        }
-
-        body {
-            background-color: var(--background);
-            color: var(--text);
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        #game-canvas {
-            background-color: #2a2a3e;
-            display: block;
-        }
-
-        #ui-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-
-        #top-bar {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 20px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-bottom: 2px solid var(--primary);
-        }
-
-        .stat {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
-
-        #castle-health-container {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            max-width: 500px;
-            height: 30px;
-            background-color: rgba(0, 0, 0, 0.5);
-            border-radius: 15px;
-            overflow: hidden;
-            border: 2px solid var(--primary);
-        }
-
-        #castle-health-bar {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(to right, var(--health), #ff4500);
-            transition: width 0.3s ease;
-        }
-
-        #castle-health-text {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-weight: bold;
-            text-shadow: 1px 1px 2px black;
-        }
-
-        #quiz-container {
-            position: absolute;
-            bottom: 70px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 600px;
-            background-color: rgba(0, 0, 0, 0.7);
-            border: 2px solid var(--primary);
-            border-radius: 10px;
-            padding: 15px;
-            display: none;
-            pointer-events: auto;
-            backdrop-filter: blur(5px);
-        }
-
-        #question-text {
-            margin-bottom: 15px;
-            font-size: 1.2rem;
-            text-align: center;
-            color: white;
-            text-shadow: 1px 1px 2px black;
-        }
-
-        .answer-option {
-            background-color: rgba(70, 70, 110, 0.7);
-            border: 1px solid var(--secondary);
-            border-radius: 5px;
-            padding: 10px;
-            margin: 5px 0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-align: center;
-            color: white;
-            text-shadow: 1px 1px 1px black;
-        }
-
-        .answer-option:hover {
-            background-color: rgba(90, 90, 130, 0.9);
-            transform: scale(1.02);
-        }
-
-        .correct-answer {
-            background-color: rgba(0, 100, 0, 0.7);
-            border-color: var(--correct);
-            animation: pulse 0.5s;
-        }
-
-        .incorrect-answer {
-            background-color: rgba(100, 0, 0, 0.7);
-            border-color: var(--incorrect);
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        #timer-bar {
-            height: 5px;
-            width: 100%;
-            background-color: rgba(255, 255, 255, 0.2);
-            margin-top: 10px;
-            border-radius: 3px;
-            overflow: hidden;
-        }
-
-        #timer-progress {
-            height: 100%;
-            width: 100%;
-            background: linear-gradient(to right, var(--accent), #ff4500);
-            transition: width 0.05s linear;
-        }
-
-        #defender-selection {
-            position: absolute;
-            top: 50%;
-            left: 20px;
-            transform: translateY(-50%);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            pointer-events: auto;
-        }
-
-        .defender-btn {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: rgba(0, 0, 0, 0.5);
-            border: 2px solid var(--secondary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: white;
-        }
-
-        .defender-btn:hover {
-            transform: scale(1.1);
-            background-color: rgba(0, 0, 0, 0.7);
-        }
-
-        .defender-btn.selected {
-            border-color: var(--accent);
-            box-shadow: 0 0 10px var(--accent);
-        }
-
-        #game-menu {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            pointer-events: auto;
-            backdrop-filter: blur(5px);
-        }
-
-        .menu-container {
-            background-color: var(--background);
-            border: 3px solid var(--primary);
-            border-radius: 10px;
-            padding: 20px;
-            max-width: 500px;
-            width: 90%;
-            text-align: center;
-        }
-
-        .menu-title {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: var(--accent);
-            text-shadow: 2px 2px 4px black;
-        }
-
-        .menu-btn {
-            background-color: var(--primary);
-            color: var(--text);
-            border: none;
-            border-radius: 5px;
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 200px;
-            max-width: 100%;
-        }
-
-        .menu-btn:hover {
-            background-color: var(--secondary);
-            transform: scale(1.05);
-        }
-
-        #upgrade-menu {
-            position: absolute;
-            top: 50%;
-            right: 20px;
-            transform: translateY(-50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            border: 2px solid var(--primary);
-            border-radius: 10px;
-            padding: 10px;
-            display: none;
-            pointer-events: auto;
-            max-height: 80vh;
-            overflow-y: auto;
-            backdrop-filter: blur(5px);
-        }
-
-        .upgrade-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 10px 0;
-            padding: 10px;
-            border-bottom: 1px solid var(--secondary);
-            color: white;
-        }
-
-        .upgrade-btn {
-            background-color: var(--secondary);
-            color: var(--text);
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-            margin-top: 5px;
-            cursor: pointer;
-        }
-
-        .upgrade-btn:disabled {
-            background-color: #555;
-            cursor: not-allowed;
-        }
-
-        #wave-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: rgba(0, 0, 0, 0.7);
-            border: 2px solid var(--accent);
-            border-radius: 10px;
-            padding: 15px 30px;
-            font-size: 1.5rem;
-            font-weight: bold;
-            display: none;
-            z-index: 50;
-            pointer-events: none;
-            animation: wavePulse 1.5s infinite;
-            color: white;
-            text-shadow: 1px 1px 2px black;
-            backdrop-filter: blur(5px);
-        }
-
-        @keyframes wavePulse {
-            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            50% { transform: translate(-50%, -50%) scale(1.1); opacity: 0.8; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        }
-
-        .damage-text {
-            position: absolute;
-            color: #ff4500;
-            font-weight: bold;
-            text-shadow: 1px 1px 2px black;
-            animation: floatUp 1s forwards;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0); opacity: 1; }
-            100% { transform: translateY(-50px); opacity: 0; }
-        }
-
-        .combo-text {
-            position: absolute;
-            color: var(--accent);
-            font-weight: bold;
-            font-size: 1.5rem;
-            text-shadow: 2px 2px 4px black;
-            animation: comboPulse 0.5s forwards;
-            pointer-events: none;
-            z-index: 10;
-        }
-
-        @keyframes comboPulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.5); opacity: 1; }
-            100% { transform: scale(1); opacity: 0; }
-        }
-
-        #pause-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: rgba(0, 0, 0, 0.5);
-            border: 2px solid var(--secondary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            pointer-events: auto;
-            z-index: 20;
-            color: white;
-        }
-
-        #mobile-controls {
-            position: absolute;
-            bottom: 20px;
-            left: 20px;
-            display: none;
-            pointer-events: auto;
-            gap: 10px;
-        }
-
-        .mobile-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: rgba(0, 0, 0, 0.5);
-            border: 2px solid var(--secondary);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: white;
-        }
-
-        /* Castle icon styling */
-        .castle-icon {
-            font-size: 2rem;
-            color: gold;
-            text-shadow: 1px 1px 2px black;
-        }
-
-        /* Smooth animations */
-        .smooth-move {
-            transition: transform 0.1s linear;
-        }
-
-        @media (max-width: 768px) {
-            #defender-selection {
-                flex-direction: row;
-                top: auto;
-                bottom: 100px;
-                left: 50%;
-                transform: translateX(-50%);
-            }
-
-            #upgrade-menu {
-                top: 20px;
-                right: 20px;
-                bottom: auto;
-                transform: none;
-                max-height: 200px;
-            }
-
-            #mobile-controls {
-                display: flex;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .stat {
-                font-size: 0.9rem;
-            }
-
-            #question-text {
-                font-size: 1rem;
-            }
-
-            .answer-option {
-                padding: 8px;
-                font-size: 0.9rem;
-            }
-
-            .defender-btn, #pause-btn, .mobile-btn {
-                width: 40px;
-                height: 40px;
-                font-size: 1rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo Công Thức Món Ăn Việt Nam</title>
+  <style>
+    :root {
+      --primary: #e53935;
+      --secondary: #f8f8f8;
+      --accent: #4CAF50;
+      --text: #333;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: #f5f5f5;
+      padding: 20px;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: var(--primary);
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 28px;
+    }
+    h2 {
+      font-size: 20px;
+      margin: 15px 0 10px;
+      color: var(--primary);
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    .form-group {
+      margin-bottom: 15px;
+    }
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 600;
+    }
+    input[type="text"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+    .ingredient-categories {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    .category {
+      background: var(--secondary);
+      padding: 15px;
+      border-radius: 5px;
+    }
+    .category h3 {
+      font-size: 16px;
+      margin-bottom: 10px;
+      color: var(--primary);
+    }
+    .ingredient-option {
+      margin-bottom: 8px;
+    }
+    .ingredient-option label {
+      display: flex;
+      align-items: center;
+      font-weight: normal;
+      cursor: pointer;
+    }
+    .ingredient-option input {
+      margin-right: 8px;
+    }
+    .custom-ingredient {
+      display: flex;
+      margin-top: 10px;
+    }
+    .custom-ingredient input {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-secondary {
+      background: var(--accent);
+      color: white;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    #preview {
+      margin-top: 30px;
+      padding: 20px;
+      background: var(--secondary);
+      border-radius: 5px;
+      display: none;
+    }
+    #preview h2 {
+      color: var(--text);
+    }
+    @media (max-width: 600px) {
+      .ingredient-categories {
+        grid-template-columns: 1fr;
+      }
+      .buttons {
+        flex-direction: column;
+        gap: 10px;
+      }
+      button {
+        width: 100%;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="game-canvas"></canvas>
-        
-        <div id="ui-overlay">
-            <div id="top-bar">
-                <div class="stat"><i class="fas fa-coins"></i> <span id="gold-display">0</span></div>
-                <div class="stat"><i class="fas fa-shield-alt"></i> <span id="wave-display">Wave: 1</span></div>
-                <div class="stat"><i class="fas fa-trophy"></i> <span id="score-display">0</span></div>
-                <div class="stat"><i class="fas fa-bolt"></i> <span id="streak-display">0x</span></div>
-            </div>
-            
-            <div id="castle-health-container">
-                <div id="castle-health-bar"></div>
-                <div id="castle-health-text">Castle: 100%</div>
-            </div>
-            
-            <div id="quiz-container">
-                <div id="question-text"></div>
-                <div id="answer-options"></div>
-                <div id="timer-bar">
-                    <div id="timer-progress"></div>
-                </div>
-            </div>
-            
-            <div id="defender-selection">
-                <div class="defender-btn" data-type="melee"><i class="fas fa-paw"></i></div>
-                <div class="defender-btn" data-type="ranged"><i class="fas fa-feather"></i></div>
-                <div class="defender-btn" data-type="aoe"><i class="fas fa-dragon"></i></div>
-                <div id="upgrade-btn" class="defender-btn"><i class="fas fa-cog"></i></div>
-            </div>
-            
-            <div id="upgrade-menu">
-                <h3>Upgrades</h3>
-                <div id="upgrade-items"></div>
-            </div>
-            
-            <div id="wave-indicator"></div>
-            
-            <div id="pause-btn"><i class="fas fa-pause"></i></div>
-            
-            <div id="mobile-controls">
-                <div id="mobile-upgrade" class="mobile-btn"><i class="fas fa-cog"></i></div>
-                <div id="mobile-pause" class="mobile-btn"><i class="fas fa-pause"></i></div>
-            </div>
+  <div class="container">
+    <h1>🍜 Tạo Công Thức Món Ăn Việt Nam</h1>
+    
+    <form id="recipeForm">
+      <div class="form-group">
+        <label for="recipeName">Tên món ăn:</label>
+        <input type="text" id="recipeName" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="recipeDescription">Mô tả món ăn:</label>
+        <textarea id="recipeDescription"></textarea>
+      </div>
+      
+      <h2>Nguyên liệu</h2>
+      <div class="ingredient-categories">
+        <!-- Thịt -->
+        <div class="category">
+          <h3>Thịt</h3>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Thịt bò"> Thịt bò</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Thịt heo"> Thịt heo</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Thịt gà"> Thịt gà</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Thịt vịt"> Thịt vịt</label>
+          </div>
+          <div class="custom-ingredient">
+            <input type="text" placeholder="Thêm thịt khác">
+            <button type="button" class="btn-add">+</button>
+          </div>
         </div>
         
-        <div id="game-menu">
-            <div class="menu-container">
-                <h1 class="menu-title">Knowledge Defender</h1>
-                <button id="start-btn" class="menu-btn">Start Game</button>
-                <button id="help-btn" class="menu-btn">How to Play</button>
-                <button id="highscores-btn" class="menu-btn">High Scores</button>
-            </div>
+        <!-- Hải sản -->
+        <div class="category">
+          <h3>Hải sản</h3>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Tôm"> Tôm</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Cá"> Cá</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Mực"> Mực</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Nghêu/Sò"> Nghêu/Sò</label>
+          </div>
+          <div class="custom-ingredient">
+            <input type="text" placeholder="Thêm hải sản khác">
+            <button type="button" class="btn-add">+</button>
+          </div>
         </div>
+        
+        <!-- Rau củ Việt Nam -->
+        <div class="category">
+          <h3>Rau củ Việt Nam</h3>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Rau thơm"> Rau thơm</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Rau muống"> Rau muống</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Rau răm"> Rau răm</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Ngò om"> Ngò om</label>
+          </div>
+          <div class="custom-ingredient">
+            <input type="text" placeholder="Thêm rau củ khác">
+            <button type="button" class="btn-add">+</button>
+          </div>
+        </div>
+        
+        <!-- Nấm -->
+        <div class="category">
+          <h3>Nấm</h3>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Nấm hương"> Nấm hương</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Nấm mèo"> Nấm mèo</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Nấm rơm"> Nấm rơm</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Nấm đùi gà"> Nấm đùi gà</label>
+          </div>
+          <div class="custom-ingredient">
+            <input type="text" placeholder="Thêm nấm khác">
+            <button type="button" class="btn-add">+</button>
+          </div>
+        </div>
+        
+        <!-- Gia vị -->
+        <div class="category">
+          <h3>Gia vị</h3>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Nước mắm"> Nước mắm</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Hạt nêm"> Hạt nêm</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Đường"> Đường</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Muối"> Muối</label>
+          </div>
+          <div class="custom-ingredient">
+            <input type="text" placeholder="Thêm gia vị khác">
+            <button type="button" class="btn-add">+</button>
+          </div>
+        </div>
+        
+        <!-- Khác -->
+        <div class="category">
+          <h3>Khác</h3>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Dứa"> Dứa</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Đậu phộng"> Đậu phộng</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Hành tím"> Hành tím</label>
+          </div>
+          <div class="ingredient-option">
+            <label><input type="checkbox" name="ingredient" value="Tỏi"> Tỏi</label>
+          </div>
+          <div class="custom-ingredient">
+            <input type="text" placeholder="Thêm nguyên liệu khác">
+            <button type="button" class="btn-add">+</button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="instructions">Hướng dẫn nấu:</label>
+        <textarea id="instructions" required></textarea>
+      </div>
+      
+      <div class="form-group">
+        <label for="servings">Khẩu phần:</label>
+        <select id="servings">
+          <option value="1">1 người</option>
+          <option value="2">2 người</option>
+          <option value="4" selected>4 người</option>
+          <option value="6">6 người</option>
+          <option value="8">8 người</option>
+        </select>
+      </div>
+      
+      <div class="form-group">
+        <label for="cookingTime">Thời gian nấu (phút):</label>
+        <input type="number" id="cookingTime" min="1" value="30">
+      </div>
+      
+      <div class="buttons">
+        <button type="button" id="previewBtn" class="btn-secondary">Xem trước</button>
+        <button type="submit" class="btn-primary">Gửi công thức</button>
+      </div>
+    </form>
+    
+    <div id="preview">
+      <h2>Xem trước công thức</h2>
+      <h3 id="previewName"></h3>
+      <p id="previewDescription"></p>
+      
+      <h4>Nguyên liệu:</h4>
+      <ul id="previewIngredients"></ul>
+      
+      <h4>Hướng dẫn:</h4>
+      <p id="previewInstructions"></p>
+      
+      <p><strong>Khẩu phần:</strong> <span id="previewServings"></span></p>
+      <p><strong>Thời gian nấu:</strong> <span id="previewTime"></span> phút</p>
+      
+      <button type="button" id="backToEdit" class="btn-secondary">Quay lại chỉnh sửa</button>
+      <button type="button" id="sendEmail" class="btn-primary">Gửi email</button>
     </div>
+  </div>
 
-    <script>
-        // Game Constants
-        const DEFENDER_TYPES = {
-            MELEE: 'melee',
-            RANGED: 'ranged',
-            AOE: 'aoe'
-        };
-
-        const ENEMY_TYPES = {
-            BASIC: 'basic',
-            FAST: 'fast',
-            TANK: 'tank',
-            FLYING: 'flying',
-            BOSS: 'boss'
-        };
-
-        const QUESTION_CATEGORIES = {
-            SCIENCE: 'Science',
-            HISTORY: 'History',
-            POP_CULTURE: 'Pop Culture',
-            GEOGRAPHY: 'Geography',
-            MATH: 'Math'
-        };
-
-        // Game Configuration
-        const config = {
-            castle: {
-                maxHealth: 100,
-                position: { x: 0.9, y: 0.5 }, // Relative to canvas width/height
-                size: 40,
-                icon: 'fas fa-chess-rook' // Castle icon
-            },
-            defenders: {
-                melee: {
-                    cost: 30,
-                    icon: 'fas fa-paw',
-                    color: '#ff6347',
-                    range: 100,
-                    damage: 10,
-                    attackSpeed: 1,
-                    upgradeCost: 50
-                },
-                ranged: {
-                    cost: 50,
-                    icon: 'fas fa-feather',
-                    color: '#4682b4',
-                    range: 200,
-                    damage: 7,
-                    attackSpeed: 1.5,
-                    upgradeCost: 70
-                },
-                aoe: {
-                    cost: 80,
-                    icon: 'fas fa-dragon',
-                    color: '#9370db',
-                    range: 150,
-                    damage: 5,
-                    attackSpeed: 2,
-                    aoeRadius: 100,
-                    upgradeCost: 100
-                }
-            },
-            enemies: {
-                basic: {
-                    health: 30,
-                    speed: 1.5,
-                    damage: 5,
-                    gold: 10,
-                    color: '#ff6347',
-                    icon: 'fas fa-bug'
-                },
-                fast: {
-                    health: 15,
-                    speed: 3,
-                    damage: 3,
-                    gold: 15,
-                    color: '#32cd32',
-                    icon: 'fas fa-running'
-                },
-                tank: {
-                    health: 60,
-                    speed: 0.8,
-                    damage: 10,
-                    gold: 25,
-                    color: '#4682b4',
-                    icon: 'fas fa-shield-alt'
-                },
-                flying: {
-                    health: 25,
-                    speed: 2,
-                    damage: 4,
-                    gold: 20,
-                    color: '#9370db',
-                    flying: true,
-                    icon: 'fas fa-dove'
-                },
-                boss: {
-                    health: 150,
-                    speed: 1,
-                    damage: 20,
-                    gold: 100,
-                    color: '#8b0000',
-                    scale: 1.5,
-                    icon: 'fas fa-skull'
-                }
-            },
-            wave: {
-                baseEnemies: 5,
-                enemyIncrement: 2,
-                timeBetweenWaves: 5000, // ms
-                bossInterval: 5
-            },
-            quiz: {
-                timeLimit: 10000, // ms
-                timeBonus: 0.5, // points per ms remaining
-                streakMultiplier: 0.1, // 10% bonus per streak
-                basePoints: 100,
-                difficultyScaling: 0.1 // 10% harder per wave
-            },
-            game: {
-                startingGold: 100,
-                goldPerWave: 50,
-                damageMultiplier: 1, // Based on answer speed/accuracy
-                maxStreak: 10,
-                targetFPS: 60
-            }
-        };
-
-        // Game State
-        const gameState = {
-            initialized: false,
-            running: false,
-            paused: false,
-            currentWave: 0,
-            gold: 0,
-            score: 0,
-            streak: 0,
-            castleHealth: 0,
-            selectedDefender: null,
-            activeEnemies: [],
-            activeDefenders: [],
-            activeProjectiles: [],
-            particles: [],
-            floatingTexts: [],
-            lastTime: 0,
-            lastFrameTime: 0,
-            frameCount: 0,
-            fps: 0,
-            waveStartTime: 0,
-            betweenWaves: false,
-            quizActive: false,
-            quizStartTime: 0,
-            quizCorrectAnswer: null,
-            defenderUpgrades: {
-                melee: { level: 0, damage: 0, range: 0, speed: 0 },
-                ranged: { level: 0, damage: 0, range: 0, speed: 0 },
-                aoe: { level: 0, damage: 0, range: 0, speed: 0, radius: 0 }
-            },
-            questions: {
-                // Expanded questions
-                Science: [
-                    {
-                        question: "What is the chemical symbol for gold?",
-                        answers: ["Go", "Gd", "Au", "Ag"],
-                        correct: 2
-                    },
-                    {
-                        question: "Which planet is known as the Red Planet?",
-                        answers: ["Venus", "Mars", "Jupiter", "Saturn"],
-                        correct: 1
-                    },
-                    {
-                        question: "What is the hardest natural substance on Earth?",
-                        answers: ["Gold", "Iron", "Diamond", "Quartz"],
-                        correct: 2
-                    },
-                    {
-                        question: "What is the main gas that makes up the Earth's atmosphere?",
-                        answers: ["Oxygen", "Carbon Dioxide", "Nitrogen", "Hydrogen"],
-                        correct: 2
-                    }
-                ],
-                History: [
-                    {
-                        question: "In which year did World War II end?",
-                        answers: ["1943", "1945", "1947", "1950"],
-                        correct: 1
-                    },
-                    {
-                        question: "Who was the first president of the United States?",
-                        answers: ["Thomas Jefferson", "John Adams", "George Washington", "Abraham Lincoln"],
-                        correct: 2
-                    },
-                    {
-                        question: "Which ancient civilization built the pyramids?",
-                        answers: ["Greeks", "Romans", "Egyptians", "Mayans"],
-                        correct: 2
-                    },
-                    {
-                        question: "When did the Berlin Wall fall?",
-                        answers: ["1985", "1989", "1991", "1995"],
-                        correct: 1
-                    }
-                ],
-                "Pop Culture": [
-                    {
-                        question: "Which artist released the album 'Thriller' in 1982?",
-                        answers: ["Prince", "Michael Jackson", "Madonna", "Whitney Houston"],
-                        correct: 1
-                    },
-                    {
-                        question: "Which TV show features the characters Ross, Rachel, and Chandler?",
-                        answers: ["How I Met Your Mother", "Seinfeld", "Friends", "The Office"],
-                        correct: 2
-                    },
-                    {
-                        question: "Who played Iron Man in the Marvel Cinematic Universe?",
-                        answers: ["Chris Evans", "Robert Downey Jr.", "Chris Hemsworth", "Mark Ruffalo"],
-                        correct: 1
-                    },
-                    {
-                        question: "Which video game features the character Mario?",
-                        answers: ["Sonic the Hedgehog", "The Legend of Zelda", "Super Mario Bros.", "Donkey Kong"],
-                        correct: 2
-                    }
-                ],
-                Geography: [
-                    {
-                        question: "What is the capital of France?",
-                        answers: ["Berlin", "Madrid", "Paris", "Rome"],
-                        correct: 2
-                    },
-                    {
-                        question: "Which is the longest river in the world?",
-                        answers: ["Amazon", "Nile", "Yangtze", "Mississippi"],
-                        correct: 1
-                    },
-                    {
-                        question: "Which country has the largest population?",
-                        answers: ["India", "United States", "China", "Indonesia"],
-                        correct: 2
-                    },
-                    {
-                        question: "What is the largest ocean on Earth?",
-                        answers: ["Atlantic", "Indian", "Arctic", "Pacific"],
-                        correct: 3
-                    }
-                ],
-                Math: [
-                    {
-                        question: "What is the square root of 64?",
-                        answers: ["6", "7", "8", "9"],
-                        correct: 2
-                    },
-                    {
-                        question: "If x + 5 = 10, what is the value of x?",
-                        answers: ["2", "3", "5", "10"],
-                        correct: 2
-                    },
-                    {
-                        question: "What is 3 to the power of 3?",
-                        answers: ["6", "9", "27", "81"],
-                        correct: 2
-                    },
-                    {
-                        question: "What is the area of a square with side length 4?",
-                        answers: ["8", "12", "16", "20"],
-                        correct: 2
-                    }
-                ]
-            },
-            highScores: []
-        };
-
-        // DOM Elements
-        const elements = {
-            canvas: document.getElementById('game-canvas'),
-            ctx: null,
-            goldDisplay: document.getElementById('gold-display'),
-            waveDisplay: document.getElementById('wave-display'),
-            scoreDisplay: document.getElementById('score-display'),
-            streakDisplay: document.getElementById('streak-display'),
-            castleHealthBar: document.getElementById('castle-health-bar'),
-            castleHealthText: document.getElementById('castle-health-text'),
-            quizContainer: document.getElementById('quiz-container'),
-            questionText: document.getElementById('question-text'),
-            answerOptions: document.getElementById('answer-options'),
-            timerProgress: document.getElementById('timer-progress'),
-            defenderSelection: document.getElementById('defender-selection'),
-            upgradeMenu: document.getElementById('upgrade-menu'),
-            upgradeItems: document.getElementById('upgrade-items'),
-            waveIndicator: document.getElementById('wave-indicator'),
-            gameMenu: document.getElementById('game-menu'),
-            startBtn: document.getElementById('start-btn'),
-            helpBtn: document.getElementById('help-btn'),
-            highscoresBtn: document.getElementById('highscores-btn'),
-            pauseBtn: document.getElementById('pause-btn'),
-            mobileUpgrade: document.getElementById('mobile-upgrade'),
-            mobilePause: document.getElementById('mobile-pause')
-        };
-
-        // Initialize the game
-        function initGame() {
-            // Set up canvas
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-            elements.ctx = elements.canvas.getContext('2d');
-            
-            // Load saved high scores
-            loadHighScores();
-            
-            // Set up event listeners
-            setupEventListeners();
-            
-            // Initialize game state
-            resetGameState();
-            
-            // Start the game loop
-            gameState.initialized = true;
-            gameState.lastTime = performance.now();
-            gameState.lastFrameTime = performance.now();
-            requestAnimationFrame(gameLoop);
-        }
-
-        function resizeCanvas() {
-            elements.canvas.width = window.innerWidth;
-            elements.canvas.height = window.innerHeight;
-            
-            if (gameState.initialized) {
-                // Redraw game elements if game is already running
-                drawGame();
-            }
-        }
-
-        function setupEventListeners() {
-            // Defender selection
-            document.querySelectorAll('.defender-btn').forEach(btn => {
-                if (btn.id !== 'upgrade-btn') {
-                    btn.addEventListener('click', () => selectDefender(btn.dataset.type));
-                }
-            });
-            
-            // Upgrade button
-            document.getElementById('upgrade-btn').addEventListener('click', toggleUpgradeMenu);
-            elements.mobileUpgrade.addEventListener('click', toggleUpgradeMenu);
-            
-            // Pause button
-            elements.pauseBtn.addEventListener('click', togglePause);
-            elements.mobilePause.addEventListener('click', togglePause);
-            
-            // Menu buttons
-            elements.startBtn.addEventListener('click', startGame);
-            elements.helpBtn.addEventListener('click', showHelp);
-            elements.highscoresBtn.addEventListener('click', showHighScores);
-            
-            // Touch events for mobile
-            elements.canvas.addEventListener('touchstart', handleTouch, { passive: false });
-            elements.canvas.addEventListener('click', handleClick);
-        }
-
-        function resetGameState() {
-            gameState.running = false;
-            gameState.paused = false;
-            gameState.currentWave = 0;
-            gameState.gold = config.game.startingGold;
-            gameState.score = 0;
-            gameState.streak = 0;
-            gameState.castleHealth = config.castle.maxHealth;
-            gameState.selectedDefender = null;
-            gameState.activeEnemies = [];
-            gameState.activeDefenders = [];
-            gameState.activeProjectiles = [];
-            gameState.particles = [];
-            gameState.floatingTexts = [];
-            gameState.betweenWaves = false;
-            gameState.quizActive = false;
-            
-            // Reset upgrades
-            gameState.defenderUpgrades = {
-                melee: { level: 0, damage: 0, range: 0, speed: 0 },
-                ranged: { level: 0, damage: 0, range: 0, speed: 0 },
-                aoe: { level: 0, damage: 0, range: 0, speed: 0, radius: 0 }
-            };
-            
-            updateUI();
-        }
-
-        function startGame() {
-            resetGameState();
-            gameState.running = true;
-            elements.gameMenu.style.display = 'none';
-            startNextWave();
-        }
-
-        function togglePause() {
-            if (!gameState.running) return;
-            
-            gameState.paused = !gameState.paused;
-            
-            if (gameState.paused) {
-                elements.pauseBtn.innerHTML = '<i class="fas fa-play"></i>';
-                showMessage("Game Paused");
-            } else {
-                elements.pauseBtn.innerHTML = '<i class="fas fa-pause"></i>';
-                gameState.lastTime = performance.now();
-                gameState.lastFrameTime = performance.now();
-                requestAnimationFrame(gameLoop);
-            }
-        }
-
-        function showMessage(message, duration = 2000) {
-            elements.waveIndicator.textContent = message;
-            elements.waveIndicator.style.display = 'block';
-            
-            setTimeout(() => {
-                elements.waveIndicator.style.display = 'none';
-            }, duration);
-        }
-
-        // Main game loop
-        function gameLoop(timestamp) {
-            if (gameState.paused || !gameState.running) return;
-            
-            // Calculate delta time for smooth animations
-            const deltaTime = timestamp - gameState.lastTime;
-            gameState.lastTime = timestamp;
-            
-            // Calculate FPS
-            gameState.frameCount++;
-            if (timestamp >= gameState.lastFrameTime + 1000) {
-                gameState.fps = gameState.frameCount;
-                gameState.frameCount = 0;
-                gameState.lastFrameTime = timestamp;
-            }
-            
-            // Update game state
-            updateGame(deltaTime);
-            
-            // Render game
-            drawGame();
-            
-            // Continue the loop
-            requestAnimationFrame(gameLoop);
-        }
-
-        function updateGame(deltaTime) {
-            // Update all game entities
-            updateEnemies(deltaTime);
-            updateDefenders(deltaTime);
-            updateProjectiles(deltaTime);
-            updateParticles(deltaTime);
-            updateFloatingTexts(deltaTime);
-            
-            // Check for wave completion
-            if (!gameState.betweenWaves && gameState.activeEnemies.length === 0 && !gameState.quizActive) {
-                completeWave();
-            }
-            
-            // Update quiz timer if active
-            if (gameState.quizActive) {
-                updateQuizTimer();
-            }
-        }
-
-        function updateEnemies(deltaTime) {
-            for (let i = gameState.activeEnemies.length - 1; i >= 0; i--) {
-                const enemy = gameState.activeEnemies[i];
-                
-                // Move enemy along path
-                enemy.update(deltaTime);
-                
-                // Check if enemy reached the castle
-                if (enemy.reachedCastle()) {
-                    // Damage castle
-                    gameState.castleHealth -= enemy.damage;
-                    createDamageText(enemy.x, enemy.y, `-${enemy.damage}`);
-                    
-                    // Remove enemy
-                    gameState.activeEnemies.splice(i, 1);
-                    
-                    // Check for game over
-                    if (gameState.castleHealth <= 0) {
-                        gameOver();
-                    }
-                    
-                    updateUI();
-                }
-            }
-        }
-
-        function updateDefenders(deltaTime) {
-            gameState.activeDefenders.forEach(defender => {
-                defender.update(deltaTime, gameState.activeEnemies);
-            });
-        }
-
-        function updateProjectiles(deltaTime) {
-            for (let i = gameState.activeProjectiles.length - 1; i >= 0; i--) {
-                const projectile = gameState.activeProjectiles[i];
-                
-                // Move projectile
-                projectile.update(deltaTime);
-                
-                // Check if projectile reached target or max distance
-                if (projectile.reachedTarget()) {
-                    // Apply damage
-                    if (projectile.target && projectile.target.health > 0) {
-                        const damage = projectile.damage * config.game.damageMultiplier;
-                        projectile.target.health -= damage;
-                        createDamageText(projectile.target.x, projectile.target.y, `-${Math.round(damage)}`);
-                        
-                        // Check if enemy died
-                        if (projectile.target.health <= 0) {
-                            const enemyIndex = gameState.activeEnemies.indexOf(projectile.target);
-                            if (enemyIndex !== -1) {
-                                // Add gold and score
-                                gameState.gold += projectile.target.gold;
-                                gameState.score += Math.round(projectile.target.gold * 10 * (1 + gameState.streak * config.quiz.streakMultiplier));
-                                gameState.activeEnemies.splice(enemyIndex, 1);
-                                
-                                // Create death particles
-                                createParticles(projectile.target.x, projectile.target.y, projectile.target.color);
-                            }
-                        }
-                    }
-                    
-                    // Remove projectile
-                    gameState.activeProjectiles.splice(i, 1);
-                    updateUI();
-                }
-            }
-        }
-
-        function updateParticles(deltaTime) {
-            for (let i = gameState.particles.length - 1; i >= 0; i--) {
-                const particle = gameState.particles[i];
-                
-                particle.update(deltaTime);
-                
-                if (particle.lifetime <= 0) {
-                    gameState.particles.splice(i, 1);
-                }
-            }
-        }
-
-        function updateFloatingTexts(deltaTime) {
-            for (let i = gameState.floatingTexts.length - 1; i >= 0; i--) {
-                const text = gameState.floatingTexts[i];
-                
-                text.update(deltaTime);
-                
-                if (text.lifetime <= 0) {
-                    text.destroy();
-                    gameState.floatingTexts.splice(i, 1);
-                }
-            }
-        }
-
-        function updateQuizTimer() {
-            const elapsed = performance.now() - gameState.quizStartTime;
-            const remaining = Math.max(0, config.quiz.timeLimit - elapsed);
-            const percentage = (remaining / config.quiz.timeLimit) * 100;
-            
-            elements.timerProgress.style.width = `${percentage}%`;
-            
-            if (remaining <= 0) {
-                endQuiz(false);
-            }
-        }
-
-        function drawGame() {
-            // Clear canvas
-            elements.ctx.clearRect(0, 0, elements.canvas.width, elements.canvas.height);
-            
-            // Draw game entities
-            drawDefenders();
-            drawEnemies();
-            drawProjectiles();
-            drawParticles();
-            drawCastle();
-            
-            // Draw selected defender preview
-            if (gameState.selectedDefender && !gameState.quizActive) {
-                drawSelectedDefenderPreview();
-            }
-            
-            // Draw FPS counter (for debugging)
-            // drawFPS();
-        }
-
-        function drawFPS() {
-            elements.ctx.fillStyle = 'white';
-            elements.ctx.font = '16px Arial';
-            elements.ctx.fillText(`FPS: ${gameState.fps}`, 10, 20);
-        }
-
-        function drawCastle() {
-            const castleX = elements.canvas.width * config.castle.position.x;
-            const castleY = elements.canvas.height * config.castle.position.y;
-            const castleSize = config.castle.size * (1 + gameState.castleHealth / config.castle.maxHealth);
-            
-            elements.ctx.save();
-            
-            // Draw castle base
-            elements.ctx.fillStyle = `hsl(${gameState.castleHealth * 1.2}, 70%, 50%)`;
-            elements.ctx.beginPath();
-            elements.ctx.arc(castleX, castleY, castleSize, 0, Math.PI * 2);
-            elements.ctx.fill();
-            elements.ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-            elements.ctx.lineWidth = 5;
-            elements.ctx.stroke();
-            
-            // Draw castle icon
-            elements.ctx.fillStyle = 'gold';
-            elements.ctx.font = `${castleSize * 1.5}px FontAwesome`;
-            elements.ctx.textAlign = 'center';
-            elements.ctx.textBaseline = 'middle';
-            elements.ctx.fillText('♜', castleX, castleY); // Using chess rook as castle icon
-            
-            elements.ctx.restore();
-        }
-
-        function drawEnemies() {
-            gameState.activeEnemies.forEach(enemy => {
-                enemy.draw(elements.ctx);
-            });
-        }
-
-        function drawDefenders() {
-            gameState.activeDefenders.forEach(defender => {
-                defender.draw(elements.ctx);
-            });
-        }
-
-        function drawProjectiles() {
-            gameState.activeProjectiles.forEach(projectile => {
-                projectile.draw(elements.ctx);
-            });
-        }
-
-        function drawParticles() {
-            gameState.particles.forEach(particle => {
-                particle.draw(elements.ctx);
-            });
-        }
-
-        function drawSelectedDefenderPreview() {
-            const defenderConfig = config.defenders[gameState.selectedDefender];
-            const range = defenderConfig.range + (gameState.defenderUpgrades[gameState.selectedDefender].range * 10);
-            
-            elements.ctx.save();
-            elements.ctx.strokeStyle = defenderConfig.color;
-            elements.ctx.setLineDash([5, 5]);
-            elements.ctx.lineWidth = 2;
-            elements.ctx.beginPath();
-            elements.ctx.arc(
-                elements.canvas.width * config.castle.position.x,
-                elements.canvas.height * config.castle.position.y,
-                range,
-                0,
-                Math.PI * 2
-            );
-            elements.ctx.stroke();
-            elements.ctx.restore();
-        }
-
-        // Wave Management
-        function startNextWave() {
-            gameState.currentWave++;
-            gameState.betweenWaves = false;
-            gameState.waveStartTime = performance.now();
-            
-            // Add base gold per wave
-            gameState.gold += config.game.goldPerWave;
-            
-            // Spawn enemies for this wave
-            spawnWaveEnemies();
-            
-            updateUI();
-            showMessage(`Wave ${gameState.currentWave}`, 1500);
-        }
-
-        function spawnWaveEnemies() {
-            const isBossWave = gameState.currentWave % config.wave.bossInterval === 0;
-            const baseCount = config.wave.baseEnemies + (gameState.currentWave * config.wave.enemyIncrement);
-            const enemyCount = isBossWave ? 1 : baseCount;
-            
-            for (let i = 0; i < enemyCount; i++) {
-                let enemyType;
-                
-                if (isBossWave) {
-                    enemyType = ENEMY_TYPES.BOSS;
-                } else {
-                    // Randomly select enemy type with different probabilities
-                    const rand = Math.random();
-                    if (rand < 0.4) {
-                        enemyType = ENEMY_TYPES.BASIC;
-                    } else if (rand < 0.7) {
-                        enemyType = ENEMY_TYPES.FAST;
-                    } else if (rand < 0.85) {
-                        enemyType = ENEMY_TYPES.TANK;
-                    } else {
-                        enemyType = ENEMY_TYPES.FLYING;
-                    }
-                }
-                
-                spawnEnemy(enemyType);
-            }
-        }
-
-        function spawnEnemy(type) {
-            const enemyConfig = config.enemies[type];
-            const scale = enemyConfig.scale || 1;
-            const health = enemyConfig.health * (1 + (gameState.currentWave * 0.1));
-            
-            const enemy = new Enemy(
-                type,
-                -50, // Start off-screen to the left
-                elements.canvas.height * Math.random(),
-                enemyConfig.speed,
-                health,
-                enemyConfig.damage,
-                enemyConfig.gold,
-                enemyConfig.color,
-                scale,
-                enemyConfig.flying || false,
-                enemyConfig.icon
-            );
-            
-            gameState.activeEnemies.push(enemy);
-        }
-
-        function completeWave() {
-            gameState.betweenWaves = true;
-            showMessage(`Wave ${gameState.currentWave} Complete!`, 2000);
-            
-            // Start quiz for next wave
-            setTimeout(() => {
-                startQuiz();
-            }, config.wave.timeBetweenWaves);
-        }
-
-        // Quiz System
-        function startQuiz() {
-            gameState.quizActive = true;
-            gameState.quizStartTime = performance.now();
-            
-            // Select random category
-            const categories = Object.keys(QUESTION_CATEGORIES);
-            const category = categories[Math.floor(Math.random() * categories.length)];
-            
-            // Select random question from category
-            const questions = gameState.questions[category];
-            const question = questions[Math.floor(Math.random() * questions.length)];
-            
-            // Display question
-            elements.questionText.textContent = question.question;
-            elements.answerOptions.innerHTML = '';
-            
-            // Display answer options
-            question.answers.forEach((answer, index) => {
-                const answerElement = document.createElement('div');
-                answerElement.className = 'answer-option';
-                answerElement.textContent = answer;
-                answerElement.dataset.index = index;
-                answerElement.addEventListener('click', () => checkAnswer(index === question.correct));
-                elements.answerOptions.appendChild(answerElement);
-            });
-            
-            // Store correct answer for timer bonus calculation
-            gameState.quizCorrectAnswer = question.correct;
-            
-            // Show quiz UI
-            elements.quizContainer.style.display = 'block';
-            elements.timerProgress.style.width = '100%';
-        }
-
-        function checkAnswer(isCorrect) {
-            // Highlight the selected answer
-            const answerOptions = document.querySelectorAll('.answer-option');
-            answerOptions.forEach(option => {
-                option.style.pointerEvents = 'none'; // Disable further clicks
-            });
-            
-            // Find the correct answer element
-            const correctAnswer = Array.from(answerOptions).find(
-                (option, index) => index === gameState.quizCorrectAnswer
-            );
-            
-            if (isCorrect) {
-                // Highlight selected correct answer
-                event.target.classList.add('correct-answer');
-            } else {
-                // Highlight selected wrong answer
-                event.target.classList.add('incorrect-answer');
-                // Also show the correct answer
-                correctAnswer.classList.add('correct-answer');
-            }
-            
-            // Delay the quiz end to show feedback
-            setTimeout(() => {
-                endQuiz(isCorrect);
-            }, 1000);
-        }
-
-        function endQuiz(isCorrect) {
-            gameState.quizActive = false;
-            elements.quizContainer.style.display = 'none';
-            
-            if (isCorrect) {
-                // Calculate time bonus
-                const timeElapsed = performance.now() - gameState.quizStartTime;
-                const timeRemaining = Math.max(0, config.quiz.timeLimit - timeElapsed);
-                const timeBonus = timeRemaining * config.quiz.timeBonus;
-                
-                // Increase streak
-                gameState.streak = Math.min(gameState.streak + 1, config.game.maxStreak);
-                
-                // Calculate score
-                const basePoints = config.quiz.basePoints * (1 + (gameState.currentWave * config.quiz.difficultyScaling));
-                const streakBonus = basePoints * (gameState.streak * config.quiz.streakMultiplier);
-                const totalPoints = Math.round(basePoints + streakBonus + timeBonus);
-                
-                // Add to score
-                gameState.score += totalPoints;
-                
-                // Update damage multiplier based on performance
-                const answerSpeed = timeElapsed / config.quiz.timeLimit;
-                config.game.damageMultiplier = 0.8 + (0.4 * (1 - answerSpeed)) + (0.2 * gameState.streak);
-                
-                // Visual feedback
-                showMessage("Correct!", 1000);
-                createComboText(
-                    elements.canvas.width / 2,
-                    elements.canvas.height / 2,
-                    `${gameState.streak}x STREAK!`
-                );
-                
-                // Add some bonus gold
-                gameState.gold += Math.round(totalPoints / 10);
-            } else {
-                // Reset streak
-                gameState.streak = 0;
-                config.game.damageMultiplier = 1;
-                
-                // Visual feedback
-                showMessage("Incorrect!", 1000);
-            }
-            
-            updateUI();
-            
-            // Start next wave after short delay
-            setTimeout(() => {
-                startNextWave();
-            }, 1500);
-        }
-
-        // Defender System
-        function selectDefender(type) {
-            if (gameState.selectedDefender === type) {
-                gameState.selectedDefender = null;
-                document.querySelector(`.defender-btn[data-type="${type}"]`).classList.remove('selected');
-            } else {
-                // Deselect any previously selected defender
-                if (gameState.selectedDefender) {
-                    document.querySelector(`.defender-btn[data-type="${gameState.selectedDefender}"]`).classList.remove('selected');
-                }
-                
-                gameState.selectedDefender = type;
-                document.querySelector(`.defender-btn[data-type="${type}"]`).classList.add('selected');
-            }
-        }
-
-        function placeDefender(x, y) {
-            if (!gameState.selectedDefender || gameState.quizActive) return;
-            
-            const defenderConfig = config.defenders[gameState.selectedDefender];
-            
-            // Check if player has enough gold
-            if (gameState.gold < defenderConfig.cost) {
-                showMessage("Not enough gold!", 1000);
-                return;
-            }
-            
-            // Check if position is valid (not too close to castle or other defenders)
-            const castleX = elements.canvas.width * config.castle.position.x;
-            const castleY = elements.canvas.height * config.castle.position.y;
-            const distanceToCastle = Math.sqrt(Math.pow(x - castleX, 2) + Math.pow(y - castleY, 2));
-            
-            if (distanceToCastle < 100) {
-                showMessage("Too close to castle!", 1000);
-                return;
-            }
-            
-            // Check for nearby defenders
-            for (const defender of gameState.activeDefenders) {
-                const distance = Math.sqrt(Math.pow(x - defender.x, 2) + Math.pow(y - defender.y, 2));
-                if (distance < 50) {
-                    showMessage("Too close to another defender!", 1000);
-                    return;
-                }
-            }
-            
-            // Deduct gold
-            gameState.gold -= defenderConfig.cost;
-            
-            // Create defender
-            const upgrades = gameState.defenderUpgrades[gameState.selectedDefender];
-            const defender = new Defender(
-                gameState.selectedDefender,
-                x,
-                y,
-                defenderConfig.range + (upgrades.range * 10),
-                defenderConfig.damage + (upgrades.damage * 2),
-                defenderConfig.attackSpeed * (1 - (upgrades.speed * 0.1)),
-                defenderConfig.color,
-                defenderConfig.icon,
-                defenderConfig.aoeRadius ? defenderConfig.aoeRadius + (upgrades.radius * 5) : 0
-            );
-            
-            gameState.activeDefenders.push(defender);
-            updateUI();
-        }
-
-        function toggleUpgradeMenu() {
-            if (elements.upgradeMenu.style.display === 'block') {
-                elements.upgradeMenu.style.display = 'none';
-            } else {
-                updateUpgradeMenu();
-                elements.upgradeMenu.style.display = 'block';
-            }
-        }
-
-        function updateUpgradeMenu() {
-            elements.upgradeItems.innerHTML = '';
-            
-            Object.keys(DEFENDER_TYPES).forEach(type => {
-                const defenderType = DEFENDER_TYPES[type];
-                const defenderConfig = config.defenders[defenderType];
-                const upgrades = gameState.defenderUpgrades[defenderType];
-                
-                const item = document.createElement('div');
-                item.className = 'upgrade-item';
-                
-                const title = document.createElement('h4');
-                title.textContent = `${defenderType.toUpperCase()} (Level ${upgrades.level})`;
-                
-                const stats = document.createElement('div');
-                stats.innerHTML = `
-                    <p>Damage: ${defenderConfig.damage + (upgrades.damage * 2)}</p>
-                    <p>Range: ${defenderConfig.range + (upgrades.range * 10)}</p>
-                    <p>Speed: ${(defenderConfig.attackSpeed * (1 - (upgrades.speed * 0.1))).toFixed(2)}/s</p>
-                    ${defenderType === DEFENDER_TYPES.AOE ? `<p>AOE Radius: ${defenderConfig.aoeRadius + (upgrades.radius * 5)}</p>` : ''}
-                `;
-                
-                const upgradeBtn = document.createElement('button');
-                upgradeBtn.className = 'upgrade-btn';
-                upgradeBtn.textContent = `Upgrade (${defenderConfig.upgradeCost * (upgrades.level + 1)})`;
-                upgradeBtn.disabled = gameState.gold < defenderConfig.upgradeCost * (upgrades.level + 1);
-                upgradeBtn.addEventListener('click', () => upgradeDefender(defenderType));
-                
-                item.appendChild(title);
-                item.appendChild(stats);
-                item.appendChild(upgradeBtn);
-                elements.upgradeItems.appendChild(item);
-            });
-        }
-
-        function upgradeDefender(type) {
-            const defenderConfig = config.defenders[type];
-            const upgradeCost = defenderConfig.upgradeCost * (gameState.defenderUpgrades[type].level + 1);
-            
-            if (gameState.gold >= upgradeCost) {
-                gameState.gold -= upgradeCost;
-                gameState.defenderUpgrades[type].level++;
-                
-                // Randomly upgrade one of the stats
-                const stats = ['damage', 'range', 'speed'];
-                if (type === DEFENDER_TYPES.AOE) stats.push('radius');
-                
-                const statToUpgrade = stats[Math.floor(Math.random() * stats.length)];
-                gameState.defenderUpgrades[type][statToUpgrade]++;
-                
-                updateUI();
-                updateUpgradeMenu();
-                showMessage(`${type.toUpperCase()} upgraded!`, 1000);
-            }
-        }
-
-        // Input Handling
-        function handleClick(e) {
-            if (!gameState.running || gameState.paused || gameState.quizActive) return;
-            
-            const rect = elements.canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            
-            if (gameState.selectedDefender) {
-                placeDefender(x, y);
-            }
-        }
-
-        function handleTouch(e) {
-            if (!gameState.running || gameState.paused || gameState.quizActive) return;
-            
-            e.preventDefault();
-            
-            const touch = e.touches[0];
-            const rect = elements.canvas.getBoundingClientRect();
-            const x = touch.clientX - rect.left;
-            const y = touch.clientY - rect.top;
-            
-            if (gameState.selectedDefender) {
-                placeDefender(x, y);
-            }
-        }
-
-        // UI Updates
-        function updateUI() {
-            // Update gold display
-            elements.goldDisplay.textContent = gameState.gold;
-            
-            // Update wave display
-            elements.waveDisplay.textContent = `Wave: ${gameState.currentWave}`;
-            
-            // Update score display
-            elements.scoreDisplay.textContent = gameState.score;
-            
-            // Update streak display
-            elements.streakDisplay.textContent = `${gameState.streak}x`;
-            elements.streakDisplay.style.color = `hsl(${gameState.streak * 30}, 100%, 50%)`;
-            
-            // Update castle health
-            const healthPercentage = (gameState.castleHealth / config.castle.maxHealth) * 100;
-            elements.castleHealthBar.style.width = `${healthPercentage}%`;
-            elements.castleHealthText.textContent = `Castle: ${Math.round(healthPercentage)}%`;
-            
-            // Update defender buttons
-            document.querySelectorAll('.defender-btn').forEach(btn => {
-                if (btn.id !== 'upgrade-btn') {
-                    const type = btn.dataset.type;
-                    btn.disabled = gameState.gold < config.defenders[type].cost;
-                }
-            });
-        }
-
-        // Game Entities
-        class Enemy {
-            constructor(type, x, y, speed, health, damage, gold, color, scale, flying, icon) {
-                this.type = type;
-                this.x = x;
-                this.y = y;
-                this.speed = speed;
-                this.maxHealth = health;
-                this.health = health;
-                this.damage = damage;
-                this.gold = gold;
-                this.color = color;
-                this.scale = scale;
-                this.flying = flying;
-                this.size = 20 * scale;
-                this.pathProgress = 0;
-                this.path = this.generatePath();
-                this.icon = icon;
-                this.lastX = x;
-                this.lastY = y;
-            }
-            
-            generatePath() {
-                // Simple path - move right toward the castle
-                const castleX = elements.canvas.width * config.castle.position.x;
-                const castleY = elements.canvas.height * config.castle.position.y;
-                
-                // Add some randomness to the path
-                const waypoints = [];
-                const segments = 3 + Math.floor(Math.random() * 3);
-                
-                for (let i = 0; i < segments; i++) {
-                    const t = i / segments;
-                    const x = this.x + (castleX - this.x) * t;
-                    const y = this.y + (castleY - this.y) * t;
-                    
-                    // Add some random variation to y coordinate
-                    const randomY = this.flying ? 
-                        (Math.random() - 0.5) * 100 :
-                        (Math.random() - 0.5) * 50;
-                    
-                    waypoints.push({
-                        x: x,
-                        y: y + randomY
-                    });
-                }
-                
-                // Add final position at castle
-                waypoints.push({
-                    x: castleX,
-                    y: castleY
-                });
-                
-                return waypoints;
-            }
-            
-            update(deltaTime) {
-                this.lastX = this.x;
-                this.lastY = this.y;
-                
-                // Move along path
-                const speed = this.speed * (deltaTime / 16); // Normalize speed to 60fps
-                this.pathProgress = Math.min(this.pathProgress + speed, this.path.length - 1);
-                
-                const segmentIndex = Math.floor(this.pathProgress);
-                const segmentProgress = this.pathProgress - segmentIndex;
-                
-                if (segmentIndex < this.path.length - 1) {
-                    const start = this.path[segmentIndex];
-                    const end = this.path[segmentIndex + 1];
-                    
-                    this.x = start.x + (end.x - start.x) * segmentProgress;
-                    this.y = start.y + (end.y - start.y) * segmentProgress;
-                } else {
-                    this.x = this.path[this.path.length - 1].x;
-                    this.y = this.path[this.path.length - 1].y;
-                }
-            }
-            
-            reachedCastle() {
-                const castleX = elements.canvas.width * config.castle.position.x;
-                const castleY = elements.canvas.height * config.castle.position.y;
-                const distance = Math.sqrt(Math.pow(this.x - castleX, 2) + Math.pow(this.y - castleY, 2));
-                
-                return distance < config.castle.size;
-            }
-            
-            draw(ctx) {
-                // Draw enemy body
-                ctx.save();
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Draw health bar
-                const healthPercentage = this.health / this.maxHealth;
-                ctx.fillStyle = 'black';
-                ctx.fillRect(this.x - this.size, this.y - this.size - 10, this.size * 2, 5);
-                ctx.fillStyle = healthPercentage > 0.6 ? 'lime' : healthPercentage > 0.3 ? 'yellow' : 'red';
-                ctx.fillRect(this.x - this.size, this.y - this.size - 10, this.size * 2 * healthPercentage, 5);
-                
-                // Draw enemy icon
-                ctx.fillStyle = 'white';
-                ctx.font = `${this.size}px FontAwesome`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                // Use the specified icon
-                let iconChar = '';
-                switch (this.icon) {
-                    case 'fas fa-bug': iconChar = '🐛'; break;
-                    case 'fas fa-running': iconChar = '🏃'; break;
-                    case 'fas fa-shield-alt': iconChar = '🛡'; break;
-                    case 'fas fa-dove': iconChar = '🕊'; break;
-                    case 'fas fa-skull': iconChar = '💀'; break;
-                    default: iconChar = '👾'; // Fallback
-                }
-                
-                ctx.fillText(iconChar, this.x, this.y);
-                
-                // Draw special indicators
-                if (this.type === ENEMY_TYPES.BOSS) {
-                    ctx.strokeStyle = 'gold';
-                    ctx.lineWidth = 3;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size + 5, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-                
-                ctx.restore();
-            }
-        }
-
-        class Defender {
-            constructor(type, x, y, range, damage, attackSpeed, color, icon, aoeRadius = 0) {
-                this.type = type;
-                this.x = x;
-                this.y = y;
-                this.range = range;
-                this.damage = damage;
-                this.attackSpeed = attackSpeed;
-                this.color = color;
-                this.icon = icon;
-                this.aoeRadius = aoeRadius;
-                this.size = 30;
-                this.cooldown = 0;
-                this.target = null;
-            }
-            
-            update(deltaTime, enemies) {
-                // Update cooldown
-                if (this.cooldown > 0) {
-                    this.cooldown -= deltaTime / 1000; // Convert to seconds
-                    return;
-                }
-                
-                // Find target
-                this.target = this.findTarget(enemies);
-                
-                if (this.target) {
-                    // Attack target
-                    this.attack(this.target);
-                    this.cooldown = 1 / this.attackSpeed;
-                }
-            }
-            
-            findTarget(enemies) {
-                let closestEnemy = null;
-                let closestDistance = Infinity;
-                
-                for (const enemy of enemies) {
-                    const distance = Math.sqrt(Math.pow(this.x - enemy.x, 2) + Math.pow(this.y - enemy.y, 2));
-                    
-                    if (distance < this.range && distance < closestDistance) {
-                        closestEnemy = enemy;
-                        closestDistance = distance;
-                    }
-                }
-                
-                return closestEnemy;
-            }
-            
-            attack(target) {
-                if (this.type === DEFENDER_TYPES.RANGED) {
-                    // Create projectile
-                    const projectile = new Projectile(
-                        this.x,
-                        this.y,
-                        target,
-                        this.damage,
-                        this.color,
-                        8,
-                        false
-                    );
-                    gameState.activeProjectiles.push(projectile);
-                } else if (this.type === DEFENDER_TYPES.AOE) {
-                    // Create AOE projectile
-                    const projectile = new Projectile(
-                        this.x,
-                        this.y,
-                        target,
-                        this.damage,
-                        this.color,
-                        12,
-                        true,
-                        this.aoeRadius
-                    );
-                    gameState.activeProjectiles.push(projectile);
-                } else {
-                    // Melee attack - direct damage
-                    const damage = this.damage * config.game.damageMultiplier;
-                    target.health -= damage;
-                    createDamageText(target.x, target.y, `-${Math.round(damage)}`);
-                    
-                    // Create attack effect
-                    createParticles(
-                        target.x,
-                        target.y,
-                        this.color,
-                        5
-                    );
-                    
-                    // Check if enemy died
-                    if (target.health <= 0) {
-                        const enemyIndex = gameState.activeEnemies.indexOf(target);
-                        if (enemyIndex !== -1) {
-                            // Add gold and score
-                            gameState.gold += target.gold;
-                            gameState.score += Math.round(target.gold * 10 * (1 + gameState.streak * config.quiz.streakMultiplier));
-                            gameState.activeEnemies.splice(enemyIndex, 1);
-                            
-                            // Create death particles
-                            createParticles(target.x, target.y, target.color);
-                        }
-                    }
-                }
-                
-                // Create attack particles
-                createParticles(
-                    this.x,
-                    this.y,
-                    this.color,
-                    3
-                );
-            }
-            
-            draw(ctx) {
-                // Draw range circle (translucent)
-                ctx.save();
-                ctx.fillStyle = `${this.color}30`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-                ctx.fill();
-                
-                // Draw defender body
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = 'rgba(0, 0, 0, 0.7)';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                // Draw icon
-                ctx.fillStyle = 'white';
-                ctx.font = `${this.size}px FontAwesome`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                
-                // Use the specified icon
-                let iconChar = '';
-                switch (this.icon) {
-                    case 'fas fa-paw': iconChar = '🐾'; break;
-                    case 'fas fa-feather': iconChar = '🏹'; break;
-                    case 'fas fa-dragon': iconChar = '🐉'; break;
-                    default: iconChar = '🛡'; // Fallback
-                }
-                
-                ctx.fillText(iconChar, this.x, this.y);
-                
-                // Draw cooldown indicator
-                if (this.cooldown > 0) {
-                    const cooldownPercentage = this.cooldown / (1 / this.attackSpeed);
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.size, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * cooldownPercentage, true);
-                    ctx.lineTo(this.x, this.y);
-                    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-                    ctx.fill();
-                }
-                
-                ctx.restore();
-            }
-        }
-
-        class Projectile {
-            constructor(x, y, target, damage, color, size, isAOE, aoeRadius = 0) {
-                this.x = x;
-                this.y = y;
-                this.target = target;
-                this.damage = damage;
-                this.color = color;
-                this.size = size;
-                this.isAOE = isAOE;
-                this.aoeRadius = aoeRadius;
-                this.speed = 10;
-                this.reached = false;
-            }
-            
-            update(deltaTime) {
-                if (this.reached || !this.target || this.target.health <= 0) {
-                    this.reached = true;
-                    return;
-                }
-                
-                // Move toward target
-                const dx = this.target.x - this.x;
-                const dy = this.target.y - this.y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                if (distance < this.speed) {
-                    this.reached = true;
-                } else {
-                    this.x += (dx / distance) * this.speed;
-                    this.y += (dy / distance) * this.speed;
-                }
-            }
-            
-            reachedTarget() {
-                return this.reached || !this.target || this.target.health <= 0;
-            }
-            
-            draw(ctx) {
-                ctx.save();
-                ctx.fillStyle = this.color;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                
-                if (this.isAOE) {
-                    ctx.strokeStyle = `${this.color}80`;
-                    ctx.lineWidth = 2;
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.aoeRadius, 0, Math.PI * 2);
-                    ctx.stroke();
-                }
-                
-                ctx.restore();
-            }
-        }
-
-        class Particle {
-            constructor(x, y, color, size, velocity, lifetime) {
-                this.x = x;
-                this.y = y;
-                this.color = color;
-                this.size = size;
-                this.velocity = velocity;
-                this.lifetime = lifetime;
-                this.maxLifetime = lifetime;
-            }
-            
-            update(deltaTime) {
-                this.x += this.velocity.x * (deltaTime / 16);
-                this.y += this.velocity.y * (deltaTime / 16);
-                this.lifetime -= deltaTime;
-                this.size *= 0.99;
-            }
-            
-            draw(ctx) {
-                const alpha = this.lifetime / this.maxLifetime;
-                ctx.save();
-                ctx.fillStyle = `${this.color}${Math.floor(alpha * 255).toString(16).padStart(2, '0')}`;
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
-            }
-        }
-
-        class FloatingText {
-            constructor(x, y, text, color, size = 16, lifetime = 1000) {
-                this.x = x;
-                this.y = y;
-                this.text = text;
-                this.color = color;
-                this.size = size;
-                this.lifetime = lifetime;
-                this.maxLifetime = lifetime;
-                this.element = document.createElement('div');
-                this.element.className = 'damage-text';
-                this.element.textContent = text;
-                this.element.style.color = color;
-                this.element.style.fontSize = `${size}px`;
-                this.element.style.left = `${x}px`;
-                this.element.style.top = `${y}px`;
-                document.getElementById('ui-overlay').appendChild(this.element);
-            }
-            
-            update(deltaTime) {
-                this.lifetime -= deltaTime;
-                this.y -= 0.5 * (deltaTime / 16);
-                this.element.style.top = `${this.y}px`;
-                this.element.style.opacity = this.lifetime / this.maxLifetime;
-            }
-            
-            destroy() {
-                if (this.element.parentNode) {
-                    this.element.parentNode.removeChild(this.element);
-                }
-            }
-        }
-
-        // Helper Functions
-        function createParticles(x, y, color, count = 10, size = 5, lifetime = 1000) {
-            for (let i = 0; i < count; i++) {
-                const angle = Math.random() * Math.PI * 2;
-                const speed = 0.5 + Math.random() * 2;
-                const particleLifetime = lifetime * (0.5 + Math.random() * 0.5);
-                
-                gameState.particles.push(new Particle(
-                    x,
-                    y,
-                    color,
-                    size * (0.5 + Math.random()),
-                    {
-                        x: Math.cos(angle) * speed,
-                        y: Math.sin(angle) * speed
-                    },
-                    particleLifetime
-                ));
-            }
-        }
-
-        function createDamageText(x, y, text, color = '#ff4500', size = 20) {
-            gameState.floatingTexts.push(new FloatingText(
-                x,
-                y,
-                text,
-                color,
-                size
-            ));
-        }
-
-        function createComboText(x, y, text) {
-            const comboText = new FloatingText(
-                x,
-                y,
-                text,
-                '#ff8c00',
-                30,
-                1000
-            );
-            comboText.element.className = 'combo-text';
-            gameState.floatingTexts.push(comboText);
-        }
-
-        // Game Over and High Scores
-        function gameOver() {
-            gameState.running = false;
-            
-            // Add to high scores
-            addHighScore(gameState.score);
-            
-            // Show game over menu
-            const menuContainer = document.createElement('div');
-            menuContainer.className = 'menu-container';
-            menuContainer.innerHTML = `
-                <h1 class="menu-title">Game Over</h1>
-                <p>Final Score: ${gameState.score}</p>
-                <p>Wave Reached: ${gameState.currentWave}</p>
-                <button id="restart-btn" class="menu-btn">Play Again</button>
-                <button id="menu-btn" class="menu-btn">Main Menu</button>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add custom ingredients
+      document.querySelectorAll('.btn-add').forEach(btn => {
+        btn.addEventListener('click', function() {
+          const input = this.previousElementSibling;
+          const value = input.value.trim();
+          if (value) {
+            const category = this.closest('.category');
+            const newOption = document.createElement('div');
+            newOption.className = 'ingredient-option';
+            newOption.innerHTML = `
+              <label>
+                <input type="checkbox" name="ingredient" value="${value}" checked>
+                ${value}
+              </label>
             `;
-            
-            elements.gameMenu.innerHTML = '';
-            elements.gameMenu.appendChild(menuContainer);
-            elements.gameMenu.style.display = 'flex';
-            
-            // Add event listeners to new buttons
-            document.getElementById('restart-btn').addEventListener('click', startGame);
-            document.getElementById('menu-btn').addEventListener('click', () => {
-                elements.gameMenu.innerHTML = `
-                    <div class="menu-container">
-                        <h1 class="menu-title">Knowledge Defender</h1>
-                        <button id="start-btn" class="menu-btn">Start Game</button>
-                        <button id="help-btn" class="menu-btn">How to Play</button>
-                        <button id="highscores-btn" class="menu-btn">High Scores</button>
-                    </div>
-                `;
-                
-                // Reattach event listeners
-                document.getElementById('start-btn').addEventListener('click', startGame);
-                document.getElementById('help-btn').addEventListener('click', showHelp);
-                document.getElementById('highscores-btn').addEventListener('click', showHighScores);
-            });
+            category.insertBefore(newOption, this.closest('.custom-ingredient'));
+            input.value = '';
+          }
+        });
+      });
+      
+      // Preview recipe
+      document.getElementById('previewBtn').addEventListener('click', function() {
+        const name = document.getElementById('recipeName').value;
+        const description = document.getElementById('recipeDescription').value;
+        const instructions = document.getElementById('instructions').value;
+        const servings = document.getElementById('servings').value;
+        const time = document.getElementById('cookingTime').value;
+        
+        // Get selected ingredients
+        const ingredients = [];
+        document.querySelectorAll('input[name="ingredient"]:checked').forEach(checkbox => {
+          ingredients.push(checkbox.value);
+        });
+        
+        if (!name || !instructions || ingredients.length === 0) {
+          alert('Vui lòng điền đầy đủ thông tin công thức!');
+          return;
         }
-
-        function addHighScore(score) {
-            gameState.highScores.push({
-                score: score,
-                date: new Date().toLocaleDateString(),
-                wave: gameState.currentWave
-            });
-            
-            // Sort descending by score
-            gameState.highScores.sort((a, b) => b.score - a.score);
-            
-            // Keep only top 10
-            if (gameState.highScores.length > 10) {
-                gameState.highScores = gameState.highScores.slice(0, 10);
-            }
-            
-            // Save to local storage
-            localStorage.setItem('knowledgeDefenderHighScores', JSON.stringify(gameState.highScores));
-        }
-
-        function loadHighScores() {
-            const savedScores = localStorage.getItem('knowledgeDefenderHighScores');
-            if (savedScores) {
-                gameState.highScores = JSON.parse(savedScores);
-            }
-        }
-
-        function showHighScores() {
-            const menuContainer = document.createElement('div');
-            menuContainer.className = 'menu-container';
-            
-            let scoresHTML = '<h1 class="menu-title">High Scores</h1><div style="margin-bottom: 20px;">';
-            
-            if (gameState.highScores.length === 0) {
-                scoresHTML += '<p>No scores yet!</p>';
-            } else {
-                scoresHTML += '<ol style="text-align: left; margin: 0 auto; width: fit-content;">';
-                gameState.highScores.forEach((score, index) => {
-                    scoresHTML += `<li>${score.score} (Wave ${score.wave}) - ${score.date}</li>`;
-                });
-                scoresHTML += '</ol>';
-            }
-            
-            scoresHTML += '</div><button id="back-btn" class="menu-btn">Back</button>';
-            
-            menuContainer.innerHTML = scoresHTML;
-            elements.gameMenu.innerHTML = '';
-            elements.gameMenu.appendChild(menuContainer);
-            
-            document.getElementById('back-btn').addEventListener('click', () => {
-                elements.gameMenu.innerHTML = `
-                    <div class="menu-container">
-                        <h1 class="menu-title">Knowledge Defender</h1>
-                        <button id="start-btn" class="menu-btn">Start Game</button>
-                        <button id="help-btn" class="menu-btn">How to Play</button>
-                        <button id="highscores-btn" class="menu-btn">High Scores</button>
-                    </div>
-                `;
-                
-                // Reattach event listeners
-                document.getElementById('start-btn').addEventListener('click', startGame);
-                document.getElementById('help-btn').addEventListener('click', showHelp);
-                document.getElementById('highscores-btn').addEventListener('click', showHighScores);
-            });
-        }
-
-        function showHelp() {
-            const menuContainer = document.createElement('div');
-            menuContainer.className = 'menu-container';
-            menuContainer.innerHTML = `
-                <h1 class="menu-title">How to Play</h1>
-                <div style="text-align: left; margin-bottom: 20px;">
-                    <h3>Game Objective</h3>
-                    <p>Defend your castle by answering quiz questions correctly and placing defenders strategically.</p>
-                    
-                    <h3>Gameplay</h3>
-                    <p>- Each wave, enemies will try to reach your castle</p>
-                    <p>- Answer quiz questions to earn points and strengthen your defenders</p>
-                    <p>- Use gold to place defenders along the enemy path</p>
-                    <p>- Upgrade your defenders between waves</p>
-                    
-                    <h3>Defenders</h3>
-                    <p><i class="fas fa-paw"></i> Melee: Short range, high damage</p>
-                    <p><i class="fas fa-feather"></i> Ranged: Long range, medium damage</p>
-                    <p><i class="fas fa-dragon"></i> AOE: Medium range, area damage</p>
-                    
-                    <h3>Scoring</h3>
-                    <p>- Correct answers: +100 points + time bonus</p>
-                    <p>- Streak multiplier: +10% per consecutive correct answer</p>
-                    <p>- Enemy kills: +gold and points</p>
-                </div>
-                <button id="back-btn" class="menu-btn">Back</button>
-            `;
-            
-            elements.gameMenu.innerHTML = '';
-            elements.gameMenu.appendChild(menuContainer);
-            
-            document.getElementById('back-btn').addEventListener('click', () => {
-                elements.gameMenu.innerHTML = `
-                    <div class="menu-container">
-                        <h1 class="menu-title">Knowledge Defender</h1>
-                        <button id="start-btn" class="menu-btn">Start Game</button>
-                        <button id="help-btn" class="menu-btn">How to Play</button>
-                        <button id="highscores-btn" class="menu-btn">High Scores</button>
-                    </div>
-                `;
-                
-                // Reattach event listeners
-                document.getElementById('start-btn').addEventListener('click', startGame);
-                document.getElementById('help-btn').addEventListener('click', showHelp);
-                document.getElementById('highscores-btn').addEventListener('click', showHighScores);
-            });
-        }
-
-        // Initialize the game when the page loads
-        window.addEventListener('load', initGame);
-    </script>
+        
+        // Update preview
+        document.getElementById('previewName').textContent = name;
+        document.getElementById('previewDescription').textContent = description;
+        
+        const ingredientsList = document.getElementById('previewIngredients');
+        ingredientsList.innerHTML = '';
+        ingredients.forEach(ingredient => {
+          const li = document.createElement('li');
+          li.textContent = ingredient;
+          ingredientsList.appendChild(li);
+        });
+        
+        document.getElementById('previewInstructions').textContent = instructions;
+        document.getElementById('previewServings').textContent = servings + ' người';
+        document.getElementById('previewTime').textContent = time;
+        
+        // Show preview
+        document.getElementById('recipeForm').style.display = 'none';
+        document.getElementById('preview').style.display = 'block';
+      });
+      
+      // Back to edit
+      document.getElementById('backToEdit').addEventListener('click', function() {
+        document.getElementById('preview').style.display = 'none';
+        document.getElementById('recipeForm').style.display = 'block';
+      });
+      
+      // Send email
+      document.getElementById('sendEmail').addEventListener('click', function() {
+        const name = document.getElementById('previewName').textContent;
+        const description = document.getElementById('previewDescription').textContent;
+        const ingredients = Array.from(document.getElementById('previewIngredients').children)
+          .map(li => li.textContent).join(', ');
+        const instructions = document.getElementById('previewInstructions').textContent;
+        const servings = document.getElementById('previewServings').textContent;
+        const time = document.getElementById('previewTime').textContent;
+        
+        const subject = `Công thức mới: ${name}`;
+        const body = `Tên món: ${name}%0D%0A%0D%0A` +
+                     `Mô tả: ${description}%0D%0A%0D%0A` +
+                     `Nguyên liệu:%0D%0A${ingredients}%0D%0A%0D%0A` +
+                     `Hướng dẫn nấu:%0D%0A${instructions}%0D%0A%0D%0A` +
+                     `Khẩu phần: ${servings}%0D%0A` +
+                     `Thời gian nấu: ${time}`;
+        
+        window.location.href = `mailto:reneringuet@gmail.com?subject=${subject}&body=${body}`;
+      });
+      
+      // Form submission
+      document.getElementById('recipeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        document.getElementById('previewBtn').click();
+      });
+    });
+  </script>
 </body>
 </html>
