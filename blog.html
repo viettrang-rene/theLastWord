@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>🍲 Family Vietnamese Recipe Dashboard</title>
+  <title>🍲 Vietnamese Recipes & Shopping List</title>
   <style>
     :root {
       --primary-color: #e53935;
       --secondary-color: #f5f5f5;
+      --accent-color: #4CAF50;
     }
     * {
       box-sizing: border-box;
@@ -27,6 +28,28 @@
       position: sticky;
       top: 0;
       z-index: 10;
+    }
+    .tabs {
+      display: flex;
+      background: #f0f0f0;
+    }
+    .tab {
+      flex: 1;
+      padding: 1rem;
+      text-align: center;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+    }
+    .tab.active {
+      border-bottom: 3px solid var(--primary-color);
+      font-weight: bold;
+    }
+    .tab-content {
+      display: none;
+      padding: 1rem;
+    }
+    .tab-content.active {
+      display: block;
     }
     .container {
       display: flex;
@@ -58,64 +81,55 @@
       margin-bottom: 0;
     }
     
-    /* Button-based input styles */
-    .input-buttons {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 0.5rem;
-      margin-top: 0.5rem;
+    /* Shopping List Styles */
+    .shopping-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
     }
-    .input-button {
-      background: var(--secondary-color);
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      padding: 0.8rem;
-      text-align: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      font-size: 0.9rem;
-    }
-    .input-button:hover, .input-button.selected {
-      background: var(--primary-color);
-      color: white;
-      border-color: var(--primary-color);
-    }
-    .selected-items {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .selected-item {
-      background: var(--primary-color);
-      color: white;
-      padding: 0.3rem 0.6rem;
-      border-radius: 20px;
-      font-size: 0.8rem;
+    .shopping-item {
       display: flex;
       align-items: center;
+      padding: 0.8rem;
+      border-bottom: 1px solid #eee;
     }
-    .selected-item button {
-      background: none;
-      border: none;
-      color: white;
-      margin-left: 0.3rem;
+    .shopping-item input[type="checkbox"] {
+      margin-right: 1rem;
+      transform: scale(1.3);
+    }
+    .shopping-item label {
+      flex: 1;
       cursor: pointer;
-      font-size: 0.8rem;
     }
-    
-    /* Form styles */
-    form button[type="submit"] {
-      margin-top: 1rem;
-      background: var(--primary-color);
+    .shopping-item.checked {
+      text-decoration: line-through;
+      color: #888;
+    }
+    .add-all-btn {
+      background: var(--accent-color);
       color: white;
       border: none;
       padding: 0.8rem;
       border-radius: 4px;
       cursor: pointer;
       width: 100%;
-      font-size: 1rem;
+      margin-top: 1rem;
       font-weight: bold;
+    }
+    
+    /* Button styles */
+    .btn {
+      margin-top: 0.8rem;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .btn-small {
+      padding: 0.3rem 0.6rem;
+      font-size: 0.8rem;
     }
     
     /* Recipe grid */
@@ -126,17 +140,9 @@
     }
     
     /* Responsive adjustments */
-    @media (min-width: 480px) {
-      .input-buttons {
-        grid-template-columns: repeat(3, 1fr);
-      }
-    }
     @media (min-width: 768px) {
       .recipes-container {
         grid-template-columns: repeat(2, 1fr);
-      }
-      .input-buttons {
-        grid-template-columns: repeat(4, 1fr);
       }
     }
     @media (min-width: 1024px) {
@@ -144,263 +150,186 @@
         grid-template-columns: repeat(3, 1fr);
       }
     }
-    
-    /* Animation */
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .card {
-      animation: fadeIn 0.3s ease-out;
-    }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>🍲 Family Vietnamese Recipe Dashboard</h1>
+  <h1>🍲 Vietnamese Recipes & Shopping List</h1>
 </header>
 
-<main class="container">
+<div class="tabs">
+  <div class="tab active" data-tab="recipes">Công thức</div>
+  <div class="tab" data-tab="shopping">Danh sách mua sắm</div>
+</div>
 
-  <!-- Add New Recipe Form -->
-  <section class="card">
-    <h2>Thêm công thức mới</h2>
-    <form id="recipeForm">
-      
-      <div class="form-group">
-        <label>Tên món ăn:</label>
-        <div class="input-buttons">
-          <div class="input-button" data-value="Phở Bò">Phở Bò</div>
-          <div class="input-button" data-value="Bún Chả">Bún Chả</div>
-          <div class="input-button" data-value="Cơm Tấm">Cơm Tấm</div>
-          <div class="input-button" data-value="Gỏi Cuốn">Gỏi Cuốn</div>
-          <div class="input-button" data-value="Bánh Xèo">Bánh Xèo</div>
-          <div class="input-button" data-value="Khác">Khác</div>
-        </div>
-        <input type="hidden" id="recipeName" name="recipeName" required>
-      </div>
-      
-      <div class="form-group">
-        <label>Nguyên liệu chính:</label>
-        <div class="input-buttons">
-          <div class="input-button" data-value="Thịt bò">Thịt bò</div>
-          <div class="input-button" data-value="Thịt heo">Thịt heo</div>
-          <div class="input-button" data-value="Gà">Gà</div>
-          <div class="input-button" data-value="Cá">Cá</div>
-          <div class="input-button" data-value="Tôm">Tôm</div>
-          <div class="input-button" data-value="Rau thơm">Rau thơm</div>
-          <div class="input-button" data-value="Bún">Bún</div>
-          <div class="input-button" data-value="Phở">Phở</div>
-          <div class="input-button" data-value="Gạo">Gạo</div>
-          <div class="input-button" data-value="Nước mắm">Nước mắm</div>
-        </div>
-        <div class="selected-items" id="ingredientsContainer"></div>
-        <input type="hidden" id="ingredients" name="ingredients" required>
-      </div>
-      
-      <div class="form-group">
-        <label>Cách nấu:</label>
-        <div class="input-buttons">
-          <div class="input-button" data-value="Nướng">Nướng</div>
-          <div class="input-button" data-value="Luộc">Luộc</div>
-          <div class="input-button" data-value="Chiên">Chiên</div>
-          <div class="input-button" data-value="Kho">Kho</div>
-          <div class="input-button" data-value="Xào">Xào</div>
-          <div class="input-button" data-value="Hấp">Hấp</div>
-        </div>
-        <textarea id="instructions" name="instructions" rows="4" placeholder="Mô tả cách nấu (có thể nhập tay nếu cần)" required></textarea>
+<div class="container">
+  <!-- Recipes Tab -->
+  <div class="tab-content active" id="recipes">
+    <!-- Recipe cards -->
+    <div class="recipes-container">
+      <!-- Recipe 1 -->
+      <div class="card">
+        <h3>1. Phở Bò</h3>
+        <img src="/images/pho-bo.jpg" alt="Phở Bò">
+        <p><strong>Nguyên liệu:</strong></p>
+        <ul>
+          <li>Thịt bò tái hoặc chín</li>
+          <li>Bánh phở</li>
+          <li>Hành tây, hành lá</li>
+          <li>Gừng, quế, hồi</li>
+          <li>Muối, đường, nước mắm</li>
+        </ul>
+        <button class="btn btn-small add-to-list" data-ingredients="Thịt bò tái hoặc chín,Bánh phở,Hành tây,Hành lá,Gừng,Quế,Hồi,Muối,Đường,Nước mắm">Thêm vào danh sách</button>
       </div>
 
-      <button type="submit">Lưu công thức</button>
-    </form>
-  </section>
+      <!-- Recipe 2 -->
+      <div class="card">
+        <h3>2. Bún Chả</h3>
+        <img src="/images/bun-cha.jpg" alt="Bún Chả">
+        <p><strong>Nguyên liệu:</strong></p>
+        <ul>
+          <li>Thịt nạc vai (xay & viên)</li>
+          <li>Bún tươi</li>
+          <li>Dưa leo, rau thơm</li>
+          <li>Đường, nước mắm, tỏi, ớt</li>
+        </ul>
+        <button class="btn btn-small add-to-list" data-ingredients="Thịt nạc vai,Bún tươi,Dưa leo,Rau thơm,Đường,Nước mắm,Tỏi,Ớt">Thêm vào danh sách</button>
+      </div>
 
-  <!-- Preloaded Vietnamese Recipes -->
-  <section class="recipes-container">
-    <!-- Recipe cards remain the same as before -->
-    <!-- Recipe 1 -->
-    <div class="card">
-      <h3>1. Phở Bò</h3>
-      <img src="/images/pho-bo.jpg" alt="Phở Bò">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Thịt bò tái hoặc chín</li>
-        <li>Bánh phở</li>
-        <li>Hành tây, hành lá</li>
-        <li>Gừng, quế, hồi</li>
-        <li>Muối, đường, nước mắm</li>
-      </ul>
+      <!-- Recipe 3 -->
+      <div class="card">
+        <h3>3. Cơm Tấm</h3>
+        <img src="/images/com-tam.jpg" alt="Cơm Tấm">
+        <p><strong>Nguyên liệu:</strong></p>
+        <ul>
+          <li>Gạo tấm</li>
+          <li>Sườn nướng</li>
+          <li>Chả trứng, bì</li>
+          <li>Dưa leo, cà chua</li>
+          <li>Nước mắm, tỏi, ớt</li>
+        </ul>
+        <button class="btn btn-small add-to-list" data-ingredients="Gạo tấm,Sườn nướng,Chả trứng,Bì,Dưa leo,Cà chua,Nước mắm,Tỏi,Ớt">Thêm vào danh sách</button>
+      </div>
+
+      <!-- Recipe 4 -->
+      <div class="card">
+        <h3>4. Gỏi Cuốn</h3>
+        <img src="/images/goi-cuon.jpg" alt="Gỏi Cuốn">
+        <p><strong>Nguyên liệu:</strong></p>
+        <ul>
+          <li>Bánh tráng</li>
+          <li>Tôm, thịt luộc</li>
+          <li>Bún tươi</li>
+          <li>Rau thơm, xà lách</li>
+          <li>Tương đậu phộng</li>
+        </ul>
+        <button class="btn btn-small add-to-list" data-ingredients="Bánh tráng,Tôm,Thịt luộc,Bún tươi,Rau thơm,Xà lách,Tương đậu phộng">Thêm vào danh sách</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Recipe 2 -->
+  <!-- Shopping List Tab -->
+  <div class="tab-content" id="shopping">
     <div class="card">
-      <h3>2. Bún Chả</h3>
-      <img src="/images/bun-cha.jpg" alt="Bún Chả">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Thịt nạc vai (xay & viên)</li>
-        <li>Bún tươi</li>
-        <li>Dưa leo, rau thơm</li>
-        <li>Đường, nước mắm, tỏi, ớt</li>
+      <h3>Danh sách mua sắm</h3>
+      <ul class="shopping-list" id="shoppingList">
+        <!-- Items will be added here dynamically -->
       </ul>
+      <button class="add-all-btn" id="clearCompleted">Xóa mục đã chọn</button>
     </div>
-
-    <!-- Recipe 3 -->
-    <div class="card">
-      <h3>3. Cơm Tấm</h3>
-      <img src="/images/com-tam.jpg" alt="Cơm Tấm">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Gạo tấm</li>
-        <li>Sườn nướng</li>
-        <li>Chả trứng, bì</li>
-        <li>Dưa leo, cà chua</li>
-        <li>Nước mắm, tỏi, ớt</li>
-      </ul>
-    </div>
-
-    <!-- Recipe 4 -->
-    <div class="card">
-      <h3>4. Gỏi Cuốn</h3>
-      <img src="/images/goi-cuon.jpg" alt="Gỏi Cuốn">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Bánh tráng</li>
-        <li>Tôm, thịt luộc</li>
-        <li>Bún tươi</li>
-        <li>Rau thơm, xà lách</li>
-        <li>Tương đậu phộng</li>
-      </ul>
-    </div>
-
-    <!-- Recipe 5 -->
-    <div class="card">
-      <h3>5. Bánh Xèo</h3>
-      <img src="/images/banh-xeo.jpg" alt="Bánh Xèo">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Bột gạo, nước cốt dừa</li>
-        <li>Tôm, thịt ba chỉ</li>
-        <li>Giá đỗ</li>
-        <li>Hành lá</li>
-        <li>Rau sống, nước chấm</li>
-      </ul>
-    </div>
-
-    <!-- Recipe 6 -->
-    <div class="card">
-      <h3>6. Canh Chua</h3>
-      <img src="/images/canh-chua.jpg" alt="Canh Chua">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Cá quả hoặc cá lóc</li>
-        <li>Me, dứa, cà chua</li>
-        <li>Đậu bắp, giá đỗ</li>
-        <li>Rau ngổ, hành lá</li>
-        <li>Nước mắm, đường</li>
-      </ul>
-    </div>
-  </section>
-
-</main>
+  </div>
+</div>
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
-    // Handle recipe name selection
-    const recipeNameButtons = document.querySelectorAll('[data-value]');
-    const recipeNameInput = document.getElementById('recipeName');
+    // Tab switching
+    const tabs = document.querySelectorAll('.tab');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', function() {
+        // Remove active class from all tabs and content
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        // Add active class to clicked tab and corresponding content
+        this.classList.add('active');
+        const tabId = this.getAttribute('data-tab');
+        document.getElementById(tabId).classList.add('active');
+      });
+    });
     
-    recipeNameButtons.forEach(button => {
-      if(button.parentElement.previousElementSibling.textContent === 'Tên món ăn:') {
-        button.addEventListener('click', function() {
-          recipeNameButtons.forEach(btn => btn.classList.remove('selected'));
-          this.classList.add('selected');
-          recipeNameInput.value = this.getAttribute('data-value');
+    // Shopping list functionality
+    const shoppingList = document.getElementById('shoppingList');
+    let shoppingItems = JSON.parse(localStorage.getItem('shoppingItems')) || [];
+    
+    // Load saved items
+    function loadShoppingList() {
+      shoppingList.innerHTML = '';
+      shoppingItems.forEach((item, index) => {
+        const li = document.createElement('li');
+        li.className = 'shopping-item';
+        if(item.checked) li.classList.add('checked');
+        
+        li.innerHTML = `
+          <input type="checkbox" id="item-${index}" ${item.checked ? 'checked' : ''}>
+          <label for="item-${index}">${item.name}</label>
+        `;
+        
+        li.querySelector('input').addEventListener('change', function() {
+          shoppingItems[index].checked = this.checked;
+          li.classList.toggle('checked', this.checked);
+          saveShoppingList();
+        });
+        
+        shoppingList.appendChild(li);
+      });
+    }
+    
+    // Save to localStorage
+    function saveShoppingList() {
+      localStorage.setItem('shoppingItems', JSON.stringify(shoppingItems));
+    }
+    
+    // Add recipe ingredients to shopping list
+    document.querySelectorAll('.add-to-list').forEach(button => {
+      button.addEventListener('click', function() {
+        const ingredients = this.getAttribute('data-ingredients').split(',');
+        
+        ingredients.forEach(ingredient => {
+          const trimmedIngredient = ingredient.trim();
+          // Check if ingredient already exists
+          const exists = shoppingItems.some(item => 
+            item.name.toLowerCase() === trimmedIngredient.toLowerCase()
+          );
           
-          if(this.getAttribute('data-value') === 'Khác') {
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = 'Nhập tên món ăn';
-            input.style.width = '100%';
-            input.style.padding = '0.5rem';
-            input.style.marginTop = '0.5rem';
-            input.required = true;
-            
-            // Remove any existing input
-            const existingInput = this.parentElement.nextElementSibling;
-            if(existingInput && existingInput.tagName === 'INPUT' && existingInput.type === 'text') {
-              existingInput.remove();
-            }
-            
-            this.parentElement.after(input);
-            
-            input.addEventListener('input', function() {
-              recipeNameInput.value = this.value;
+          if(!exists) {
+            shoppingItems.push({
+              name: trimmedIngredient,
+              checked: false
             });
           }
         });
-      }
-    });
-    
-    // Handle ingredients selection
-    const ingredientButtons = document.querySelectorAll('.input-buttons:nth-of-type(2) .input-button');
-    const ingredientsContainer = document.getElementById('ingredientsContainer');
-    const ingredientsInput = document.getElementById('ingredients');
-    let selectedIngredients = [];
-    
-    ingredientButtons.forEach(button => {
-      button.addEventListener('click', function() {
-        const value = this.getAttribute('data-value');
         
-        if(selectedIngredients.includes(value)) {
-          // Remove ingredient
-          selectedIngredients = selectedIngredients.filter(item => item !== value);
-          this.classList.remove('selected');
-        } else {
-          // Add ingredient
-          selectedIngredients.push(value);
-          this.classList.add('selected');
-        }
+        saveShoppingList();
+        loadShoppingList();
         
-        updateIngredientsDisplay();
+        // Switch to shopping tab
+        document.querySelector('.tab[data-tab="shopping"]').click();
+        
+        // Show confirmation
+        alert(`Đã thêm ${ingredients.length} nguyên liệu vào danh sách mua sắm!`);
       });
     });
     
-    function updateIngredientsDisplay() {
-      ingredientsContainer.innerHTML = '';
-      selectedIngredients.forEach(ingredient => {
-        const item = document.createElement('div');
-        item.className = 'selected-item';
-        item.innerHTML = `${ingredient} <button type="button">&times;</button>`;
-        
-        item.querySelector('button').addEventListener('click', function() {
-          selectedIngredients = selectedIngredients.filter(item => item !== ingredient);
-          updateIngredientsDisplay();
-          
-          // Also remove selected class from button
-          ingredientButtons.forEach(btn => {
-            if(btn.getAttribute('data-value') === ingredient) {
-              btn.classList.remove('selected');
-            }
-          });
-        });
-        
-        ingredientsContainer.appendChild(item);
-      });
-      
-      ingredientsInput.value = selectedIngredients.join(', ');
-    }
-    
-    // Form submission
-    document.getElementById('recipeForm').addEventListener('submit', function(e) {
-      e.preventDefault();
-      alert('Công thức đã được lưu!\nMón: ' + recipeNameInput.value + '\nNguyên liệu: ' + ingredientsInput.value);
-      this.reset();
-      selectedIngredients = [];
-      ingredientsContainer.innerHTML = '';
-      recipeNameButtons.forEach(btn => btn.classList.remove('selected'));
+    // Clear completed items
+    document.getElementById('clearCompleted').addEventListener('click', function() {
+      shoppingItems = shoppingItems.filter(item => !item.checked);
+      saveShoppingList();
+      loadShoppingList();
     });
+    
+    // Initial load
+    loadShoppingList();
   });
 </script>
 
