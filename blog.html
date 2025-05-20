@@ -1,18 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Family Recipe Dashboard</title>
+  <title>🍲 Family Vietnamese Recipe Dashboard</title>
   <style>
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 0;
-      padding: 0;
-      background: #f5f5f5;
+      margin: 0; padding: 0;
+      background: #f9f9f9;
     }
     header {
-      background-color: #4CAF50;
+      background-color: #e53935;
       color: white;
       padding: 1rem;
       text-align: center;
@@ -20,8 +19,8 @@
     .container {
       display: flex;
       flex-direction: column;
-      padding: 1rem;
       gap: 1rem;
+      padding: 1rem;
     }
     .card {
       background: white;
@@ -29,34 +28,41 @@
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
     }
-    .card h2 {
+    .card h3 {
       margin-top: 0;
     }
-    button {
-      background: #4CAF50;
-      color: white;
-      border: none;
-      padding: 0.5rem 1rem;
-      border-radius: 5px;
-      cursor: pointer;
+    .card img {
+      width: 100%;
+      border-radius: 4px;
+    }
+    .card ul {
+      padding-left: 1.2rem;
+    }
+    form label {
+      display: block;
       margin-top: 0.5rem;
     }
-    button:hover {
-      background: #45a049;
-    }
-    textarea, input {
+    form input, form textarea {
       width: 100%;
-      margin: 0.3rem 0;
       padding: 0.5rem;
+      margin-top: 0.2rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    form button {
+      margin-top: 0.8rem;
+      background: #e53935;
+      color: white;
+      border: none;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      cursor: pointer;
     }
     @media (min-width: 768px) {
-      .container {
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: space-between;
-      }
-      .card {
-        flex: 1 1 45%;
+      .container.recipes {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
       }
     }
   </style>
@@ -64,40 +70,198 @@
 <body>
 
 <header>
-  <h1>🍽️ Family Recipe Dashboard</h1>
+  <h1>🍲 Family Vietnamese Recipe Dashboard</h1>
 </header>
 
-<div class="container">
+<main class="container">
 
-  <!-- Recipes Section -->
-  <div class="card">
-    <h2>📚 My Recipes</h2>
-    <p>Save and view your family recipes.</p>
-    <button onclick="alert('Open recipe form')">Add Recipe</button>
-  </div>
+  <!-- Add New Recipe Form -->
+  <section class="card">
+    <h2>Thêm công thức mới</h2>
+    <form id="recipeForm">
+      <label for="recipeName">Tên món ăn:</label>
+      <input type="text" id="recipeName" name="recipeName" placeholder="Ví dụ: Phở Bò" required>
 
-  <!-- Shopping List Section -->
-  <div class="card">
-    <h2>🛒 Shopping List</h2>
-    <p>See all ingredients you need to buy.</p>
-    <button onclick="alert('Generate shopping list')">Generate List</button>
-  </div>
+      <label for="ingredients">Nguyên liệu (phân tách bằng dấu phẩy):</label>
+      <textarea id="ingredients" name="ingredients" rows="3" placeholder="Ví dụ: Bò, bánh phở, hành tây..." required></textarea>
 
-  <!-- Vendors Section -->
-  <div class="card">
-    <h2>🗺️ My Vendors</h2>
-    <p>Add and map your favorite shops and markets.</p>
-    <button onclick="alert('Open vendor map')">View Map</button>
-  </div>
+      <label for="instructions">Cách nấu:</label>
+      <textarea id="instructions" name="instructions" rows="4" placeholder="Ví dụ: Ninh xương bò trong 2 giờ..." required></textarea>
 
-  <!-- Sharing Section -->
-  <div class="card">
-    <h2>📤 Share with Others</h2>
-    <p>Show your meals and markets to friends and family.</p>
-    <button onclick="alert('Share to social')">Share Something</button>
-  </div>
+      <button type="submit">Lưu công thức</button>
+    </form>
+  </section>
 
-</div>
+  <!-- Preloaded Vietnamese Recipes -->
+  <section class="recipes container">
+    <!-- Recipe 1 -->
+    <div class="card">
+      <h3>1. Phở Bò</h3>
+      <img src="/images/pho-bo.jpg" alt="Phở Bò">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Thịt bò tái hoặc chín</li>
+        <li>Bánh phở</li>
+        <li>Hành tây, hành lá</li>
+        <li>Gừng, quế, hồi</li>
+        <li>Muối, đường, nước mắm</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 2 -->
+    <div class="card">
+      <h3>2. Bún Chả</h3>
+      <img src="/images/bun-cha.jpg" alt="Bún Chả">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Thịt nạc vai (xay & viên)</li>
+        <li>Bún tươi</li>
+        <li>Dưa leo, rau thơm</li>
+        <li>Đường, nước mắm, tỏi, ớt</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 3 -->
+    <div class="card">
+      <h3>3. Cơm Tấm</h3>
+      <img src="/images/com-tam.jpg" alt="Cơm Tấm">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Gạo tấm</li>
+        <li>Sườn nướng</li>
+        <li>Chả trứng, bì</li>
+        <li>Dưa leo, cà chua</li>
+        <li>Nước mắm, tỏi, ớt</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 4 -->
+    <div class="card">
+      <h3>4. Gỏi Cuốn</h3>
+      <img src="/images/goi-cuon.jpg" alt="Gỏi Cuốn">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Bánh tráng</li>
+        <li>Tôm, thịt luộc</li>
+        <li>Bún tươi</li>
+        <li>Rau thơm, xà lách</li>
+        <li>Tương đậu phộng</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 5 -->
+    <div class="card">
+      <h3>5. Bánh Xèo</h3>
+      <img src="/images/banh-xeo.jpg" alt="Bánh Xèo">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Bột gạo, nước cốt dừa</li>
+        <li>Tôm, thịt ba chỉ</li>
+        <li>Giá đỗ</li>
+        <li>Hành lá</li>
+        <li>Rau sống, nước chấm</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 6 -->
+    <div class="card">
+      <h3>6. Canh Chua</h3>
+      <img src="/images/canh-chua.jpg" alt="Canh Chua">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Cá quả hoặc cá lóc</li>
+        <li>Me, dứa, cà chua</li>
+        <li>Đậu bắp, giá đỗ</li>
+        <li>Rau ngổ, hành lá</li>
+        <li>Nước mắm, đường</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 7 -->
+    <div class="card">
+      <h3>7. Bún Bò Huế</h3>
+      <img src="/images/bun-bo-hue.jpg" alt="Bún Bò Huế">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Bò viên, bắp bò</li>
+        <li>Bún Huế</li>
+        <li>Sả, ớt, mắm ruốc</li>
+        <li>Hành tím, hành lá</li>
+        <li>Ớt bột, dầu annatto</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 8 -->
+    <div class="card">
+      <h3>8. Chả Giò</h3>
+      <img src="/images/cha-gio.jpg" alt="Chả Giò">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Thịt heo xay, tôm băm</li>
+        <li>Bánh tráng</li>
+        <li>Mộc nhĩ, cà rốt, miến</li>
+        <li>Hành tím, tiêu, nước mắm</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 9 -->
+    <div class="card">
+      <h3>9. Cá Kho Tộ</h3>
+      <img src="/images/ca-kho-to.jpg" alt="Cá Kho Tộ">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Cá lóc hoặc cá kèo</li>
+        <li>Đường, nước mắm, tiêu</li>
+        <li>Hành tím, tỏi</li>
+        <li>Ớt (tuỳ chọn)</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 10 -->
+    <div class="card">
+      <h3>10. Hủ Tiếu</h3>
+      <img src="/images/hu-tieu.jpg" alt="Hủ Tiếu">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Hủ tiếu khô</li>
+        <li>Thịt heo, tôm</li>
+        <li>Hẹ, hành lá</li>
+        <li>Đậu phộng rang</li>
+        <li>Nước dùng xương heo</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 11 -->
+    <div class="card">
+      <h3>11. Miến Gà</h3>
+      <img src="/images/mien-ga.jpg" alt="Miến Gà">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Miến dong</li>
+        <li>Gà luộc</li>
+        <li>Hành tím, hành lá</li>
+        <li>Rau mùi, ngò gai</li>
+        <li>Nước dùng gà</li>
+      </ul>
+    </div>
+
+    <!-- Recipe 12 -->
+    <div class="card">
+      <h3>12. Xôi Gà</h3>
+      <img src="/images/xoi-ga.jpg" alt="Xôi Gà">
+      <p><strong>Nguyên liệu:</strong></p>
+      <ul>
+        <li>Xôi nếp</li>
+        <li>Gà xé phay</li>
+        <li>Hành phi, hành lá</li>
+        <li>Đậu phộng rang</li>
+        <li>Dầu ăn, nước mắm</li>
+      </ul>
+    </div>
+
+  </section>
+
+</main>
 
 </body>
 </html>
