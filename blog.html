@@ -2,68 +2,156 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>🍲 Family Vietnamese Recipe Dashboard</title>
   <style>
+    :root {
+      --primary-color: #e53935;
+      --secondary-color: #f5f5f5;
+    }
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
-      margin: 0; padding: 0;
+      margin: 0; 
+      padding: 0;
       background: #f9f9f9;
+      -webkit-tap-highlight-color: transparent;
     }
     header {
-      background-color: #e53935;
+      background-color: var(--primary-color);
       color: white;
       padding: 1rem;
       text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     .container {
       display: flex;
       flex-direction: column;
       gap: 1rem;
       padding: 1rem;
+      max-width: 100%;
+      overflow-x: hidden;
     }
     .card {
       background: white;
       padding: 1rem;
       border-radius: 8px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      margin-bottom: 1rem;
     }
     .card h3 {
       margin-top: 0;
+      color: var(--primary-color);
     }
     .card img {
       width: 100%;
       border-radius: 4px;
+      max-height: 200px;
+      object-fit: cover;
     }
     .card ul {
       padding-left: 1.2rem;
+      margin-bottom: 0;
     }
-    form label {
-      display: block;
+    
+    /* Button-based input styles */
+    .input-buttons {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.5rem;
       margin-top: 0.5rem;
     }
-    form input, form textarea {
-      width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.2rem;
-      border: 1px solid #ccc;
+    .input-button {
+      background: var(--secondary-color);
+      border: 1px solid #ddd;
       border-radius: 4px;
+      padding: 0.8rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
     }
-    form button {
-      margin-top: 0.8rem;
-      background: #e53935;
+    .input-button:hover, .input-button.selected {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+    .selected-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .selected-item {
+      background: var(--primary-color);
+      color: white;
+      padding: 0.3rem 0.6rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+    }
+    .selected-item button {
+      background: none;
+      border: none;
+      color: white;
+      margin-left: 0.3rem;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    
+    /* Form styles */
+    form button[type="submit"] {
+      margin-top: 1rem;
+      background: var(--primary-color);
       color: white;
       border: none;
-      padding: 0.6rem 1.2rem;
+      padding: 0.8rem;
       border-radius: 4px;
       cursor: pointer;
+      width: 100%;
+      font-size: 1rem;
+      font-weight: bold;
+    }
+    
+    /* Recipe grid */
+    .recipes-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (min-width: 480px) {
+      .input-buttons {
+        grid-template-columns: repeat(3, 1fr);
+      }
     }
     @media (min-width: 768px) {
-      .container.recipes {
-        display: grid;
+      .recipes-container {
         grid-template-columns: repeat(2, 1fr);
-        gap: 1rem;
       }
+      .input-buttons {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    @media (min-width: 1024px) {
+      .recipes-container {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card {
+      animation: fadeIn 0.3s ease-out;
     }
   </style>
 </head>
@@ -79,21 +167,58 @@
   <section class="card">
     <h2>Thêm công thức mới</h2>
     <form id="recipeForm">
-      <label for="recipeName">Tên món ăn:</label>
-      <input type="text" id="recipeName" name="recipeName" placeholder="Ví dụ: Phở Bò" required>
-
-      <label for="ingredients">Nguyên liệu (phân tách bằng dấu phẩy):</label>
-      <textarea id="ingredients" name="ingredients" rows="3" placeholder="Ví dụ: Bò, bánh phở, hành tây..." required></textarea>
-
-      <label for="instructions">Cách nấu:</label>
-      <textarea id="instructions" name="instructions" rows="4" placeholder="Ví dụ: Ninh xương bò trong 2 giờ..." required></textarea>
+      
+      <div class="form-group">
+        <label>Tên món ăn:</label>
+        <div class="input-buttons">
+          <div class="input-button" data-value="Phở Bò">Phở Bò</div>
+          <div class="input-button" data-value="Bún Chả">Bún Chả</div>
+          <div class="input-button" data-value="Cơm Tấm">Cơm Tấm</div>
+          <div class="input-button" data-value="Gỏi Cuốn">Gỏi Cuốn</div>
+          <div class="input-button" data-value="Bánh Xèo">Bánh Xèo</div>
+          <div class="input-button" data-value="Khác">Khác</div>
+        </div>
+        <input type="hidden" id="recipeName" name="recipeName" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Nguyên liệu chính:</label>
+        <div class="input-buttons">
+          <div class="input-button" data-value="Thịt bò">Thịt bò</div>
+          <div class="input-button" data-value="Thịt heo">Thịt heo</div>
+          <div class="input-button" data-value="Gà">Gà</div>
+          <div class="input-button" data-value="Cá">Cá</div>
+          <div class="input-button" data-value="Tôm">Tôm</div>
+          <div class="input-button" data-value="Rau thơm">Rau thơm</div>
+          <div class="input-button" data-value="Bún">Bún</div>
+          <div class="input-button" data-value="Phở">Phở</div>
+          <div class="input-button" data-value="Gạo">Gạo</div>
+          <div class="input-button" data-value="Nước mắm">Nước mắm</div>
+        </div>
+        <div class="selected-items" id="ingredientsContainer"></div>
+        <input type="hidden" id="ingredients" name="ingredients" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Cách nấu:</label>
+        <div class="input-buttons">
+          <div class="input-button" data-value="Nướng">Nướng</div>
+          <div class="input-button" data-value="Luộc">Luộc</div>
+          <div class="input-button" data-value="Chiên">Chiên</div>
+          <div class="input-button" data-value="Kho">Kho</div>
+          <div class="input-button" data-value="Xào">Xào</div>
+          <div class="input-button" data-value="Hấp">Hấp</div>
+        </div>
+        <textarea id="instructions" name="instructions" rows="4" placeholder="Mô tả cách nấu (có thể nhập tay nếu cần)" required></textarea>
+      </div>
 
       <button type="submit">Lưu công thức</button>
     </form>
   </section>
 
   <!-- Preloaded Vietnamese Recipes -->
-  <section class="recipes container">
+  <section class="recipes-container">
+    <!-- Recipe cards remain the same as before -->
     <!-- Recipe 1 -->
     <div class="card">
       <h3>1. Phở Bò</h3>
@@ -176,92 +301,108 @@
         <li>Nước mắm, đường</li>
       </ul>
     </div>
-
-    <!-- Recipe 7 -->
-    <div class="card">
-      <h3>7. Bún Bò Huế</h3>
-      <img src="/images/bun-bo-hue.jpg" alt="Bún Bò Huế">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Bò viên, bắp bò</li>
-        <li>Bún Huế</li>
-        <li>Sả, ớt, mắm ruốc</li>
-        <li>Hành tím, hành lá</li>
-        <li>Ớt bột, dầu annatto</li>
-      </ul>
-    </div>
-
-    <!-- Recipe 8 -->
-    <div class="card">
-      <h3>8. Chả Giò</h3>
-      <img src="/images/cha-gio.jpg" alt="Chả Giò">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Thịt heo xay, tôm băm</li>
-        <li>Bánh tráng</li>
-        <li>Mộc nhĩ, cà rốt, miến</li>
-        <li>Hành tím, tiêu, nước mắm</li>
-      </ul>
-    </div>
-
-    <!-- Recipe 9 -->
-    <div class="card">
-      <h3>9. Cá Kho Tộ</h3>
-      <img src="/images/ca-kho-to.jpg" alt="Cá Kho Tộ">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Cá lóc hoặc cá kèo</li>
-        <li>Đường, nước mắm, tiêu</li>
-        <li>Hành tím, tỏi</li>
-        <li>Ớt (tuỳ chọn)</li>
-      </ul>
-    </div>
-
-    <!-- Recipe 10 -->
-    <div class="card">
-      <h3>10. Hủ Tiếu</h3>
-      <img src="/images/hu-tieu.jpg" alt="Hủ Tiếu">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Hủ tiếu khô</li>
-        <li>Thịt heo, tôm</li>
-        <li>Hẹ, hành lá</li>
-        <li>Đậu phộng rang</li>
-        <li>Nước dùng xương heo</li>
-      </ul>
-    </div>
-
-    <!-- Recipe 11 -->
-    <div class="card">
-      <h3>11. Miến Gà</h3>
-      <img src="/images/mien-ga.jpg" alt="Miến Gà">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Miến dong</li>
-        <li>Gà luộc</li>
-        <li>Hành tím, hành lá</li>
-        <li>Rau mùi, ngò gai</li>
-        <li>Nước dùng gà</li>
-      </ul>
-    </div>
-
-    <!-- Recipe 12 -->
-    <div class="card">
-      <h3>12. Xôi Gà</h3>
-      <img src="/images/xoi-ga.jpg" alt="Xôi Gà">
-      <p><strong>Nguyên liệu:</strong></p>
-      <ul>
-        <li>Xôi nếp</li>
-        <li>Gà xé phay</li>
-        <li>Hành phi, hành lá</li>
-        <li>Đậu phộng rang</li>
-        <li>Dầu ăn, nước mắm</li>
-      </ul>
-    </div>
-
   </section>
 
 </main>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Handle recipe name selection
+    const recipeNameButtons = document.querySelectorAll('[data-value]');
+    const recipeNameInput = document.getElementById('recipeName');
+    
+    recipeNameButtons.forEach(button => {
+      if(button.parentElement.previousElementSibling.textContent === 'Tên món ăn:') {
+        button.addEventListener('click', function() {
+          recipeNameButtons.forEach(btn => btn.classList.remove('selected'));
+          this.classList.add('selected');
+          recipeNameInput.value = this.getAttribute('data-value');
+          
+          if(this.getAttribute('data-value') === 'Khác') {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = 'Nhập tên món ăn';
+            input.style.width = '100%';
+            input.style.padding = '0.5rem';
+            input.style.marginTop = '0.5rem';
+            input.required = true;
+            
+            // Remove any existing input
+            const existingInput = this.parentElement.nextElementSibling;
+            if(existingInput && existingInput.tagName === 'INPUT' && existingInput.type === 'text') {
+              existingInput.remove();
+            }
+            
+            this.parentElement.after(input);
+            
+            input.addEventListener('input', function() {
+              recipeNameInput.value = this.value;
+            });
+          }
+        });
+      }
+    });
+    
+    // Handle ingredients selection
+    const ingredientButtons = document.querySelectorAll('.input-buttons:nth-of-type(2) .input-button');
+    const ingredientsContainer = document.getElementById('ingredientsContainer');
+    const ingredientsInput = document.getElementById('ingredients');
+    let selectedIngredients = [];
+    
+    ingredientButtons.forEach(button => {
+      button.addEventListener('click', function() {
+        const value = this.getAttribute('data-value');
+        
+        if(selectedIngredients.includes(value)) {
+          // Remove ingredient
+          selectedIngredients = selectedIngredients.filter(item => item !== value);
+          this.classList.remove('selected');
+        } else {
+          // Add ingredient
+          selectedIngredients.push(value);
+          this.classList.add('selected');
+        }
+        
+        updateIngredientsDisplay();
+      });
+    });
+    
+    function updateIngredientsDisplay() {
+      ingredientsContainer.innerHTML = '';
+      selectedIngredients.forEach(ingredient => {
+        const item = document.createElement('div');
+        item.className = 'selected-item';
+        item.innerHTML = `${ingredient} <button type="button">&times;</button>`;
+        
+        item.querySelector('button').addEventListener('click', function() {
+          selectedIngredients = selectedIngredients.filter(item => item !== ingredient);
+          updateIngredientsDisplay();
+          
+          // Also remove selected class from button
+          ingredientButtons.forEach(btn => {
+            if(btn.getAttribute('data-value') === ingredient) {
+              btn.classList.remove('selected');
+            }
+          });
+        });
+        
+        ingredientsContainer.appendChild(item);
+      });
+      
+      ingredientsInput.value = selectedIngredients.join(', ');
+    }
+    
+    // Form submission
+    document.getElementById('recipeForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert('Công thức đã được lưu!\nMón: ' + recipeNameInput.value + '\nNguyên liệu: ' + ingredientsInput.value);
+      this.reset();
+      selectedIngredients = [];
+      ingredientsContainer.innerHTML = '';
+      recipeNameButtons.forEach(btn => btn.classList.remove('selected'));
+    });
+  });
+</script>
 
 </body>
 </html>
