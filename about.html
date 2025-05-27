@@ -1,465 +1,74 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tạo Công Thức Món Ăn Việt Nam</title>
-  <style>
-    :root {
-      --primary: #e53935;
-      --secondary: #f8f8f8;
-      --accent: #4CAF50;
-      --text: #333;
-    }
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      line-height: 1.6;
-      color: var(--text);
-      background-color: #f5f5f5;
-      padding: 20px;
-    }
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      color: var(--primary);
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 28px;
-    }
-    h2 {
-      font-size: 20px;
-      margin: 15px 0 10px;
-      color: var(--primary);
-      border-bottom: 1px solid #eee;
-      padding-bottom: 5px;
-    }
-    .form-group {
-      margin-bottom: 15px;
-    }
-    label {
-      display: block;
-      margin-bottom: 5px;
-      font-weight: 600;
-    }
-    input[type="text"],
-    textarea,
-    select {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 16px;
-    }
-    textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-    .ingredient-categories {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-    .category {
-      background: var(--secondary);
-      padding: 15px;
-      border-radius: 5px;
-    }
-    .category h3 {
-      font-size: 16px;
-      margin-bottom: 10px;
-      color: var(--primary);
-    }
-    .ingredient-option {
-      margin-bottom: 8px;
-    }
-    .ingredient-option label {
-      display: flex;
-      align-items: center;
-      font-weight: normal;
-      cursor: pointer;
-    }
-    .ingredient-option input {
-      margin-right: 8px;
-    }
-    .custom-ingredient {
-      display: flex;
-      margin-top: 10px;
-    }
-    .custom-ingredient input {
-      flex-grow: 1;
-      margin-right: 10px;
-    }
-    .buttons {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 20px;
-    }
-    button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 5px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    .btn-primary {
-      background: var(--primary);
-      color: white;
-    }
-    .btn-secondary {
-      background: var(--accent);
-      color: white;
-    }
-    button:hover {
-      opacity: 0.9;
-    }
-    #preview {
-      margin-top: 30px;
-      padding: 20px;
-      background: var(--secondary);
-      border-radius: 5px;
-      display: none;
-    }
-    #preview h2 {
-      color: var(--text);
-    }
-    @media (max-width: 600px) {
-      .ingredient-categories {
-        grid-template-columns: 1fr;
-      }
-      .buttons {
-        flex-direction: column;
-        gap: 10px;
-      }
-      button {
-        width: 100%;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lost at Sea: 25L Container of Water</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F4F8; /* Light gray background */
+            color: #2D3748; /* Dark charcoal text */
+        }
+        .card-container {
+            max-width: 600px;
+            margin: 2rem auto;
+            background-color: #FFFFFF;
+            border-radius: 0.75rem; /* rounded-lg */
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            overflow: hidden; /* Ensures rounded corners apply to image */
+        }
+        .image-wrapper {
+            width: 100%;
+            padding-top: 66.66%; /* 3:2 aspect ratio for image, adjust as needed */
+            position: relative;
+            background-color: #E2E8F0; /* Placeholder background */
+        }
+        .image-wrapper img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures image covers the area, cropping if necessary */
+        }
+        .content-area {
+            padding: 1.5rem; /* p-6 */
+        }
+        .item-title {
+            font-size: 1.875rem; /* text-3xl */
+            font-weight: 700; /* font-bold */
+            color: #FF6B6B; /* Lively Coral */
+            margin-bottom: 1rem;
+        }
+        .section-heading {
+            font-size: 1.125rem; /* text-lg */
+            font-weight: 600; /* font-semibold */
+            color: #4ECDC4; /* Medium Turquoise */
+            margin-bottom: 0.5rem;
+        }
+        .info-text {
+            color: #4A5568; /* Gray-700 */
+            line-height: 1.6;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🍜 Tạo Công Thức Món Ăn Việt Nam</h1>
-    
-    <form id="recipeForm">
-      <div class="form-group">
-        <label for="recipeName">Tên món ăn:</label>
-        <input type="text" id="recipeName" required>
-      </div>
-      
-      <div class="form-group">
-        <label for="recipeDescription">Mô tả món ăn:</label>
-        <textarea id="recipeDescription"></textarea>
-      </div>
-      
-      <h2>Nguyên liệu</h2>
-      <div class="ingredient-categories">
-        <!-- Thịt -->
-        <div class="category">
-          <h3>Thịt</h3>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Thịt bò"> Thịt bò</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Thịt heo"> Thịt heo</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Thịt gà"> Thịt gà</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Thịt vịt"> Thịt vịt</label>
-          </div>
-          <div class="custom-ingredient">
-            <input type="text" placeholder="Thêm thịt khác">
-            <button type="button" class="btn-add">+</button>
-          </div>
+    <div class="card-container">
+        <div class="image-wrapper">
+            <img src="http://googleusercontent.com/image_generation_content/22" alt="25L Container of Water">
         </div>
-        
-        <!-- Hải sản -->
-        <div class="category">
-          <h3>Hải sản</h3>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Tôm"> Tôm</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Cá"> Cá</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Mực"> Mực</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Nghêu/Sò"> Nghêu/Sò</label>
-          </div>
-          <div class="custom-ingredient">
-            <input type="text" placeholder="Thêm hải sản khác">
-            <button type="button" class="btn-add">+</button>
-          </div>
-        </div>
-        
-        <!-- Rau củ Việt Nam -->
-        <div class="category">
-          <h3>Rau củ Việt Nam</h3>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Rau thơm"> Rau thơm</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Rau muống"> Rau muống</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Rau răm"> Rau răm</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Ngò om"> Ngò om</label>
-          </div>
-          <div class="custom-ingredient">
-            <input type="text" placeholder="Thêm rau củ khác">
-            <button type="button" class="btn-add">+</button>
-          </div>
-        </div>
-        <!-- Add this new category section with other Central Vietnamese ingredients -->
-      <div class="category">
-        <h3>Rau củ Miền Trung</h3>
-        <div class="ingredient-option">
-          <label><input type="checkbox" name="ingredient" value="Hoa chuối"> Hoa chuối (Banana flower)</label>
-        </div>
-        <div class="ingredient-option">
-          <label><input type="checkbox" name="ingredient" value="Rau má"> Rau má (Centella)</label>
-        </div>
-        <div class="ingredient-option">
-          <label><input type="checkbox" name="ingredient" value="Rau dớn"> Rau dớn (Fiddlehead fern)</label>
-        </div>
-        <div class="ingredient-option">
-          <label><input type="checkbox" name="ingredient" value="Rau lủi"> Rau lủi (Piper lolot)</label>
-        </div>
-        <div class="ingredient-option">
-          <label><input type="checkbox" name="ingredient" value="Bắp chuối"> Bắp chuối (Banana blossom)</label>
-        </div>
-        <div class="ingredient-option">
-          <label><input type="checkbox" name="ingredient" value="Rau sắng"> Rau sắng (Melientha suavis)</label>
-        </div>
-        <div class="custom-ingredient">
-          <input type="text" placeholder="Thêm rau miền Trung khác">
-          <button type="button" class="btn-add">+</button>
-        </div>
-      </div>
-        <!-- Nấm -->
-        <div class="category">
-          <h3>Nấm</h3>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Nấm hương"> Nấm hương</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Nấm mèo"> Nấm mèo</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Nấm rơm"> Nấm rơm</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Nấm đùi gà"> Nấm đùi gà</label>
-          </div>
-          <div class="custom-ingredient">
-            <input type="text" placeholder="Thêm nấm khác">
-            <button type="button" class="btn-add">+</button>
-          </div>
-        </div>
-        
-        <!-- Gia vị -->
-        <div class="category">
-          <h3>Gia vị</h3>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Nước mắm"> Nước mắm</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Hạt nêm"> Hạt nêm</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Đường"> Đường</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Muối"> Muối</label>
-          </div>
-          <div class="custom-ingredient">
-            <input type="text" placeholder="Thêm gia vị khác">
-            <button type="button" class="btn-add">+</button>
-          </div>
-        </div>
-        
-        <!-- Khác -->
-        <div class="category">
-          <h3>Khác</h3>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Dứa"> Dứa</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Đậu phộng"> Đậu phộng</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Hành tím"> Hành tím</label>
-          </div>
-          <div class="ingredient-option">
-            <label><input type="checkbox" name="ingredient" value="Tỏi"> Tỏi</label>
-          </div>
-          <div class="custom-ingredient">
-            <input type="text" placeholder="Thêm nguyên liệu khác">
-            <button type="button" class="btn-add">+</button>
-          </div>
-        </div>
-      </div>
-      
-      <div class="form-group">
-        <label for="instructions">Hướng dẫn nấu:</label>
-        <textarea id="instructions" required></textarea>
-      </div>
-      
-      <div class="form-group">
-        <label for="servings">Khẩu phần:</label>
-        <select id="servings">
-          <option value="1">1 người</option>
-          <option value="2">2 người</option>
-          <option value="4" selected>4 người</option>
-          <option value="6">6 người</option>
-          <option value="8">8 người</option>
-        </select>
-      </div>
-      
-      <div class="form-group">
-        <label for="cookingTime">Thời gian nấu (phút):</label>
-        <input type="number" id="cookingTime" min="1" value="30">
-      </div>
-      
-      <div class="buttons">
-        <button type="button" id="previewBtn" class="btn-secondary">Xem trước</button>
-        <button type="submit" class="btn-primary">Gửi công thức</button>
-      </div>
-    </form>
-    
-    <div id="preview">
-      <h2>Xem trước công thức</h2>
-      <h3 id="previewName"></h3>
-      <p id="previewDescription"></p>
-      
-      <h4>Nguyên liệu:</h4>
-      <ul id="previewIngredients"></ul>
-      
-      <h4>Hướng dẫn:</h4>
-      <p id="previewInstructions"></p>
-      
-      <p><strong>Khẩu phần:</strong> <span id="previewServings"></span></p>
-      <p><strong>Thời gian nấu:</strong> <span id="previewTime"></span> phút</p>
-      
-      <button type="button" id="backToEdit" class="btn-secondary">Quay lại chỉnh sửa</button>
-      <button type="button" id="sendEmail" class="btn-primary">Gửi email</button>
-    </div>
-  </div>
+        <div class="content-area">
+            <h1 class="item-title">25L Container of Water</h1>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add custom ingredients
-      document.querySelectorAll('.btn-add').forEach(btn => {
-        btn.addEventListener('click', function() {
-          const input = this.previousElementSibling;
-          const value = input.value.trim();
-          if (value) {
-            const category = this.closest('.category');
-            const newOption = document.createElement('div');
-            newOption.className = 'ingredient-option';
-            newOption.innerHTML = `
-              <label>
-                <input type="checkbox" name="ingredient" value="${value}" checked>
-                ${value}
-              </label>
-            `;
-            category.insertBefore(newOption, this.closest('.custom-ingredient'));
-            input.value = '';
-          }
-        });
-      });
-      
-      // Preview recipe
-      document.getElementById('previewBtn').addEventListener('click', function() {
-        const name = document.getElementById('recipeName').value;
-        const description = document.getElementById('recipeDescription').value;
-        const instructions = document.getElementById('instructions').value;
-        const servings = document.getElementById('servings').value;
-        const time = document.getElementById('cookingTime').value;
-        
-        // Get selected ingredients
-        const ingredients = [];
-        document.querySelectorAll('input[name="ingredient"]:checked').forEach(checkbox => {
-          ingredients.push(checkbox.value);
-        });
-        
-        if (!name || !instructions || ingredients.length === 0) {
-          alert('Vui lòng điền đầy đủ thông tin công thức!');
-          return;
-        }
-        
-        // Update preview
-        document.getElementById('previewName').textContent = name;
-        document.getElementById('previewDescription').textContent = description;
-        
-        const ingredientsList = document.getElementById('previewIngredients');
-        ingredientsList.innerHTML = '';
-        ingredients.forEach(ingredient => {
-          const li = document.createElement('li');
-          li.textContent = ingredient;
-          ingredientsList.appendChild(li);
-        });
-        
-        document.getElementById('previewInstructions').textContent = instructions;
-        document.getElementById('previewServings').textContent = servings + ' người';
-        document.getElementById('previewTime').textContent = time;
-        
-        // Show preview
-        document.getElementById('recipeForm').style.display = 'none';
-        document.getElementById('preview').style.display = 'block';
-      });
-      
-      // Back to edit
-      document.getElementById('backToEdit').addEventListener('click', function() {
-        document.getElementById('preview').style.display = 'none';
-        document.getElementById('recipeForm').style.display = 'block';
-      });
-      
-      // Send email
-      document.getElementById('sendEmail').addEventListener('click', function() {
-        const name = document.getElementById('previewName').textContent;
-        const description = document.getElementById('previewDescription').textContent;
-        const ingredients = Array.from(document.getElementById('previewIngredients').children)
-          .map(li => li.textContent).join(', ');
-        const instructions = document.getElementById('previewInstructions').textContent;
-        const servings = document.getElementById('previewServings').textContent;
-        const time = document.getElementById('previewTime').textContent;
-        
-        const subject = `Công thức mới: ${name}`;
-        const body = `Tên món: ${name}%0D%0A%0D%0A` +
-                     `Mô tả: ${description}%0D%0A%0D%0A` +
-                     `Nguyên liệu:%0D%0A${ingredients}%0D%0A%0D%0A` +
-                     `Hướng dẫn nấu:%0D%0A${instructions}%0D%0A%0D%0A` +
-                     `Khẩu phần: ${servings}%0D%0A` +
-                     `Thời gian nấu: ${time}`;
-        
-        window.location.href = `mailto:reneringuet@gmail.com?subject=${subject}&body=${body}`;
-      });
-      
-      // Form submission
-      document.getElementById('recipeForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        document.getElementById('previewBtn').click();
-      });
-    });
-  </script>
+            <h2 class="section-heading">Possible Uses:</h2>
+            <p class="info-text mb-4">Essential for hydration, can be used for cooling or washing.</p>
+
+            <h2 class="section-heading">Negative Aspects:</h2>
+            <p class="info-text">Heavy and bulky, finite supply, can be contaminated if not stored properly.</p>
+        </div>
+    </div>
 </body>
 </html>
