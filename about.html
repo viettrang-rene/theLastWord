@@ -444,9 +444,9 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800">
+<body>
     <div id="input-section" class="container">
-        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-4">Puzzle Fun Generator! 5</h1>
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-4">1.10 Puzzle Fun Generator!</h1>
         <p class="text-md text-center text-gray-600 mb-8">Create custom crossword and word search puzzles.</p>
 
         <div class="flex flex-col md:flex-row gap-4 mb-6">
@@ -535,9 +535,6 @@
 
     <script>
         const { PDFDocument, rgb, StandardFonts } = PDFLib;
-
-        // Register fontkit with PDFDocument for custom font embedding
-        PDFDocument.registerFontkit(fontkit);
 
         // --- UI Elements ---
         const wordInput = document.getElementById('wordInput');
@@ -1267,6 +1264,9 @@
          */
         async function generatePuzzlesPdf(words, crosswordLayouts, wordSearchGridData) {
             const pdfDoc = await PDFDocument.create();
+            // Register fontkit with PDFDocument for custom font embedding
+            PDFDocument.registerFontkit(fontkit);
+
             const margin = 30;
             const { width, height } = { width: 595.28, height: 841.89 }; // A4 dimensions
             const contentWidth = width - 2 * margin;
