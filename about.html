@@ -3,72 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lost at Sea: 25L Container of Water</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <title>Puzzle Fun! - Crossword & Word Search Generator</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/crossword-layout-generator@1.0.0/dist/crossword-layout-generator.min.js"></script>
     <style>
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #F0F4F8; /* Light gray background */
-            color: #2D3748; /* Dark charcoal text */
+            font-family: 'Arial', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
         }
-        .card-container {
-            max-width: 600px;
-            margin: 2rem auto;
-            background-color: #FFFFFF;
-            border-radius: 0.75rem; /* rounded-lg */
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            overflow: hidden; /* Ensures rounded corners apply to image */
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
         }
-        .image-wrapper {
+        
+        .container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .input-section {
+            margin-bottom: 20px;
+        }
+        
+        textarea {
             width: 100%;
-            padding-top: 66.66%; /* 3:2 aspect ratio for image, adjust as needed */
-            position: relative;
-            background-color: #E2E8F0; /* Placeholder background */
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            resize: vertical;
+            font-size: 16px;
         }
-        .image-wrapper img {
-            position: absolute;
-            top: 0;
-            left: 0;
+        
+        .theme-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            flex-wrap: wrap;
+        }
+        
+        .theme-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .theme-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .easy-animals {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .farm-animals {
+            background-color: #8b4513;
+            color: white;
+        }
+        
+        .ocean-animals {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .generate-btn, .reset-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .generate-btn {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .reset-btn {
+            background-color: #95a5a6;
+            color: white;
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        
+        .preview {
+            margin-top: 30px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        
+        .pdf-preview {
             width: 100%;
-            height: 100%;
-            object-fit: cover; /* Ensures image covers the area, cropping if necessary */
+            height: 500px;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            display: none;
         }
-        .content-area {
-            padding: 1.5rem; /* p-6 */
-        }
-        .item-title {
-            font-size: 1.875rem; /* text-3xl */
-            font-weight: 700; /* font-bold */
-            color: #FF6B6B; /* Lively Coral */
-            margin-bottom: 1rem;
-        }
-        .section-heading {
-            font-size: 1.125rem; /* text-lg */
-            font-weight: 600; /* font-semibold */
-            color: #4ECDC4; /* Medium Turquoise */
-            margin-bottom: 0.5rem;
-        }
-        .info-text {
-            color: #4A5568; /* Gray-700 */
-            line-height: 1.6;
+        
+        @media print {
+            .no-print {
+                display: none;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="card-container">
-        <div class="image-wrapper">
-            <img src="http://googleusercontent.com/image_generation_content/22" alt="25L Container of Water">
+    <div class="container">
+        <h1>Puzzle Fun!</h1>
+        <p class="subtitle">Create custom crossword and word search puzzles</p>
+        
+        <div class="input-section">
+            <label for="word-input">Enter your words (one per line or comma separated):</label>
+            <textarea id="word-input" placeholder="e.g., apple, banana, dolphin, elephant, giraffe, kangaroo, octopus, rabbit"></textarea>
+            
+            <p>Or choose a premade theme:</p>
+            <div class="theme-buttons">
+                <button class="theme-btn easy-animals" onclick="loadTheme('easy-animals')">Easy Animals</button>
+                <button class="theme-btn farm-animals" onclick="loadTheme('farm-animals')">Farm Animals</button>
+                <button class="theme-btn ocean-animals" onclick="loadTheme('ocean-animals')">Ocean Animals</button>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="generate-btn" onclick="generatePDF()">Generate PDF</button>
+                <button class="reset-btn" onclick="resetForm()">Reset</button>
+            </div>
+            
+            <div id="error-message" class="error-message"></div>
         </div>
-        <div class="content-area">
-            <h1 class="item-title">25L Container of Water</h1>
-
-            <h2 class="section-heading">Possible Uses:</h2>
-            <p class="info-text mb-4">Essential for hydration, can be used for cooling or washing.</p>
-
-            <h2 class="section-heading">Negative Aspects:</h2>
-            <p class="info-text">Heavy and bulky, finite supply, can be contaminated if not stored properly.</p>
+        
+        <div class="preview no-print">
+            <h3>Preview</h3>
+            <div id="pdf-preview" class="pdf-preview"></div>
         </div>
     </div>
+
+    <script>
+        // Theme word banks
+        const themes = {
+            'easy-animals': ['cat', 'dog', 'fish', 'bird', 'frog', 'bear', 'lion', 'duck'],
+            'farm-animals': ['cow', 'pig', 'goat', 'sheep', 'horse', 'chicken', 'duck', 'turkey'],
+            'ocean-animals': ['whale', 'shark', 'dolphin', 'octopus', 'seal', 'jellyfish', 'starfish', 'turtle']
+        };
+        
+        // Theme colors
+        const themeColors = {
+            'easy-animals': '#2ecc71',
+            'farm-animals': '#8b4513',
+            'ocean-animals': '#3498db'
+        };
+        
+        let currentTheme = null;
+        
+        // Load a premade theme
+        function loadTheme(theme) {
+            currentTheme = theme;
+            const words = themes[theme].join(', ');
+            document.getElementById('word-input').value = words;
+            
+            // Change container border color
+            document.querySelector('.container').style.borderTop = `5px solid ${themeColors[theme]}`;
+            
+            // Clear any errors
+            document.getElementById('error-message').textContent = '';
+        }
+        
+        // Reset the form
+        function resetForm() {
+            document.getElementById('word-input').value = '';
+            document.getElementById('error-message').textContent = '';
+            document.querySelector('.container').style.borderTop = '';
+            document.getElementById('pdf-preview').style.display = 'none';
+            currentTheme = null;
+        }
+        
+        // Validate and parse input words
+        function getWords() {
+            const input = document.getElementById('word-input').value.trim();
+            if (!input) {
+                showError('Please enter some words or select a theme.');
+                return null;
+            }
+            
+            // Split by commas or newlines
+            let words = input.split(/[\n,]+/).map(word => word.trim()).filter(word => word);
+            
+            // Validate each word
+            for (const word of words) {
+                if (!/^[a-zA-Z]+$/.test(word)) {
+                    showError(`"${word}" contains invalid characters. Only letters allowed.`);
+                    return null;
+                }
+            }
+            
+            // Limit to 12 words max
+            if (words.length > 12) {
+                words = words.slice(0, 12);
+            }
+            
+            return words;
+        }
+        
+        // Display error message
+        function showError(message) {
+            document.getElementById('error-message').textContent = message;
+        }
+        
+        // Scramble a word
+        function scrambleWord(word) {
+            return word.split('').sort(() => 0.5 - Math.random()).join('');
+        }
+        
+        // Generate the PDF
+        async function generatePDF() {
+            const words = getWords();
+            if (!words) return;
+            
+            try {
+                // Create a new PDF document
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Add header
+                doc.setFontSize(24);
+                doc.setTextColor(40, 40, 40);
+                doc.text('Puzzle Fun!', 105, 20, { align: 'center' });
+                
+                doc.setFontSize(12);
+                doc.text('Made by Rene', 105, 28, { align: 'center' });
+                
+                doc.setFontSize(14);
+                doc.text('Student name: _________________', 105, 38, { align: 'center' });
+                
+                // Add crossword section
+                doc.setFontSize(16);
+                doc.text('Crossword Puzzle', 15, 50);
+                
+                // Generate crossword clues (scrambled words)
+                let clues = '';
+                words.forEach((word, index) => {
+                    clues += `${index + 1}. ${scrambleWord(word.toLowerCase())} (${word.length} letters)\n`;
+                });
+                
+                doc.setFontSize(12);
+                doc.text(clues, 15, 60, { maxWidth: 80 });
+                
+                // Add word search section
+                doc.setFontSize(16);
+                doc.text('Word Search', 15, 120);
+                
+                // Generate word search grid (simplified for this example)
+                const gridSize = 15;
+                let grid = Array(gridSize).fill().map(() => Array(gridSize).fill(''));
+                
+                // Place words in grid (simplified - in a real app you'd use a proper algorithm)
+                words.forEach(word => {
+                    const direction = Math.floor(Math.random() * 3); // 0=horizontal, 1=vertical, 2=diagonal
+                    const row = Math.floor(Math.random() * (gridSize - word.length));
+                    const col = Math.floor(Math.random() * (gridSize - word.length));
+                    
+                    for (let i = 0; i < word.length; i++) {
+                        if (direction === 0) {
+                            grid[row][col + i] = word[i].toUpperCase();
+                        } else if (direction === 1) {
+                            grid[row + i][col] = word[i].toUpperCase();
+                        } else {
+                            grid[row + i][col + i] = word[i].toUpperCase();
+                        }
+                    }
+                });
+                
+                // Fill empty spaces with random letters
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        if (!grid[i][j]) {
+                            grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+                        }
+                    }
+                }
+                
+                // Draw word search grid
+                const cellSize = 5;
+                const startX = 15;
+                const startY = 130;
+                
+                for (let i = 0; i < gridSize; i++) {
+                    for (let j = 0; j < gridSize; j++) {
+                        doc.rect(startX + j * cellSize, startY + i * cellSize, cellSize, cellSize);
+                        doc.text(grid[i][j], startX + j * cellSize + cellSize/2, startY + i * cellSize + cellSize/2 + 1, { align: 'center' });
+                    }
+                }
+                
+                // Add word bank
+                doc.setFontSize(12);
+                doc.text('Word Bank:', 15, startY + gridSize * cellSize + 10);
+                doc.text(words.join(', ').toUpperCase(), 15, startY + gridSize * cellSize + 16);
+                
+                // Add theme color if selected
+                if (currentTheme) {
+                    doc.setDrawColor(themeColors[currentTheme]);
+                    doc.setLineWidth(1);
+                    doc.rect(5, 5, 200, 287);
+                }
+                
+                // Save the PDF
+                doc.save('puzzle-fun.pdf');
+                
+                // Show preview (simplified for this example)
+                const pdfPreview = document.getElementById('pdf-preview');
+                pdfPreview.style.display = 'block';
+                pdfPreview.innerHTML = `
+                    <h4>PDF Preview (simulated)</h4>
+                    <p><strong>Title:</strong> Puzzle Fun!</p>
+                    <p><strong>Crossword Clues:</strong></p>
+                    <ul>
+                        ${words.map((word, index) => `<li>${index + 1}. ${scrambleWord(word.toLowerCase())} (${word.length} letters)</li>`).join('')}
+                    </ul>
+                    <p><strong>Word Search Grid:</strong> ${gridSize}x${gridSize} grid with words hidden</p>
+                    <p><strong>Word Bank:</strong> ${words.join(', ').toUpperCase()}</p>
+                `;
+                
+            } catch (error) {
+                showError('An error occurred while generating the PDF. Please try again.');
+                console.error(error);
+            }
+        }
+    </script>
 </body>
 </html>
