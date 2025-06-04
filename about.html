@@ -444,7 +444,7 @@
 </head>
 <body class="bg-gray-100 text-gray-800">
     <div id="input-section" class="container">
-        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-4">Puzzle Fun Generator!</h1>
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-4">Puzzle Fun Generator! 2</h1>
         <p class="text-md text-center text-gray-600 mb-8">Create custom crossword and word search puzzles.</p>
 
         <div class="flex flex-col md:flex-row gap-4 mb-6">
@@ -1266,8 +1266,21 @@
             const { width, height } = { width: 595.28, height: 841.89 }; // A4 dimensions
             const contentWidth = width - 2 * margin;
 
-            const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-            const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+            // --- Embed Noto Sans Regular font for Unicode support (e.g., Vietnamese characters) ---
+            // This font is fetched from Google Fonts CDN. If this specific URL changes or becomes unavailable,
+            // you might need to find an updated URL or host the font file yourself.
+            const notoSansRegularUrl = 'https://fonts.gstatic.com/s/notosans/v27/o-0NIpQoQp_R_g_r_g_r_g.ttf';
+            const fontBytes = await fetch(notoSansRegularUrl).then(res => res.arrayBuffer());
+            const customFont = await pdfDoc.embedFont(fontBytes);
+
+            // For bold text, you would typically embed a separate bold font file (e.g., NotoSans-Bold.ttf).
+            // For simplicity and to address the encoding issue, we are using the regular Noto Sans for all text.
+            // If explicit bold styling is crucial and not achieved by the regular font's rendering,
+            // you would need to find and embed a Noto Sans Bold TTF and pass it as a separate 'boldFont' parameter.
+            const font = customFont;
+            const boldFont = customFont; // Using the same font for bold, as a bold variant TTF is not explicitly embedded here.
+
+
             const accentColor = currentThemeColor ? currentThemeColor.pdf : rgb(0.8, 0.8, 0.8); // Default light gray border
 
             // --- Helper to draw page border and header ---
@@ -1296,14 +1309,14 @@
                 page.drawText('Student name: _________________', {
                     x: margin,
                     y: currentY - studentNameLineSize,
-                    font: font,
+                    font: font, // Use custom font
                     size: studentNameLineSize,
                     color: rgb(0, 0, 0),
                 });
                 currentY -= studentNameLineSize + 40; // More space after header block
 
                 if (pageNum > 1) {
-                    page.drawText(`Page ${pageNum}`, { x: width - margin - 50, y: height - margin + 10, font: font, size: 8 });
+                    page.drawText(`Page ${pageNum}`, { x: width - margin - 50, y: height - margin + 10, font: font, size: 8 }); // Use custom font
                 }
 
                 return currentY;
@@ -1343,8 +1356,8 @@
                     currentYPage,
                     contentWidth,
                     height, // Pass full height as grid is not drawn
-                    font,
-                    boldFont,
+                    font, // Use custom font
+                    boldFont, // Use custom font
                     titleEn,
                     titleVi,
                     instructionsEn,
@@ -1384,8 +1397,8 @@
                 currentYPage,
                 contentWidth,
                 height, // Pass full height
-                font,
-                boldFont,
+                font, // Use custom font
+                boldFont, // Use custom font
                 crosswordTitleEn,
                 crosswordTitleVi,
                 crosswordInstructionsEn,
@@ -1421,8 +1434,8 @@
                 currentYPage,
                 contentWidth,
                 height,
-                font,
-                boldFont,
+                font, // Use custom font
+                boldFont, // Use custom font
                 wordSearchTitleEn,
                 wordSearchTitleVi,
                 wordSearchInstructionsEn,
@@ -1615,7 +1628,8 @@
                 appContainer.classList.add('hidden');
                 puzzlesSection.classList.remove('hidden');
 
-            } catch (error) {
+            }
+            catch (error) {
                 console.error('Error generating puzzles:', error);
                 alert('Failed to generate puzzles. Please try again. Error: ' + error.message);
             } finally {
