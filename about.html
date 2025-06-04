@@ -1004,6 +1004,9 @@
             const clueImageWidth = 15;
             const clueImageMargin = 5;
 
+            // Determine if this is a standalone section (e.g., by checking its title)
+            const isStandaloneSection = sectionTitle === 'Additional Crossword Clues';
+
             // Draw Section Title
             page.drawText(sectionTitle, {
                 x: startX,
@@ -1014,74 +1017,72 @@
             });
             currentY -= titleSize + titleMarginBottom;
 
-            const layoutRows = layout.layout.length;
-            const layoutCols = layout.layout[0].length;
+            if (!isStandaloneSection) { // Only draw grid for non-standalone crosswords
+                const layoutRows = layout.layout.length;
+                const layoutCols = layout.layout[0].length;
 
-            const estimatedCluesHeight = layout.entries.length * clueLineHeight;
-            const remainingHeightForGrid = availableHeight - (titleSize + titleMarginBottom) - estimatedCluesHeight - 20; // 20px buffer below grid
+                const estimatedCluesHeight = layout.entries.length * clueLineHeight;
+                const remainingHeightForGrid = availableHeight - (titleSize + titleMarginBottom) - estimatedCluesHeight - 20; // 20px buffer below grid
 
-            let cellSize = Math.min(
-                availableWidth / layoutCols,
-                remainingHeightForGrid / layoutRows,
-                40 // Max cell size from reference
-            );
-            cellSize = Math.max(cellSize, 27); // Min cell size for readability from reference
+                let cellSize = Math.min(
+                    availableWidth / layoutCols,
+                    remainingHeightForGrid / layoutRows,
+                    40 // Max cell size from reference
+                );
+                cellSize = Math.max(cellSize, 27); // Min cell size for readability from reference
 
-            const gridHeight = layoutRows * cellSize;
-            const gridWidth = layoutCols * cellSize;
-            const gridStartX = startX;
-            const gridStartY = currentY - gridHeight - 10; // 10px buffer below title
-            currentY = gridStartY; // Update currentY to be at the top of the grid
+                const gridHeight = layoutRows * cellSize;
+                const gridWidth = layoutCols * cellSize;
+                const gridStartX = startX;
+                const gridStartY = currentY - gridHeight - 10; // 10px buffer below title
+                currentY = gridStartY; // Update currentY to be at the top of the grid
 
-            // Draw crossword grid
-            for (let r = 0; r < layout.layout.length; r++) {
-                for (let c = 0; c < layout.layout[r].length; c++) {
-                    const cell = layout.layout[r][c];
-                    const x = gridStartX + c * cellSize;
-                    const y = gridStartY + (layout.layout.length - 1 - r) * cellSize; // PDF coordinates are from bottom-left
+                // Draw crossword grid
+                for (let r = 0; r < layout.layout.length; r++) {
+                    for (let c = 0; c < layout.layout[r].length; c++) {
+                        const cell = layout.layout[r][c];
+                        const x = gridStartX + c * cellSize;
+                        const y = gridStartY + (layout.layout.length - 1 - r) * cellSize; // PDF coordinates are from bottom-left
 
-                    if (cell === null) { // Black square (inactive in reference)
-                        page.drawRectangle({
-                            x: x, y: y, width: cellSize, height: cellSize, color: rgb(0, 0.5, 0), // Green background for inactive
-                        });
-                    } else { // White square (active in reference)
-                        page.drawRectangle({
-                            x: x, y: y, width: cellSize, height: cellSize,
-                            borderColor: rgb(0, 0.5, 0), // Green border
-                            borderWidth: 1, // 1px border
-                            color: rgb(1, 1, 1), // White background
-                        });
-                        // Removed drawing 'cell.char' here to ensure the PDF crossword is unsolved.
-                        // The `if (cell.char && (layout.layout[0].length === 1 || layout.layout.length === 1))` condition
-                        // which previously drew characters for standalone words is now removed.
-
-                        if (cell.startWord) {
-                            page.drawText(cell.startWord.toString(), {
-                                x: x + 3, // Left offset from reference
-                                y: y + cellSize - (cellSize * 0.2) - 5, // Adjusted for top-left and bottom 45px relative
-                                font: font, size: cellSize * 0.2, // Small font size from reference
-                                color: rgb(0, 0, 0),
+                        if (cell === null) { // Black square (inactive in reference)
+                            page.drawRectangle({
+                                x: x, y: y, width: cellSize, height: cellSize, color: rgb(0, 0.5, 0), // Green background for inactive
                             });
+                        } else { // White square (active in reference)
+                            page.drawRectangle({
+                                x: x, y: y, width: cellSize, height: cellSize,
+                                borderColor: rgb(0, 0.5, 0), // Green border
+                                borderWidth: 1, // 1px border
+                                color: rgb(1, 1, 1), // White background
+                            });
+
+                            if (cell.startWord) {
+                                page.drawText(cell.startWord.toString(), {
+                                    x: x + 3, // Left offset from reference
+                                    y: y + cellSize - (cellSize * 0.2) - 5, // Adjusted for top-left and bottom 45px relative
+                                    font: font, size: cellSize * 0.2, // Small font size from reference
+                                    color: rgb(0, 0, 0),
+                                });
+                            }
                         }
                     }
                 }
+            } else { // For standalone section, skip grid drawing, just adjust Y for clues
+                // No grid drawn, so clues start from currentY after title
             }
 
             // Draw crossword clues and images
-            const clueStartX = gridStartX + gridWidth + 20;
-            let clueYOffset = gridStartY + gridHeight - 10; // Start clues near top of grid
+            const clueStartX = isStandaloneSection ? startX : (gridStartX + gridWidth + 20); // Adjust clue start for standalone
+            let clueYOffset = isStandaloneSection ? currentY : (gridStartY + gridHeight - 10); // Adjust clue Y start for standalone
 
-            page.drawText('Clues:', {
-                x: clueStartX,
-                y: clueYOffset,
-                font: boldFont,
-                size: 14,
-                color: rgb(0, 0, 0),
-            });
-            clueYOffset -= 20;
+            for (let i = 0; i < layout.entries.length; i++) {
+                const entry = layout.entries[i];
+                let clueText = `${entry.position}. ${entry.clue}`;
 
-            for (const entry of layout.entries) {
-                const clueText = `${entry.position}. ${entry.clue}`; // clue already scrambled and without length
+                if (i === 0) { // If it's the first clue, prepend "Clues: "
+                    clueText = `Clues: ${clueText}`;
+                }
+
                 // Simulate image fetching with placehold.co
                 const imageUrl = `https://placehold.co/${clueImageWidth}x${clueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${entry.word.charAt(0)}`;
 
@@ -1205,7 +1206,14 @@
 
                 // Check if enough space on current page for this crossword
                 // Estimate required height: Title + grid + clues + buffers
-                const estimatedCrosswordHeight = 20 + 15 + (layout.layout.length * 40) + (layout.entries.length * 15) + 30; // Rough estimate
+                // For standalone, no grid, so height is less.
+                let estimatedCrosswordHeight;
+                if (title === 'Additional Crossword Clues') {
+                    estimatedCrosswordHeight = 20 + 15 + (layout.entries.length * 15) + 30; // Title + clues + buffers
+                } else {
+                    estimatedCrosswordHeight = 20 + 15 + (layout.layout.length * 40) + (layout.entries.length * 15) + 30; // Title + grid + clues + buffers
+                }
+
                 if (currentYPage - estimatedCrosswordHeight < margin) { // If it won't fit, add new page
                     currentPage = pdfDoc.addPage();
                     currentYPage = drawPageBorderAndHeader(currentPage, pdfDoc.getPages().length);
@@ -1441,24 +1449,25 @@
                 const unplacedWords = crosswordWordsFormatted.filter(wordObj => !placedWordsInMainLayouts.has(wordObj.word));
 
                 if (unplacedWords.length > 0) {
+                    const standaloneEntries = [];
                     unplacedWords.forEach((wordObj) => {
-                        const word = wordObj.word;
-                        // Create a simple layout for the standalone word
-                        // A 1xN grid for horizontal words (simplest for PDF display)
-                        const standaloneLayoutGrid = [Array(word.length).fill(null).map((_, i) => ({ char: word[i] }))];
+                        standaloneEntries.push({
+                            position: null, // Will be re-numbered later
+                            word: wordObj.word,
+                            clue: wordObj.clue, // Already scrambled
+                            direction: 'across', // Arbitrary, not used for standalone visual
+                            start: { x: 0, y: 0 } // Dummy
+                        });
+                    });
 
-                        // Create a dummy layout object for the standalone word
-                        const standaloneLayout = {
-                            layout: standaloneLayoutGrid,
-                            entries: [{
-                                position: null, // Will be re-numbered later
-                                word: word,
-                                clue: wordObj.clue,
-                                direction: 'across', // Arbitrary direction for standalone
-                                start: { x: 0, y: 0 }
-                            }]
-                        };
-                        generatedCrosswordLayouts.push({ layout: standaloneLayout, title: `Standalone Puzzle: ${word}` });
+                    // Create a minimal 1x1 grid for the combined standalone layout.
+                    // This grid will not be drawn in the PDF due to the isStandaloneSection check.
+                    const dummyGridForStandalone = [[{ char: ' ' }]];
+
+                    // Add a single combined layout for all standalone words
+                    generatedCrosswordLayouts.push({
+                        layout: { layout: dummyGridForStandalone, entries: standaloneEntries },
+                        title: 'Additional Crossword Clues'
                     });
                 }
 
@@ -1488,7 +1497,7 @@
                 // --- Render Interactive Puzzles ---
                 // For simplicity, we'll only render the first *main* crossword interactively.
                 // If no main crossword, we'll show a message.
-                const mainCrossword = generatedCrosswordLayouts.find(cw => cw.title.includes('Crossword Puzzle') && !cw.title.includes('Standalone'));
+                const mainCrossword = generatedCrosswordLayouts.find(cw => cw.title.includes('Crossword Puzzle') && !cw.title.includes('Additional'));
                 if (mainCrossword) {
                     renderInteractiveCrossword(mainCrossword.layout, interactiveCrosswordGrid);
                 } else {
