@@ -1051,17 +1051,9 @@
                             borderWidth: 1, // 1px border
                             color: rgb(1, 1, 1), // White background
                         });
-                        // Draw character if available (for solved puzzle or if we want to show answers)
-                        // For a puzzle to be solved by user, we should NOT draw the char here.
-                        // But for "one-word crosswords", we need to draw the char.
-                        if (cell.char && (layout.layout[0].length === 1 || layout.layout.length === 1)) { // Heuristic for standalone word
-                            page.drawText(cell.char, {
-                                x: x + cellSize / 2 - font.widthOfTextAtSize(cell.char, cellSize * 0.4) / 2, // Adjusted font size
-                                y: y + cellSize / 2 - (cellSize * 0.4) / 2 + 1, // Adjusted vertical alignment
-                                font: font, size: cellSize * 0.4, // Scale font with cell size
-                                color: rgb(0, 0, 0),
-                            });
-                        }
+                        // Removed drawing 'cell.char' here to ensure the PDF crossword is unsolved.
+                        // The `if (cell.char && (layout.layout[0].length === 1 || layout.layout.length === 1))` condition
+                        // which previously drew characters for standalone words is now removed.
 
                         if (cell.startWord) {
                             page.drawText(cell.startWord.toString(), {
@@ -1089,7 +1081,7 @@
             clueYOffset -= 20;
 
             for (const entry of layout.entries) {
-                const clueText = `${entry.position}. ${entry.clue}`;
+                const clueText = `${entry.position}. ${entry.clue}`; // clue already scrambled and without length
                 // Simulate image fetching with placehold.co
                 const imageUrl = `https://placehold.co/${clueImageWidth}x${clueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${entry.word.charAt(0)}`;
 
@@ -1111,7 +1103,8 @@
                     });
                 } catch (imgError) {
                     console.warn(`Could not fetch image for ${entry.word}:`, imgError);
-                    page.drawText(clueText + ' (Image failed)', { // Fallback if image fails
+                    // Removed "(Image failed)" text.
+                    page.drawText(clueText, { // Fallback if image fails, just draw the clue
                         x: clueStartX,
                         y: clueYOffset,
                         font: font,
@@ -1418,7 +1411,7 @@
                 generatedCrosswordLayouts = [];
                 const crosswordWordsFormatted = words.map(word => ({
                     word: word,
-                    clue: scrambleWord(word.toLowerCase()) + ` (${word.length} letters)`
+                    clue: scrambleWord(word.toLowerCase()) // Removed length hint from clue
                 }));
 
                 let placedWordsInMainLayouts = new Set();
