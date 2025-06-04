@@ -444,7 +444,7 @@
 </head>
 <body class="bg-gray-100 text-gray-800">
     <div id="input-section" class="container">
-        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-4">Puzzle Fun Generator! 1.1</h1>
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-4">Puzzle Fun Generator!</h1>
         <p class="text-md text-center text-gray-600 mb-8">Create custom crossword and word search puzzles.</p>
 
         <div class="flex flex-col md:flex-row gap-4 mb-6">
@@ -985,44 +985,78 @@
         // --- Main Puzzle Generation & PDF Logic ---
 
         /**
-         * Helper function to draw a single crossword puzzle section.
+         * Helper function to draw a single puzzle section in the PDF.
          * @param {PDFPage} page - The PDF page to draw on.
-         * @param {object} layout - The crossword layout object from crossword-layout-generator.
+         * @param {object} layout - The puzzle layout object.
          * @param {number} startX - X coordinate to start drawing the section.
          * @param {number} currentY - Current Y coordinate on the page (top of the section).
          * @param {number} availableWidth - Available width for the section.
          * @param {number} availableHeight - Available height for the section.
          * @param {PDFPage} font - The standard font.
          * @param {PDFPage} boldFont - The bold font.
-         * @param {string} sectionTitle - Title for this crossword section (e.g., "Crossword Puzzle", "Crossword Puzzle (Part 1)").
+         * @param {string} sectionTitleEn - English title for this section.
+         * @param {string} sectionTitleVi - Vietnamese title for this section.
+         * @param {string} instructionsEn - English instructions for this section.
+         * @param {string} instructionsVi - Vietnamese instructions for this section.
+         * @param {boolean} isUnscrambleSection - True if this section is for unscrambling words.
+         * @param {boolean} isCrosswordSectionEmpty - True if the crossword grid is empty.
          * @returns {number} The new currentY after drawing the section.
          */
-        async function drawCrosswordSection(page, layout, startX, currentY, availableWidth, availableHeight, font, boldFont, sectionTitle) {
+        async function drawPuzzleSection(page, layout, startX, currentY, availableWidth, availableHeight, font, boldFont, sectionTitleEn, sectionTitleVi, instructionsEn, instructionsVi, isUnscrambleSection, isCrosswordSectionEmpty) {
             const titleSize = 20;
-            const titleMarginBottom = 15;
+            const instructionSize = 10;
+            const instructionLineHeight = 12;
             const clueLineHeight = 15;
             const clueImageWidth = 15;
             const clueImageMargin = 5;
+            const blankLineLength = 40; // Length of the blank line for unscramble
 
-            // Determine if this is a standalone section (e.g., by checking its title)
-            const isAdditionalCluesSection = sectionTitle === 'Additional Crossword Clues';
-
-            // Draw Section Title
-            page.drawText(sectionTitle, {
+            // Draw Section Title (English)
+            page.drawText(sectionTitleEn, {
                 x: startX,
                 y: currentY - titleSize,
                 font: boldFont,
                 size: titleSize,
                 color: rgb(0, 0, 0),
             });
-            currentY -= titleSize + titleMarginBottom;
+            currentY -= titleSize + 5; // Small gap between English and Vietnamese title
 
-            if (!isAdditionalCluesSection) { // Only draw grid for the main crossword
+            // Draw Section Title (Vietnamese)
+            page.drawText(sectionTitleVi, {
+                x: startX,
+                y: currentY - titleSize * 0.7, // Smaller size for Vietnamese title
+                font: boldFont,
+                size: titleSize * 0.7,
+                color: rgb(0, 0, 0),
+            });
+            currentY -= titleSize * 0.7 + 10; // Gap after title
+
+            // Draw Instructions (English)
+            page.drawText(`Instructions: ${instructionsEn}`, {
+                x: startX,
+                y: currentY - instructionSize,
+                font: font,
+                size: instructionSize,
+                color: rgb(0.3, 0.3, 0.3),
+            });
+            currentY -= instructionSize + 2;
+
+            // Draw Instructions (Vietnamese)
+            page.drawText(`Hướng dẫn: ${instructionsVi}`, {
+                x: startX,
+                y: currentY - instructionSize,
+                font: font,
+                size: instructionSize,
+                color: rgb(0.3, 0.3, 0.3),
+            });
+            currentY -= instructionSize + 15; // Gap after instructions
+
+            if (!isUnscrambleSection && !isCrosswordSectionEmpty) { // Only draw grid for the main crossword if not empty
                 const layoutRows = layout.layout.length;
                 const layoutCols = layout.layout[0].length;
 
                 const estimatedCluesHeight = layout.entries.length * clueLineHeight;
-                const remainingHeightForGrid = availableHeight - (titleSize + titleMarginBottom) - estimatedCluesHeight - 20; // 20px buffer below grid
+                const remainingHeightForGrid = availableHeight - (titleSize + instructionLineHeight * 2 + 15) - estimatedCluesHeight - 20; // Adjusted for instructions
 
                 let cellSize = Math.min(
                     availableWidth / layoutCols,
@@ -1034,7 +1068,7 @@
                 const gridHeight = layoutRows * cellSize;
                 const gridWidth = layoutCols * cellSize;
                 const gridStartX = startX;
-                const gridStartY = currentY - gridHeight - 10; // 10px buffer below title
+                const gridStartY = currentY - gridHeight - 10; // 10px buffer below instructions
                 currentY = gridStartY; // Update currentY to be at the top of the grid
 
                 // Draw crossword grid
@@ -1067,18 +1101,38 @@
                         }
                     }
                 }
-            } else { // For Additional Clues section, no grid is drawn, just adjust Y for clues
-                // Clues will start from currentY after the title.
+            } else if (isCrosswordSectionEmpty) {
+                // If crossword section is empty, just print a message instead of a grid
+                page.drawText('No crossword puzzle could be generated with the provided words.', {
+                    x: startX,
+                    y: currentY - 30,
+                    font: font,
+                    size: 12,
+                    color: rgb(0.5, 0.5, 0.5),
+                });
+                page.drawText('Không thể tạo ô chữ với các từ đã cung cấp.', {
+                    x: startX,
+                    y: currentY - 45,
+                    font: font,
+                    size: 12,
+                    color: rgb(0.5, 0.5, 0.5),
+                });
+                currentY -= 60; // Adjust Y for the message
             }
 
-            // Draw crossword clues and images
-            const clueStartX = isAdditionalCluesSection ? startX : (gridStartX + gridWidth + 20); // Adjust clue start for additional clues
-            let clueYOffset = isAdditionalCluesSection ? currentY : (gridStartY + gridHeight - 10); // Adjust clue Y start for additional clues
+            // Draw clues
+            const clueStartX = isUnscrambleSection || isCrosswordSectionEmpty ? startX : (gridStartX + gridWidth + 20);
+            let clueYOffset = isUnscrambleSection || isCrosswordSectionEmpty ? currentY : (gridStartY + gridHeight - 10);
 
             // Draw "Clues:" on the same line as the first clue
             if (layout.entries.length > 0) {
                 const firstEntry = layout.entries[0];
-                const firstClueText = `${firstEntry.position}. ${firstEntry.clue}`;
+                let firstClueText;
+                if (isUnscrambleSection) {
+                    firstClueText = `${firstEntry.position}. "${firstEntry.clue}" = ${'_'.repeat(firstEntry.word.length)}`;
+                } else {
+                    firstClueText = `${firstEntry.position}. ${firstEntry.clue}`;
+                }
                 const combinedClueText = `Clues: ${firstClueText}`;
 
                 const imageUrl = `https://placehold.co/${clueImageWidth}x${clueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${firstEntry.word.charAt(0)}`;
@@ -1114,7 +1168,12 @@
                 // Draw remaining clues
                 for (let i = 1; i < layout.entries.length; i++) {
                     const entry = layout.entries[i];
-                    const clueText = `${entry.position}. ${entry.clue}`;
+                    let clueText;
+                    if (isUnscrambleSection) {
+                        clueText = `${entry.position}. "${entry.clue}" = ${'_'.repeat(entry.word.length)}`;
+                    } else {
+                        clueText = `${entry.position}. ${entry.clue}`;
+                    }
                     const imageUrl = `https://placehold.co/${clueImageWidth}x${clueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${entry.word.charAt(0)}`;
 
                     try {
@@ -1188,29 +1247,9 @@
 
                 let currentY = height - margin; // Start from top margin for content
 
-                // Header
-                const headerTitleSize = 36;
-                const headerSubtitleSize = 14;
+                // Header (Removed "Puzzle Fun!" and "Made by Rene")
                 const studentNameLineSize = 12;
                 const headerSpacing = 20;
-
-                page.drawText('Puzzle Fun!', {
-                    x: margin,
-                    y: currentY - headerTitleSize,
-                    font: boldFont,
-                    size: headerTitleSize,
-                    color: rgb(0, 0, 0),
-                });
-                currentY -= headerTitleSize + headerSpacing;
-
-                page.drawText('Made by Rene', {
-                    x: margin,
-                    y: currentY - headerSubtitleSize,
-                    font: font,
-                    size: headerSubtitleSize,
-                    color: rgb(0.3, 0.3, 0.3),
-                });
-                currentY -= headerSubtitleSize + headerSpacing;
 
                 page.drawText('Student name: _________________', {
                     x: margin,
@@ -1231,94 +1270,143 @@
             let currentPage = pdfDoc.addPage();
             let currentYPage = drawPageBorderAndHeader(currentPage, 1);
 
-            // --- Draw Crosswords ---
-            for (let i = 0; i < crosswordLayouts.length; i++) {
-                const layout = crosswordLayouts[i].layout;
-                const title = crosswordLayouts[i].title;
+            // --- Separate layouts for ordering ---
+            let unscrambleLayout = null;
+            let mainCrosswordLayout = null;
 
-                // Check if enough space on current page for this crossword
-                // Estimate required height: Title + grid + clues + buffers
-                // For standalone, no grid, so height is less.
-                let estimatedCrosswordHeight;
-                if (title === 'Additional Crossword Clues') {
-                    estimatedCrosswordHeight = 20 + 15 + (layout.entries.length * 15) + 30; // Title + clues + buffers
-                } else {
-                    estimatedCrosswordHeight = 20 + 15 + (layout.layout.length * 40) + (layout.entries.length * 15) + 30; // Title + grid + clues + buffers
+            crosswordLayouts.forEach(layoutObj => {
+                if (layoutObj.title === 'Additional Crossword Clues') {
+                    unscrambleLayout = layoutObj;
+                } else if (layoutObj.title === 'Crossword Puzzle') {
+                    mainCrosswordLayout = layoutObj;
                 }
+            });
 
-                if (currentYPage - estimatedCrosswordHeight < margin) { // If it won't fit, add new page
+            // --- Draw Unscramble the Word Section (if exists) ---
+            if (unscrambleLayout && unscrambleLayout.layout.entries.length > 0) {
+                const titleEn = 'Unscramble the Word';
+                const titleVi = 'Giải mã từ';
+                const instructionsEn = 'Unscramble the scrambled words below and write the correct word in the blank.';
+                const instructionsVi = 'Giải mã các từ bị xáo trộn bên dưới và viết từ đúng vào chỗ trống.';
+
+                const estimatedHeight = 20 + 15 + (unscrambleLayout.layout.entries.length * 15) + 30 + (12 * 2 + 15); // Title, instructions, clues, buffer
+                if (currentYPage - estimatedHeight < margin) {
                     currentPage = pdfDoc.addPage();
                     currentYPage = drawPageBorderAndHeader(currentPage, pdfDoc.getPages().length);
                 }
-
-                const availableCrosswordHeight = currentYPage - margin - 20; // currentY to bottom margin, less some buffer
-                currentYPage = await drawCrosswordSection(
+                currentYPage = await drawPuzzleSection(
                     currentPage,
-                    layout,
+                    unscrambleLayout.layout,
                     margin,
-                    currentYPage, // Pass the starting Y for the section
+                    currentYPage,
                     contentWidth,
-                    availableCrosswordHeight,
+                    height, // Pass full height as grid is not drawn
                     font,
                     boldFont,
-                    title
+                    titleEn,
+                    titleVi,
+                    instructionsEn,
+                    instructionsVi,
+                    true, // Indicate this is an unscramble section
+                    false // Not an empty crossword grid
                 );
-                currentYPage -= 30; // Buffer space after crossword section
+                currentYPage -= 30;
             }
 
+            // --- Draw Main Crossword Puzzle Section (if exists or needs to be blank) ---
+            const crosswordTitleEn = 'Crossword Puzzle';
+            const crosswordTitleVi = 'Ô chữ';
+            const crosswordInstructionsEn = 'Solve the crossword puzzle by filling in the words based on the clues.';
+            const crosswordInstructionsVi = 'Giải ô chữ bằng cách điền các từ dựa trên gợi ý.';
 
-            // --- Word Search Puzzle Section (always follows the last drawn crossword or header if no crosswords) ---
-            const wordSearchTitleSize = 20;
-            const wordSearchTitleMarginBottom = 15;
-            const wordBankLineHeight = 15;
+            let isCrosswordEmpty = (!mainCrosswordLayout || mainCrosswordLayout.layout.length === 0);
+            let crosswordLayoutToDraw = mainCrosswordLayout ? mainCrosswordLayout.layout : { layout: [], entries: [] }; // Provide empty layout if none generated
 
-            // Check if enough space on current page for word search
-            const estimatedWordSearchHeight = 20 + 15 + (wordSearchGridData.length * 15) + (Math.ceil(words.length / 2) * 15) + 30;
-            if (currentYPage - estimatedWordSearchHeight < margin) {
+            // Estimate height for crossword section (even if empty, it takes space for title/instructions)
+            let estimatedCrosswordHeight = 20 + 15 + (12 * 2 + 15) + 30; // Title, instructions, buffer
+            if (!isCrosswordEmpty) {
+                estimatedCrosswordHeight += (crosswordLayoutToDraw.layout.length * 40) + (crosswordLayoutToDraw.entries.length * 15); // Add grid and clue height if not empty
+            } else {
+                estimatedCrosswordHeight += 60; // Space for "no crossword" message
+            }
+
+            if (currentYPage - estimatedCrosswordHeight < margin) {
                 currentPage = pdfDoc.addPage();
                 currentYPage = drawPageBorderAndHeader(currentPage, pdfDoc.getPages().length);
             }
+            currentYPage = await drawPuzzleSection(
+                currentPage,
+                crosswordLayoutToDraw,
+                margin,
+                currentYPage,
+                contentWidth,
+                height, // Pass full height
+                font,
+                boldFont,
+                crosswordTitleEn,
+                crosswordTitleVi,
+                crosswordInstructionsEn,
+                crosswordInstructionsVi,
+                false, // Not an unscramble section
+                isCrosswordEmpty // Indicate if the crossword grid is empty
+            );
+            currentYPage -= 30;
 
-            currentYPage -= wordSearchTitleSize + wordSearchTitleMarginBottom + 20; // Extra space before word search title
 
-            currentPage.drawText('Word Search Puzzle', {
-                x: margin,
-                y: currentYPage,
-                font: boldFont,
-                size: wordSearchTitleSize,
-                color: rgb(0, 0, 0),
-            });
-            currentYPage -= wordSearchTitleSize + wordSearchTitleMarginBottom;
+            // --- Draw Word Search Puzzle Section ---
+            const wordSearchTitleEn = 'Word Search Puzzle';
+            const wordSearchTitleVi = 'Tìm từ';
+            const wordSearchInstructionsEn = 'Find all the hidden words in the grid. Words can be found horizontally, vertically, or diagonally.';
+            const wordSearchInstructionsVi = 'Tìm tất cả các từ ẩn trong lưới. Các từ có thể được tìm thấy theo chiều ngang, chiều dọc hoặc đường chéo.';
 
             const wordSearchGrid = wordSearchGridData; // Use the pre-generated grid
 
             const layoutRowsWS = wordSearchGrid.length;
             const layoutColsWS = wordSearchGrid[0].length;
 
-            // Calculate remaining available vertical space for word search grid + word bank
-            const remainingSpaceForWS = currentYPage - margin - 20; // 20px buffer for bottom margin
+            const estimatedWordSearchHeight = 20 + 15 + (12 * 2 + 15) + (layoutRowsWS * 15) + 30; // Title, instructions, grid, buffer
+            if (currentYPage - estimatedWordSearchHeight < margin) {
+                currentPage = pdfDoc.addPage();
+                currentYPage = drawPageBorderAndHeader(currentPage, pdfDoc.getPages().length);
+            }
+
+            currentYPage = await drawPuzzleSection(
+                currentPage,
+                { layout: wordSearchGrid, entries: [] }, // Dummy layout for word search section
+                margin,
+                currentYPage,
+                contentWidth,
+                height,
+                font,
+                boldFont,
+                wordSearchTitleEn,
+                wordSearchTitleVi,
+                wordSearchInstructionsEn,
+                wordSearchInstructionsVi,
+                false, // Not unscramble
+                false // Not an empty crossword
+            );
+
+            // Adjust Y for word search grid drawing (after instructions)
+            const wsGridStartX = margin;
+            const wsGridStartY = currentYPage - 10; // Start 10px below instructions
 
             let wsCellSize = Math.min(
                 (contentWidth / layoutColsWS), // Fit horizontally
-                (remainingSpaceForWS - (Math.ceil(words.length / 2) * wordBankLineHeight) - 20) / layoutRowsWS, // Fit grid vertically
+                (wsGridStartY - margin - 20) / layoutRowsWS, // Fit grid vertically (remaining space below instructions)
                 15 // Max cell size
             );
-            // Ensure min cell size for readability
             wsCellSize = Math.max(wsCellSize, 8);
-
 
             const wsGridHeight = layoutRowsWS * wsCellSize;
             const wsGridWidth = layoutColsWS * wsCellSize;
-            const wsGridStartX = margin;
-            const wsGridStartY = currentYPage - wsGridHeight - 10; // 10px buffer below title
-            currentYPage = wsGridStartY; // Update currentY to below the grid
 
             // Draw word search grid
             for (let r = 0; r < wordSearchGrid.length; r++) {
                 for (let c = 0; c < wordSearchGrid[r].length; c++) {
                     const char = wordSearchGrid[r][c];
                     const x = wsGridStartX + c * wsCellSize;
-                    const y = wsGridStartY + (wordSearchGrid.length - 1 - r) * wsCellSize;
+                    const y = wsGridStartY - wsGridHeight + (r * wsCellSize); // Adjust Y for PDF coordinates
 
                     currentPage.drawRectangle({
                         x: x, y: y, width: wsCellSize, height: wsCellSize,
@@ -1333,31 +1421,7 @@
                     });
                 }
             }
-
-            // Word Bank
-            const wordBankStartX = wsGridStartX + wsGridWidth + 20;
-            let wordBankYOffset = wsGridStartY + wsGridHeight - 10; // Align with top of word search grid
-
-            currentPage.drawText('Word Bank:', {
-                x: wordBankStartX,
-                y: wordBankYOffset,
-                font: boldFont,
-                size: 14,
-                color: rgb(0, 0, 0),
-            });
-            wordBankYOffset -= 20;
-
-            const wordsPerColumn = Math.ceil(words.length / 2); // Two columns for word bank
-            for (let i = 0; i < words.length; i++) {
-                const word = words[i];
-                const col = Math.floor(i / wordsPerColumn);
-                const x = wordBankStartX + (col * 100); // Offset for second column
-                const y = wordBankYOffset - (i % wordsPerColumn) * wordBankLineHeight;
-
-                currentPage.drawText(word, {
-                    x: x, y: y, font: font, size: 10, color: rgb(0, 0, 0),
-                });
-            }
+            currentYPage = wsGridStartY - wsGridHeight - 10; // Update Y after drawing grid
 
 
             // Save the PDF
@@ -1457,51 +1521,47 @@
                 let placedWordsInMainLayouts = new Set();
 
                 // Attempt to generate a main crossword with all words
+                let mainCrosswordResult = null;
                 try {
                     const maxWordLength = Math.max(...words.map(w => w.length));
                     const totalChars = words.join('').length;
-                    // Increased base size and made it more dynamic
                     const crosswordGridProposedSize = Math.max(20, maxWordLength * 2, Math.ceil(Math.sqrt(totalChars * 2)) + 5);
-                    const fullCrosswordLayout = window.CrosswordLayout.generate(crosswordWordsFormatted, {
+                    mainCrosswordResult = window.CrosswordLayout.generate(crosswordWordsFormatted, {
                         maxGridSize: crosswordGridProposedSize,
-                        maxAttempts: 5000 // Significantly increased attempts
+                        maxAttempts: 5000
                     });
 
-                    if (fullCrosswordLayout && fullCrosswordLayout.layout.length > 0) {
-                        generatedCrosswordLayouts.push({ layout: fullCrosswordLayout, title: 'Crossword Puzzle' });
-                        fullCrosswordLayout.entries.forEach(entry => placedWordsInMainLayouts.add(entry.word));
+                    if (mainCrosswordResult && mainCrosswordResult.layout.length > 0) {
+                        generatedCrosswordLayouts.push({ layout: mainCrosswordResult, title: 'Crossword Puzzle' });
+                        mainCrosswordResult.entries.forEach(entry => placedWordsInMainLayouts.add(entry.word));
                     } else {
                         throw new Error("Main crossword layout failed.");
                     }
                 } catch (e) {
                     console.warn(e.message);
-                    // If main crossword fails, proceed to generate standalone puzzles for all words
-                    // No need to split and retry main crossword, as we'll handle unplaced words as standalones.
+                    // If main crossword fails, ensure it's still added to the layouts array as an empty one
+                    generatedCrosswordLayouts.push({ layout: { layout: [], entries: [] }, title: 'Crossword Puzzle' });
                 }
 
-                // Identify unplaced words (including all if main crossword failed) and create standalone "crosswords" for them
+                // Identify unplaced words and create a combined unscramble section for them
                 const unplacedWords = crosswordWordsFormatted.filter(wordObj => !placedWordsInMainLayouts.has(wordObj.word));
 
                 if (unplacedWords.length > 0) {
-                    const standaloneEntries = [];
+                    const unscrambleEntries = [];
                     unplacedWords.forEach((wordObj) => {
-                        standaloneEntries.push({
+                        unscrambleEntries.push({
                             position: null, // Will be re-numbered later
                             word: wordObj.word,
                             clue: wordObj.clue, // Already scrambled
-                            direction: 'across', // Arbitrary, not used for standalone visual
+                            direction: 'across', // Arbitrary
                             start: { x: 0, y: 0 } // Dummy
                         });
                     });
 
-                    // Create a minimal 1x1 grid for the combined standalone layout.
-                    // This grid will not be drawn in the PDF due to the isAdditionalCluesSection check.
-                    const dummyGridForStandalone = [[{ char: ' ' }]];
-
-                    // Add a single combined layout for all standalone words
-                    generatedCrosswordLayouts.push({
-                        layout: { layout: dummyGridForStandalone, entries: standaloneEntries },
-                        title: 'Additional Crossword Clues'
+                    // Add a single combined layout for all unscramble words
+                    generatedCrosswordLayouts.unshift({ // Add to the beginning so it's processed first for PDF
+                        layout: { layout: [], entries: unscrambleEntries }, // No grid for unscramble
+                        title: 'Additional Crossword Clues' // This title will be used to identify it as the unscramble section
                     });
                 }
 
@@ -1531,11 +1591,11 @@
                 // --- Render Interactive Puzzles ---
                 // For simplicity, we'll only render the first *main* crossword interactively.
                 // If no main crossword, we'll show a message.
-                const mainCrossword = generatedCrosswordLayouts.find(cw => cw.title.includes('Crossword Puzzle') && !cw.title.includes('Additional'));
-                if (mainCrossword) {
-                    renderInteractiveCrossword(mainCrossword.layout, interactiveCrosswordGrid);
+                const interactiveMainCrossword = generatedCrosswordLayouts.find(cw => cw.title === 'Crossword Puzzle');
+                if (interactiveMainCrossword && interactiveMainCrossword.layout.layout.length > 0) {
+                    renderInteractiveCrossword(interactiveMainCrossword.layout, interactiveCrosswordGrid);
                 } else {
-                    interactiveCrosswordGrid.innerHTML = '<p class="text-red-500 font-semibold">No main crossword puzzle could be generated. See PDF for additional clues.</p>';
+                    interactiveCrosswordGrid.innerHTML = '<p class="text-red-500 font-semibold">No main crossword puzzle could be generated. See PDF for unscramble clues.</p>';
                 }
 
 
