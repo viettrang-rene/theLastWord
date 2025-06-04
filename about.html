@@ -370,6 +370,16 @@
             border-radius: 8px;
             display: none;
         }
+        .pdf-download-message {
+            margin-top: 1rem;
+            padding: 0.75rem;
+            background-color: #d1fae5; /* Green-100 */
+            color: #065f46; /* Green-900 */
+            border-radius: 0.5rem;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
 
         /* Media Queries for responsiveness */
         @media screen and (max-width: 980px) {
@@ -509,6 +519,9 @@
         </div>
 
         <button id="printPdfBtn" class="generate-button w-full mt-8">Print to PDF</button>
+        <div id="pdf-download-message" class="pdf-download-message">
+            Your PDF should be opening in a new tab or downloading. If not, please check your browser's pop-up blocker settings.
+        </div>
         <button id="backToInputBtn" class="generate-button bg-gray-500 hover:bg-gray-600 w-full mt-4">Back to Input</button>
     </div>
 
@@ -535,6 +548,7 @@
         const puzzlesSection = document.getElementById('puzzles-section'); // New section for puzzles
         const loadingOverlay = document.getElementById('loadingOverlay');
         const iterationLabel = document.getElementById('iteration-label'); // New element for iteration number
+        const pdfDownloadMessage = document.getElementById('pdf-download-message'); // New element for PDF download message
 
         // Interactive Crossword Elements
         const interactiveCrosswordGrid = document.getElementById('interactive-crossword-grid');
@@ -566,7 +580,7 @@
         };
 
         // --- Puzzle Data Storage ---
-        let generatedCrosswordLayouts = []; // Can hold one or two layouts
+        let generatedCrosswordLayouts = []; // Can hold one or more layouts (main + standalones)
         let generatedWordSearchGrid = [];
         let activeWordsForPuzzles = []; // Words used for current puzzles
         let puzzleIteration = 0; // New variable to track iteration number
@@ -659,6 +673,7 @@
             activeWordsForPuzzles = [];
             puzzleIteration = 0; // Reset iteration number
             iterationLabel.textContent = ''; // Clear iteration label
+            pdfDownloadMessage.style.display = 'none'; // Hide PDF message
             // Hide puzzle section
             puzzlesSection.classList.add('hidden');
             appContainer.classList.remove('hidden');
@@ -1039,15 +1054,8 @@
                         // Draw character if available (for solved puzzle or if we want to show answers)
                         // For a puzzle to be solved by user, we should NOT draw the char here.
                         // But for "one-word crosswords", we need to draw the char.
-                        if (cell.char && layout.layout[0].length === 1 && layout.layout.length === layout.entries[0].word.length) { // Heuristic for standalone vertical word
+                        if (cell.char && (layout.layout[0].length === 1 || layout.layout.length === 1)) { // Heuristic for standalone word
                             page.drawText(cell.char, {
-                                x: x + cellSize / 2 - font.widthOfTextAtSize(cell.char, cellSize * 0.4) / 2, // Adjusted font size
-                                y: y + cellSize / 2 - (cellSize * 0.4) / 2 + 1, // Adjusted vertical alignment
-                                font: font, size: cellSize * 0.4, // Scale font with cell size
-                                color: rgb(0, 0, 0),
-                            });
-                        } else if (cell.char && layout.layout.length === 1 && layout.layout[0].length === layout.entries[0].word.length) { // Heuristic for standalone horizontal word
-                             page.drawText(cell.char, {
                                 x: x + cellSize / 2 - font.widthOfTextAtSize(cell.char, cellSize * 0.4) / 2, // Adjusted font size
                                 y: y + cellSize / 2 - (cellSize * 0.4) / 2 + 1, // Adjusted vertical alignment
                                 font: font, size: cellSize * 0.4, // Scale font with cell size
@@ -1323,7 +1331,25 @@
             const pdfBytes = await pdfDoc.save();
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
             const url = URL.createObjectURL(blob);
-            window.open(url, '_blank');
+
+            // Attempt to open in a new window
+            const newWindow = window.open(url, '_blank');
+
+            // If the new window is blocked, trigger a download
+            if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                pdfDownloadMessage.style.display = 'block'; // Show message
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'Puzzles.pdf';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            } else {
+                pdfDownloadMessage.style.display = 'none'; // Hide message if opened successfully
+            }
+
+            // Revoke the object URL after a short delay
+            setTimeout(() => URL.revokeObjectURL(url), 10000);
         }
 
         // --- Event Listeners ---
@@ -1379,6 +1405,7 @@
 
             loadingOverlay.classList.remove('hidden');
             generatePuzzlesBtn.disabled = true;
+            pdfDownloadMessage.style.display = 'none'; // Hide any previous messages
 
             activeWordsForPuzzles = words; // Store words for both interactive and PDF generation
 
@@ -1396,6 +1423,7 @@
 
                 let placedWordsInMainLayouts = new Set();
 
+                // Attempt to generate a main crossword with all words
                 try {
                     const maxWordLength = Math.max(...words.map(w => w.length));
                     const crosswordGridProposedSize = Math.max(15, maxWordLength + 5, words.length * 2);
@@ -1408,51 +1436,22 @@
                         generatedCrosswordLayouts.push({ layout: fullCrosswordLayout, title: 'Crossword Puzzle' });
                         fullCrosswordLayout.entries.forEach(entry => placedWordsInMainLayouts.add(entry.word));
                     } else {
-                        throw new Error("Single crossword layout failed, attempting split.");
+                        throw new Error("Main crossword layout failed.");
                     }
                 } catch (e) {
                     console.warn(e.message);
-                    // Attempt split
-                    const shuffledWords = [...crosswordWordsFormatted].sort(() => 0.5 - Math.random());
-                    const mid = Math.ceil(shuffledWords.length / 2);
-                    const wordsPart1 = shuffledWords.slice(0, mid);
-                    const wordsPart2 = shuffledWords.slice(mid);
-
-                    // Try Part 1
-                    if (wordsPart1.length >= 3) { // Require at least 3 words for a meaningful puzzle
-                        try {
-                            const maxWordLength1 = Math.max(...wordsPart1.map(w => w.word.length || 0));
-                            const gridProposedSize1 = Math.max(12, maxWordLength1 + 3, wordsPart1.length * 2);
-                            const layout1 = window.CrosswordLayout.generate(wordsPart1, { maxGridSize: gridProposedSize1, maxAttempts: 500 });
-                            if (layout1 && layout1.layout.length > 0) {
-                                generatedCrosswordLayouts.push({ layout: layout1, title: 'Crossword Puzzle (Part 1)' });
-                                layout1.entries.forEach(entry => placedWordsInMainLayouts.add(entry.word));
-                            }
-                        } catch (subError) { console.warn("Part 1 crossword failed:", subError.message); }
-                    }
-
-                    // Try Part 2
-                    if (wordsPart2.length >= 3) {
-                        try {
-                            const maxWordLength2 = Math.max(...wordsPart2.map(w => w.word.length || 0));
-                            const gridProposedSize2 = Math.max(12, maxWordLength2 + 3, wordsPart2.length * 2);
-                            const layout2 = window.CrosswordLayout.generate(wordsPart2, { maxGridSize: gridProposedSize2, maxAttempts: 500 });
-                            if (layout2 && layout2.layout.length > 0) {
-                                generatedCrosswordLayouts.push({ layout: layout2, title: 'Crossword Puzzle (Part 2)' });
-                                layout2.entries.forEach(entry => placedWordsInMainLayouts.add(entry.word));
-                            }
-                        } catch (subError) { console.warn("Part 2 crossword failed:", subError.message); }
-                    }
+                    // If main crossword fails, proceed to generate standalone puzzles for all words
+                    // No need to split and retry main crossword, as we'll handle unplaced words as standalones.
                 }
 
-                // 2. Identify unplaced words and create standalone "crosswords" for them
+                // Identify unplaced words (including all if main crossword failed) and create standalone "crosswords" for them
                 const unplacedWords = crosswordWordsFormatted.filter(wordObj => !placedWordsInMainLayouts.has(wordObj.word));
 
                 if (unplacedWords.length > 0) {
-                    unplacedWords.forEach((wordObj, index) => {
+                    unplacedWords.forEach((wordObj) => {
                         const word = wordObj.word;
                         // Create a simple layout for the standalone word
-                        // A 1xN grid for horizontal words, or Nx1 for vertical words (arbitrarily choose horizontal for simplicity)
+                        // A 1xN grid for horizontal words (simplest for PDF display)
                         const standaloneLayoutGrid = [Array(word.length).fill(null).map((_, i) => ({ char: word[i] }))];
 
                         // Create a dummy layout object for the standalone word
@@ -1470,7 +1469,7 @@
                     });
                 }
 
-                // 3. Re-number all crossword entries sequentially across all generated layouts
+                // Re-number all crossword entries sequentially across all generated layouts
                 let currentClueNumber = 1;
                 generatedCrosswordLayouts.forEach(cw => {
                     cw.layout.entries.forEach(entry => {
@@ -1523,6 +1522,7 @@
         printPdfBtn.addEventListener('click', async () => {
             loadingOverlay.classList.remove('hidden');
             printPdfBtn.disabled = true;
+            pdfDownloadMessage.style.display = 'none'; // Hide message before attempting again
             try {
                 // Pass the stored generated data to the PDF function
                 await generatePuzzlesPdf(activeWordsForPuzzles, generatedCrosswordLayouts, generatedWordSearchGrid);
