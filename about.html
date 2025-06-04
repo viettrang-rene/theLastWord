@@ -1005,7 +1005,7 @@
             const clueImageMargin = 5;
 
             // Determine if this is a standalone section (e.g., by checking its title)
-            const isStandaloneSection = sectionTitle === 'Additional Crossword Clues';
+            const isAdditionalCluesSection = sectionTitle === 'Additional Crossword Clues';
 
             // Draw Section Title
             page.drawText(sectionTitle, {
@@ -1017,7 +1017,7 @@
             });
             currentY -= titleSize + titleMarginBottom;
 
-            if (!isStandaloneSection) { // Only draw grid for non-standalone crosswords
+            if (!isAdditionalCluesSection) { // Only draw grid for the main crossword
                 const layoutRows = layout.layout.length;
                 const layoutCols = layout.layout[0].length;
 
@@ -1067,45 +1067,41 @@
                         }
                     }
                 }
-            } else { // For standalone section, skip grid drawing, just adjust Y for clues
-                // No grid drawn, so clues start from currentY after title
+            } else { // For Additional Clues section, no grid is drawn, just adjust Y for clues
+                // Clues will start from currentY after the title.
             }
 
             // Draw crossword clues and images
-            const clueStartX = isStandaloneSection ? startX : (gridStartX + gridWidth + 20); // Adjust clue start for standalone
-            let clueYOffset = isStandaloneSection ? currentY : (gridStartY + gridHeight - 10); // Adjust clue Y start for standalone
+            const clueStartX = isAdditionalCluesSection ? startX : (gridStartX + gridWidth + 20); // Adjust clue start for additional clues
+            let clueYOffset = isAdditionalCluesSection ? currentY : (gridStartY + gridHeight - 10); // Adjust clue Y start for additional clues
 
-            for (let i = 0; i < layout.entries.length; i++) {
-                const entry = layout.entries[i];
-                let clueText = `${entry.position}. ${entry.clue}`;
+            // Draw "Clues:" on the same line as the first clue
+            if (layout.entries.length > 0) {
+                const firstEntry = layout.entries[0];
+                const firstClueText = `${firstEntry.position}. ${firstEntry.clue}`;
+                const combinedClueText = `Clues: ${firstClueText}`;
 
-                if (i === 0) { // If it's the first clue, prepend "Clues: "
-                    clueText = `Clues: ${clueText}`;
-                }
-
-                // Simulate image fetching with placehold.co
-                const imageUrl = `https://placehold.co/${clueImageWidth}x${clueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${entry.word.charAt(0)}`;
+                const imageUrl = `https://placehold.co/${clueImageWidth}x${clueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${firstEntry.word.charAt(0)}`;
 
                 try {
                     const imageBytes = await fetch(imageUrl).then(res => res.arrayBuffer());
                     const image = await pdfDoc.embedPng(imageBytes);
                     page.drawImage(image, {
                         x: clueStartX,
-                        y: clueYOffset - (clueLineHeight / 2) - (clueImageWidth / 2), // Center image vertically with text
+                        y: clueYOffset - (clueLineHeight / 2) - (clueImageWidth / 2),
                         width: clueImageWidth,
                         height: clueImageWidth,
                     });
-                    page.drawText(clueText, {
-                        x: clueStartX + clueImageWidth + clueImageMargin, // Offset text to make space for image
+                    page.drawText(combinedClueText, {
+                        x: clueStartX + clueImageWidth + clueImageMargin,
                         y: clueYOffset,
                         font: font,
                         size: 10,
                         color: rgb(0, 0, 0),
                     });
                 } catch (imgError) {
-                    console.warn(`Could not fetch image for ${entry.word}:`, imgError);
-                    // Removed "(Image failed)" text.
-                    page.drawText(clueText, { // Fallback if image fails, just draw the clue
+                    console.warn(`Could not fetch image for ${firstEntry.word}:`, imgError);
+                    page.drawText(combinedClueText, {
                         x: clueStartX,
                         y: clueYOffset,
                         font: font,
@@ -1113,8 +1109,44 @@
                         color: rgb(0, 0, 0),
                     });
                 }
-                clueYOffset -= clueLineHeight;
+                clueYOffset -= clueLineHeight; // Move Y down for the next clue
+
+                // Draw remaining clues
+                for (let i = 1; i < layout.entries.length; i++) {
+                    const entry = layout.entries[i];
+                    const clueText = `${entry.position}. ${entry.clue}`;
+                    const imageUrl = `https://placehold.co/${clueImageWidth}x${clueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${entry.word.charAt(0)}`;
+
+                    try {
+                        const imageBytes = await fetch(imageUrl).then(res => res.arrayBuffer());
+                        const image = await pdfDoc.embedPng(imageBytes);
+                        page.drawImage(image, {
+                            x: clueStartX,
+                            y: clueYOffset - (clueLineHeight / 2) - (clueImageWidth / 2),
+                            width: clueImageWidth,
+                            height: clueImageWidth,
+                        });
+                        page.drawText(clueText, {
+                            x: clueStartX + clueImageWidth + clueImageMargin,
+                            y: clueYOffset,
+                            font: font,
+                            size: 10,
+                            color: rgb(0, 0, 0),
+                        });
+                    } catch (imgError) {
+                        console.warn(`Could not fetch image for ${entry.word}:`, imgError);
+                        page.drawText(clueText, {
+                            x: clueStartX,
+                            y: clueYOffset,
+                            font: font,
+                            size: 10,
+                            color: rgb(0, 0, 0),
+                        });
+                    }
+                    clueYOffset -= clueLineHeight;
+                }
             }
+
 
             return Math.min(currentY, clueYOffset - 10); // Return the lowest Y used by this section
         }
@@ -1427,10 +1459,12 @@
                 // Attempt to generate a main crossword with all words
                 try {
                     const maxWordLength = Math.max(...words.map(w => w.length));
-                    const crosswordGridProposedSize = Math.max(15, maxWordLength + 5, words.length * 2);
+                    const totalChars = words.join('').length;
+                    // Increased base size and made it more dynamic
+                    const crosswordGridProposedSize = Math.max(20, maxWordLength * 2, Math.ceil(Math.sqrt(totalChars * 2)) + 5);
                     const fullCrosswordLayout = window.CrosswordLayout.generate(crosswordWordsFormatted, {
                         maxGridSize: crosswordGridProposedSize,
-                        maxAttempts: 1000
+                        maxAttempts: 5000 // Significantly increased attempts
                     });
 
                     if (fullCrosswordLayout && fullCrosswordLayout.layout.length > 0) {
@@ -1461,7 +1495,7 @@
                     });
 
                     // Create a minimal 1x1 grid for the combined standalone layout.
-                    // This grid will not be drawn in the PDF due to the isStandaloneSection check.
+                    // This grid will not be drawn in the PDF due to the isAdditionalCluesSection check.
                     const dummyGridForStandalone = [[{ char: ' ' }]];
 
                     // Add a single combined layout for all standalone words
@@ -1501,7 +1535,7 @@
                 if (mainCrossword) {
                     renderInteractiveCrossword(mainCrossword.layout, interactiveCrosswordGrid);
                 } else {
-                    interactiveCrosswordGrid.innerHTML = '<p class="text-red-500 font-semibold">No main crossword puzzle could be generated. See PDF for standalone puzzles.</p>';
+                    interactiveCrosswordGrid.innerHTML = '<p class="text-red-500 font-semibold">No main crossword puzzle could be generated. See PDF for additional clues.</p>';
                 }
 
 
