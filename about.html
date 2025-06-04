@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puzzle Fun Generator</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Inter font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- PDF-LIB for PDF generation -->
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+    <!-- Crossword Layout Generator -->
     <script src="https://unpkg.com/crossword-layout-generator@1.0.0/dist/crossword-layout-generator.umd.js"></script>
     <style>
         body {
@@ -440,11 +444,15 @@
             const layoutCols = layout.layout[0].length;
 
             const estimatedCluesHeight = layout.entries.length * clueLineHeight;
-            const spaceForGrid = availableHeight - (startY - currentY) - estimatedCluesHeight - 20; // 20px buffer below grid
+            const spaceForGrid = availableHeight - (currentY - (height - margin)); // Space from currentY down to bottom margin, accounting for header already drawn
+            // Re-calculate spaceForGrid more accurately:
+            // availableHeight passed in is the total height from currentY down to where content can be drawn.
+            // We need to subtract the title and clue height from this availableHeight to get space for grid.
+            const remainingHeightForGrid = availableHeight - (titleSize + titleMarginBottom) - estimatedCluesHeight - 20; // 20px buffer below grid
 
             let cellSize = Math.min(
                 availableWidth / layoutCols,
-                spaceForGrid / layoutRows,
+                remainingHeightForGrid / layoutRows,
                 15 // Max cell size
             );
             cellSize = Math.max(cellSize, 8); // Min cell size for readability
@@ -696,7 +704,7 @@
                     page1,
                     crosswordsToDraw[0].layout,
                     margin,
-                    currentYPage1,
+                    currentYPage1, // Pass the starting Y for the section
                     contentWidth,
                     availableCrosswordHeight1,
                     font,
@@ -712,22 +720,6 @@
                 let currentYPage2 = drawPageBorderAndHeader(page2, 2); // Draw header on second page
 
                 const availableCrosswordHeight2 = currentYPage2 - margin - 20; // currentY to bottom margin, less some buffer
-                await drawCrosswordSection(
-                    page2,
-                    crosswordsToDraw[1].layout,
-                    margin,
-                    currentYPage2,
-                    contentWidth,
-                    availableCrosswordHeight2,
-                    font,
-                    boldFont,
-                    crosswordsToDraw[1].title
-                );
-                currentPageForWS = page2; // Word Search and Word Bank will go on page 2
-                currentYForWS = currentYPage2; // Reset Y for page 2 to its top, will adjust after drawing second crossword
-                // We just drew the second crossword. Its draw function returns the *lowest* Y coordinate used.
-                // We need to capture that and use it as currentYForWS.
-                // Re-calling drawCrosswordSection here from outside of the loop:
                 currentYForWS = await drawCrosswordSection(
                     page2,
                     crosswordsToDraw[1].layout,
@@ -739,6 +731,7 @@
                     boldFont,
                     crosswordsToDraw[1].title
                 );
+                currentPageForWS = page2; // Word Search and Word Bank will go on page 2
                 currentYForWS -= 30; // Buffer space after second crossword section
             }
 
