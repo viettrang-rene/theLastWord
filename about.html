@@ -8,11 +8,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Inter font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Poppins font from Google Fonts (for crossword/word search styling) -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;800&display=swap" rel="stylesheet">
     <!-- PDF-LIB for PDF generation -->
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
     <!-- Crossword Layout Generator -->
     <script src="https://unpkg.com/crossword-layout-generator@1.0.0/dist/crossword-layout-generator.umd.js"></script>
     <style>
+        /* General Body and App Container Styling (from previous version, using Inter font) */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #f8f8f8;
@@ -120,10 +123,317 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* --- Interactive Puzzle Specific Styles (from user's reference) --- */
+        /* Reset Poppins font for specific puzzle elements */
+        .game-container, .word-search-container, .puzzle-grid, .clues {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .game-container {
+            padding: 10px;
+            display: flex;
+            width: 100%;
+            justify-content: space-around;
+            min-height: 100vh; /* Adjust for overall app height */
+            align-items: flex-start; /* Align to top */
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 20px; /* Space between puzzle sections */
+        }
+
+        .puzzle-grid {
+            display: grid;
+            /* grid-template-rows will be set dynamically by JS */
+            box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+            background-color: white; /* Ensure background for grid */
+            border-radius: 0.5rem; /* Rounded corners for the grid container */
+            overflow: hidden; /* Hide overflow from cells */
+        }
+
+        .puzzle-grid .row {
+            display: grid;
+            /* grid-template-columns will be set dynamically by JS */
+        }
+
+        .puzzle-grid .cell {
+            width: 40px; /* Default cell size */
+            height: 40px; /* Default cell size */
+            background-color: white;
+            border: 1px solid green;
+            position: relative; /* For number positioning */
+            display: flex; /* For input centering */
+            justify-content: center;
+            align-items: center;
+            overflow: hidden; /* Clip content if it overflows */
+        }
+
+        .puzzle-grid .inactive {
+            background-color: green;
+        }
+
+        .puzzle-grid h1 {
+            text-align: center;
+            color: green;
+            font-size: 2.2rem;
+            position: absolute; /* Keep title absolute if needed, but consider flow */
+            top: 2px;
+            width: 100%;
+        }
+
+        .puzzle-grid .number {
+            position: absolute; /* Changed to absolute for better control within cell */
+            font-weight: 300;
+            color: #000;
+            top: 2px; /* Position at top-left of cell */
+            left: 3px;
+            font-size: small;
+            z-index: 10;
+        }
+
+        .puzzle-grid input {
+            display: block;
+            position: relative; /* Relative to cell */
+            font-size: 16px;
+            text-align: center;
+            height: 100%; /* Fill cell height */
+            width: 100%; /* Fill cell width */
+            background-color: transparent;
+            border: none;
+            z-index: 1;
+            padding: 0; /* Remove default padding */
+            margin: 0; /* Remove default margin */
+            box-sizing: border-box; /* Include padding/border in width/height */
+        }
+
+        .puzzle-grid input:focus {
+            outline: none;
+            background-color: #bddebe;
+        }
+
+        .clues {
+            flex: 1; /* Allow clues to take available space */
+            min-width: 300px; /* Minimum width for clues section */
+            max-width: 40%;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+        }
+
+        .clues h2 {
+            font-size: 1.5rem;
+            color: green;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .clues table {
+            font-family: 'Poppins', sans-serif; /* Apply Poppins to table */
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .clues td, .clues th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        .clues tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+        .clues button {
+            background-color: green;
+            color: #fff;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            border: 2px solid transparent;
+            padding: 5px 10px; /* Adjusted padding for smaller buttons */
+            font-size: 0.85rem; /* Smaller font for buttons */
+            cursor: pointer;
+            transition: all .2s ease;
+        }
+        .clues button:hover {
+            background-color: #fff;
+            border: 2px solid green;
+            color: green;
+        }
+        .clues .answer-text {
+            visibility: hidden;
+            color: green;
+            display: inline-block; /* To allow it next to button */
+            margin-left: 10px;
+        }
+        .clues button:hover + .answer-text {
+            visibility: visible;
+        }
+
+        /* Word Search Specific Styles (from user's reference) */
+        .word-search-container {
+            margin: 30px auto;
+            flex: 1; /* Allow word search to take available space */
+            min-width: 300px; /* Minimum width for word search */
+            background-color: #ffffff;
+            border-radius: 0.5rem;
+            box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+            padding: 15px;
+        }
+        .word-search {
+            border: 2px solid #4a89dc;
+            border-collapse: collapse;
+            margin: 0 auto;
+            background-color: #e6f2ff;
+            border-radius: 8px; /* Apply border-radius to the table itself */
+            overflow: hidden; /* Hide overflow for rounded corners */
+        }
+        .word-search td {
+            width: 30px;
+            height: 30px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            border: 1px solid #b3d1ff;
+            background-color: #e6f2ff;
+            color: #2c3e50;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.3s ease;
+        }
+        .word-search td:hover {
+            background-color: #cce0ff;
+        }
+        .word-search td.found-word {
+            background-color: #ffebee !important;
+            color: #c62828 !important;
+            border-color: #ef9a9a !important;
+        }
+        .word-list {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #e6f2ff;
+            border-radius: 8px;
+            border: 1px solid #b3d1ff;
+        }
+        .word-list h3 {
+            margin-top: 0;
+            color: #2c3e50;
+        }
+        .word-list ul {
+            list-style-type: none;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        .word-list li {
+            font-size: 18px;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 6px;
+            background-color: #d9e6ff;
+            color: #2c3e50;
+        }
+        .word-list li.found {
+            background-color: #ffebee;
+            color: #c62828;
+            position: relative;
+        }
+        .word-list li.found::after {
+            content: "";
+            position: absolute;
+            left: 10%;
+            top: 50%;
+            width: 80%;
+            height: 2px;
+            background-color: #c62828;
+            transform: translateY(-50%);
+        }
+        .highlight {
+            background-color: #fff3e0;
+        }
+        .stats {
+            margin: 20px 0;
+            font-size: 18px;
+            background-color: #e6f2ff;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #b3d1ff;
+        }
+        .congrats {
+            color: #c62828;
+            font-weight: bold;
+            font-size: 20px;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #ffebee;
+            border-radius: 8px;
+            display: none;
+        }
+
+        /* Media Queries for responsiveness */
+        @media screen and (max-width: 980px) {
+            .game-container {
+                flex-direction: column;
+                align-items: center;
+                padding-top: 70px;
+                gap: 30px;
+            }
+            .puzzle-grid, .word-search-container, .clues {
+                max-width: 100%;
+                width: 100%; /* Ensure they take full width */
+            }
+            .puzzle-grid .cell, .word-search td {
+                width: 35px; /* Adjust cell size for tablets */
+                height: 35px;
+            }
+            .puzzle-grid input {
+                font-size: 0.9rem;
+            }
+            .puzzle-grid .number {
+                font-size: 0.7rem;
+            }
+            .word-search td {
+                font-size: 18px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .puzzle-grid .cell, .word-search td {
+                width: 27px; /* Adjust cell size for mobile */
+                height: 27px;
+            }
+            .puzzle-grid input {
+                font-size: 0.7rem;
+            }
+            .puzzle-grid .number {
+                font-size: 0.5rem;
+                top: 1px;
+                left: 2px;
+            }
+            .word-search td {
+                font-size: 16px;
+            }
+            .clues button {
+                padding: 3px 8px;
+                font-size: 0.75rem;
+            }
+            .clues td, .clues th {
+                padding: 5px;
+            }
+            .word-list li {
+                font-size: 16px;
+                padding: 6px 10px;
+            }
+            .stats {
+                font-size: 16px;
+                padding: 10px;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800">
-    <div id="app-container" class="container">
+    <div id="input-section" class="container">
         <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-4">Puzzle Fun Generator!</h1>
         <p class="text-md text-center text-gray-600 mb-8">Create custom crossword and word search puzzles.</p>
 
@@ -146,7 +456,58 @@
             </div>
         </div>
 
-        <button id="generatePdfBtn" class="generate-button w-full">Generate PDF</button>
+        <button id="generatePuzzlesBtn" class="generate-button w-full">Generate Puzzles</button>
+    </div>
+
+    <div id="puzzles-section" class="container hidden">
+        <h1 class="text-4xl font-extrabold text-center text-gray-900 mb-4">Your Puzzles!</h1>
+        <p class="text-md text-center text-gray-600 mb-8">Interact with them below or print to PDF.</p>
+
+        <div class="game-container">
+            <!-- Interactive Crossword Puzzle -->
+            <div id="interactive-crossword-wrapper" class="flex flex-col items-center flex-1 min-w-[300px]">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Crossword Puzzle</h2>
+                <div id="interactive-crossword-grid" class="puzzle-grid">
+                    <!-- Crossword grid will be dynamically inserted here -->
+                </div>
+                <div id="interactive-crossword-clues" class="clues mt-4">
+                    <h2>Clues</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Clue</th>
+                                <th>Answer</th>
+                            </tr>
+                        </thead>
+                        <tbody id="crossword-clues-body">
+                            <!-- Clues will be dynamically inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Interactive Word Search Puzzle -->
+            <div id="interactive-wordsearch-wrapper" class="flex flex-col items-center flex-1 min-w-[300px]">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Word Search Puzzle</h2>
+                <div class="stats hidden">
+                    Found: <span id="found-count">0</span> of <span id="total-words">0</span> words
+                </div>
+                <div class="congrats" id="congrats-message">
+                    Congratulations! You found all the words!
+                </div>
+                <div class="word-list hidden">
+                    <h3>Words to find:</h3>
+                    <ul id="words-to-find"></ul>
+                </div>
+                <div class="word-search-container">
+                    <table class="word-search" id="wordSearch"></table>
+                </div>
+            </div>
+        </div>
+
+        <button id="printPdfBtn" class="generate-button w-full mt-8">Print to PDF</button>
+        <button id="backToInputBtn" class="generate-button bg-gray-500 hover:bg-gray-600 w-full mt-4">Back to Input</button>
     </div>
 
     <div id="loadingOverlay" class="loading-overlay hidden">
@@ -165,9 +526,26 @@
         const farmAnimalsBtn = document.getElementById('farmAnimalsBtn');
         const oceanAnimalsBtn = document.getElementById('oceanAnimalsBtn');
         const resetBtn = document.getElementById('resetBtn');
-        const generatePdfBtn = document.getElementById('generatePdfBtn');
-        const appContainer = document.getElementById('app-container');
+        const generatePuzzlesBtn = document.getElementById('generatePuzzlesBtn'); // Renamed from generatePdfBtn
+        const printPdfBtn = document.getElementById('printPdfBtn'); // New button
+        const backToInputBtn = document.getElementById('backToInputBtn'); // New button
+        const appContainer = document.getElementById('input-section'); // Renamed to input-section
+        const puzzlesSection = document.getElementById('puzzles-section'); // New section for puzzles
         const loadingOverlay = document.getElementById('loadingOverlay');
+
+        // Interactive Crossword Elements
+        const interactiveCrosswordGrid = document.getElementById('interactive-crossword-grid');
+        const crosswordCluesBody = document.getElementById('crossword-clues-body');
+
+        // Interactive Word Search Elements
+        const wordSearchTable = document.getElementById('wordSearch');
+        const statsDiv = document.querySelector('#puzzles-section .stats');
+        const foundCountSpan = document.getElementById('found-count');
+        const totalWordsSpan = document.getElementById('total-words');
+        const congratsMessage = document.getElementById('congrats-message');
+        const wordsToFindList = document.getElementById('words-to-find');
+        const wordListDiv = document.querySelector('#puzzles-section .word-list');
+
 
         // --- Theme Colors ---
         const themeColors = {
@@ -183,6 +561,17 @@
             'farmAnimals': ['cow', 'pig', 'chicken', 'sheep', 'horse', 'goat', 'duck', 'barn'],
             'oceanAnimals': ['dolphin', 'whale', 'shark', 'octopus', 'crab', 'jellyfish', 'seahorse', 'starfish']
         };
+
+        // --- Puzzle Data Storage ---
+        let generatedCrosswordLayouts = []; // Can hold one or two layouts
+        let generatedWordSearchGrid = [];
+        let activeWordsForPuzzles = []; // Words used for current puzzles
+
+        // --- Word Search specific global variables ---
+        let wsGrid = [];
+        let wsWordPositions = {};
+        let wsFoundWords = new Set();
+        let wsGridSize = 15; // Default word search grid size
 
         // --- Helper Functions ---
 
@@ -227,10 +616,10 @@
             currentThemeColor = themeColors[themeName];
             if (currentThemeColor) {
                 appContainer.style.borderColor = currentThemeColor.ui;
-                generatePdfBtn.style.backgroundColor = currentThemeColor.ui;
-                generatePdfBtn.style.setProperty('--tw-bg-opacity', '1'); // Ensure Tailwind opacity is overridden
-                generatePdfBtn.onmouseover = () => generatePdfBtn.style.backgroundColor = darkenColor(currentThemeColor.ui, 10);
-                generatePdfBtn.onmouseout = () => generatePdfBtn.style.backgroundColor = currentThemeColor.ui;
+                generatePuzzlesBtn.style.backgroundColor = currentThemeColor.ui;
+                generatePuzzlesBtn.style.setProperty('--tw-bg-opacity', '1'); // Ensure Tailwind opacity is overridden
+                generatePuzzlesBtn.onmouseover = () => generatePuzzlesBtn.style.backgroundColor = darkenColor(currentThemeColor.ui, 10);
+                generatePuzzlesBtn.onmouseout = () => generatePuzzlesBtn.style.backgroundColor = currentThemeColor.ui;
                 wordInput.style.borderColor = currentThemeColor.ui;
                 wordInput.style.boxShadow = `0 0 0 3px ${currentThemeColor.ui}33`; // Add a subtle shadow
             }
@@ -243,7 +632,7 @@
          * @returns {string} The darkened hex color.
          */
         function darkenColor(hex, percent) {
-            let f=parseInt(hex.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=(f>>8)&0x00FF,B=f&0x0000FF;
+            let f=parseInt(hex.slice(1),16),t=percent<0?0:255,p=percent<0?percent*-1:percent,R=f>>16,G=(f>>8)&0x00FF,B=(f&0x0000FF);
             return "#"+(0x1000000+(Math.round((t-R)*p)+R)*0x10000+(Math.round((t-G)*p)+G)*0x100+(Math.round((t-B)*p)+B)).toString(16).slice(1);
         }
 
@@ -254,12 +643,19 @@
             wordInput.value = '';
             errorMessage.classList.add('hidden');
             appContainer.style.borderColor = 'transparent';
-            generatePdfBtn.style.backgroundColor = '#4F46E5'; // Reset to default indigo
-            generatePdfBtn.onmouseover = null;
-            generatePdfBtn.onmouseout = null;
+            generatePuzzlesBtn.style.backgroundColor = '#4F46E5'; // Reset to default indigo
+            generatePuzzlesBtn.onmouseover = null;
+            generatePuzzlesBtn.onmouseout = null;
             wordInput.style.borderColor = '#D1D5DB';
             wordInput.style.boxShadow = 'none';
             currentThemeColor = null;
+            // Clear puzzle data
+            generatedCrosswordLayouts = [];
+            generatedWordSearchGrid = [];
+            activeWordsForPuzzles = [];
+            // Hide puzzle section
+            puzzlesSection.classList.add('hidden');
+            appContainer.classList.remove('hidden');
         }
 
         /**
@@ -271,288 +667,310 @@
             return alphabet.charAt(Math.floor(Math.random() * alphabet.length));
         }
 
-        /**
-         * Generates a word search puzzle grid.
-         * @param {string[]} words - An array of words to hide.
-         * @param {number} gridSize - The size of the square grid (e.g., 15 for 15x15).
-         * @returns {Array<Array<string>>} The word search grid.
-         */
-        function generateWordSearch(words, gridSize) {
-            const grid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
+        // --- Word Search Logic (adapted from user's reference) ---
+        const wsDirections = [
+            [1, 0], [0, 1], [1, 1], [-1, 1],
+            [-1, 0], [0, -1], [-1, -1], [1, -1]
+        ];
 
-            // Sort words by length descending to place longer words first
-            words.sort((a, b) => b.length - a.length);
+        function wsCanPlaceWord(word, row, col, direction) {
+            const [rowDir, colDir] = direction;
+            const endRow = row + (word.length - 1) * rowDir;
+            const endCol = col + (word.length - 1) * colDir;
 
-            const directions = [
-                { dx: 1, dy: 0 },   // Horizontal
-                { dx: 0, dy: 1 },   // Vertical
-                { dx: 1, dy: 1 },   // Diagonal (down-right)
-                { dx: 1, dy: -1 },  // Diagonal (up-right)
-                { dx: -1, dy: 0 },  // Horizontal (backward)
-                { dx: 0, dy: -1 },  // Vertical (backward)
-                { dx: -1, dy: -1 }, // Diagonal (up-left)
-                { dx: -1, dy: 1 }   // Diagonal (down-left)
-            ];
+            if (endRow < 0 || endRow >= wsGridSize || endCol < 0 || endCol >= wsGridSize) {
+                return false;
+            }
 
-            for (const word of words) {
-                let placed = false;
-                let attempts = 0;
-                const maxAttempts = 100;
+            for (let i = 0; i < word.length; i++) {
+                const r = row + i * rowDir;
+                const c = col + i * colDir;
 
-                while (!placed && attempts < maxAttempts) {
-                    attempts++;
-                    const startX = Math.floor(Math.random() * gridSize);
-                    const startY = Math.floor(Math.random() * gridSize);
-                    const dir = directions[Math.floor(Math.random() * directions.length)];
+                if (wsGrid[r][c] !== '' && wsGrid[r][c] !== word[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
 
-                    let canPlace = true;
-                    const cellsToPlace = [];
+        function wsPlaceWord(word) {
+            let placed = false;
+            let attempts = 0;
+
+            while (!placed && attempts < 100) {
+                attempts++;
+                const direction = wsDirections[Math.floor(Math.random() * wsDirections.length)];
+                const [rowDir, colDir] = direction;
+
+                let row, col;
+
+                if (rowDir === 1) {
+                    row = Math.floor(Math.random() * (wsGridSize - word.length));
+                } else if (rowDir === -1) {
+                    row = Math.floor(Math.random() * (wsGridSize - word.length)) + word.length - 1;
+                } else {
+                    row = Math.floor(Math.random() * wsGridSize);
+                }
+
+                if (colDir === 1) {
+                    col = Math.floor(Math.random() * (wsGridSize - word.length));
+                } else if (colDir === -1) {
+                    col = Math.floor(Math.random() * (wsGridSize - word.length)) + word.length - 1;
+                } else {
+                    col = Math.floor(Math.random() * wsGridSize);
+                }
+
+                if (wsCanPlaceWord(word, row, col, direction)) {
+                    wsWordPositions[word] = {
+                        start: {row, col},
+                        direction: [rowDir, colDir],
+                        letters: []
+                    };
 
                     for (let i = 0; i < word.length; i++) {
-                        const newX = startX + i * dir.dx;
-                        const newY = startY + i * dir.dy;
-
-                        if (newX < 0 || newX >= gridSize || newY < 0 || newY >= gridSize) {
-                            canPlace = false;
-                            break;
-                        }
-                        // Check if cell is empty or contains the same letter
-                        if (grid[newY][newX] !== '' && grid[newY][newX] !== word[i].toUpperCase()) {
-                            canPlace = false;
-                            break;
-                        }
-                        cellsToPlace.push({ x: newX, y: newY, char: word[i].toUpperCase() });
+                        const r = row + i * rowDir;
+                        const c = col + i * colDir;
+                        wsGrid[r][c] = word[i];
+                        wsWordPositions[word].letters.push({row: r, col: c});
                     }
+                    placed = true;
+                }
+            }
+            return placed;
+        }
 
-                    if (canPlace) {
-                        cellsToPlace.forEach(cell => {
-                            grid[cell.y][cell.x] = cell.char;
-                        });
-                        placed = true;
+        function wsFillEmptySpaces() {
+            const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            for (let i = 0; i < wsGridSize; i++) {
+                for (let j = 0; j < wsGridSize; j++) {
+                    if (wsGrid[i][j] === '') {
+                        wsGrid[i][j] = letters.charAt(Math.floor(Math.random() * letters.length));
                     }
                 }
             }
+        }
 
-            // Fill empty cells with random letters
-            for (let y = 0; y < gridSize; y++) {
-                for (let x = 0; x < gridSize; x++) {
-                    if (grid[y][x] === '') {
-                        grid[y][x] = getRandomChar();
-                    }
+        function wsRenderGrid() {
+            wordSearchTable.innerHTML = '';
+
+            for (let i = 0; i < wsGridSize; i++) {
+                const row = document.createElement('tr');
+
+                for (let j = 0; j < wsGridSize; j++) {
+                    const cell = document.createElement('td');
+                    cell.textContent = wsGrid[i][j];
+                    cell.dataset.row = i;
+                    cell.dataset.col = j;
+                    row.appendChild(cell);
+                }
+                wordSearchTable.appendChild(row);
+            }
+            wsAddCellClickListeners();
+        }
+
+        function wsAddCellClickListeners() {
+            const cells = document.querySelectorAll('#wordSearch td');
+            cells.forEach(cell => {
+                cell.removeEventListener('click', wsHandleCellClick); // Prevent duplicate listeners
+                cell.addEventListener('click', wsHandleCellClick);
+            });
+        }
+
+        function wsHandleCellClick(event) {
+            const cell = event.target;
+            const row = parseInt(cell.dataset.row);
+            const col = parseInt(cell.dataset.col);
+
+            for (const word in wsWordPositions) {
+                const positions = wsWordPositions[word].letters;
+                const isPartOfWord = positions.some(pos => pos.row === row && pos.col === col);
+
+                if (isPartOfWord && !wsFoundWords.has(word)) {
+                    wsHighlightWord(word);
+                    wsFoundWords.add(word);
+                    wsMarkWordAsFound(word);
+                    wsUpdateFoundCount();
+                    return;
                 }
             }
-            return grid;
+
+            // If not part of a word, provide temporary highlight
+            cell.classList.add('highlight');
+            setTimeout(() => {
+                cell.classList.remove('highlight');
+            }, 500);
+        }
+
+        function wsHighlightWord(word) {
+            const positions = wsWordPositions[word].letters;
+            positions.forEach(pos => {
+                const cell = document.querySelector(`#wordSearch td[data-row="${pos.row}"][data-col="${pos.col}"]`);
+                if (cell) {
+                    cell.classList.add('found-word');
+                }
+            });
+        }
+
+        function wsMarkWordAsFound(word) {
+            const wordElement = document.querySelector(`#words-to-find li[data-word="${word}"]`);
+            if (wordElement) {
+                wordElement.classList.add('found');
+            }
+        }
+
+        function wsUpdateFoundCount() {
+            foundCountSpan.textContent = wsFoundWords.size;
+            totalWordsSpan.textContent = activeWordsForPuzzles.length;
+
+            if (wsFoundWords.size === activeWordsForPuzzles.length && activeWordsForPuzzles.length > 0) {
+                congratsMessage.style.display = 'block';
+            } else {
+                congratsMessage.style.display = 'none';
+            }
+        }
+
+        function wsInitializeGrid() {
+            wsGrid = [];
+            wsWordPositions = {};
+            wsFoundWords.clear();
+            wsUpdateFoundCount();
+            congratsMessage.style.display = 'none';
+
+            for (let i = 0; i < wsGridSize; i++) {
+                wsGrid[i] = [];
+                for (let j = 0; j < wsGridSize; j++) {
+                    wsGrid[i][j] = '';
+                }
+            }
+
+            wordsToFindList.innerHTML = '';
+            activeWordsForPuzzles.forEach(word => {
+                const li = document.createElement('li');
+                li.textContent = word;
+                li.dataset.word = word;
+                wordsToFindList.appendChild(li);
+            });
+
+            const cells = document.querySelectorAll('#wordSearch td');
+            cells.forEach(cell => {
+                cell.classList.remove('found-word');
+            });
+        }
+
+        function generateInteractiveWordSearch() {
+            wsGridSize = Math.max(12, Math.ceil(Math.sqrt(activeWordsForPuzzles.join('').length)) + 3);
+            wsInitializeGrid();
+
+            // Sort words by length (longest first) for better placement
+            const wordsForWS = [...activeWordsForPuzzles].sort((a, b) => b.length - a.length);
+
+            let allPlaced = true;
+            wordsForWS.forEach(word => {
+                if (!wsPlaceWord(word)) {
+                    console.warn(`Could not place word in interactive word search: ${word}`);
+                    allPlaced = false;
+                }
+            });
+
+            if (!allPlaced) {
+                // This alert should ideally be a more subtle message on the UI
+                console.warn("Some words couldn't be placed in the interactive word search. Try with fewer or shorter words.");
+            }
+
+            wsFillEmptySpaces();
+            wsRenderGrid();
+
+            statsDiv.style.display = 'block';
+            wordListDiv.style.display = 'block';
         }
 
 
-        // --- Event Listeners ---
-        wordInput.addEventListener('input', () => {
-            if (!validateInput(wordInput.value)) {
-                errorMessage.classList.remove('hidden');
-                generatePdfBtn.disabled = true;
-            } else {
-                errorMessage.classList.add('hidden');
-                generatePdfBtn.disabled = false;
-            }
-        });
+        // --- Interactive Crossword Logic ---
+        function renderInteractiveCrossword(layout, containerElement) {
+            containerElement.innerHTML = ''; // Clear previous grid
+            crosswordCluesBody.innerHTML = ''; // Clear previous clues
 
-        easyAnimalsBtn.addEventListener('click', () => {
-            wordInput.value = themes.easyAnimals.join(', ');
-            applyThemeStyling('easyAnimals');
-            errorMessage.classList.add('hidden'); // Clear error if any
-            generatePdfBtn.disabled = false;
-        });
-
-        farmAnimalsBtn.addEventListener('click', () => {
-            wordInput.value = themes.farmAnimals.join(', ');
-            applyThemeStyling('farmAnimals');
-            errorMessage.classList.add('hidden');
-            generatePdfBtn.disabled = false;
-        });
-
-        oceanAnimalsBtn.addEventListener('click', () => {
-            wordInput.value = themes.oceanAnimals.join(', ');
-            applyThemeStyling('oceanAnimals');
-            errorMessage.classList.add('hidden');
-            generatePdfBtn.disabled = false;
-        });
-
-        resetBtn.addEventListener('click', resetApp);
-
-        generatePdfBtn.addEventListener('click', async () => {
-            const rawWords = wordInput.value;
-            if (!validateInput(rawWords)) {
-                errorMessage.classList.remove('hidden');
-                return;
-            }
-            errorMessage.classList.add('hidden');
-
-            const words = rawWords.split(/[\n,]+/)
-                                  .map(word => word.trim().toUpperCase()) // Convert to uppercase for consistency
-                                  .filter(word => word.length > 0);
-
-            if (words.length === 0) {
-                alert('Please enter some words to generate puzzles.');
+            if (!layout || layout.layout.length === 0) {
+                containerElement.innerHTML = '<p class="text-red-500 font-semibold">Crossword could not be generated with these words.</p>';
                 return;
             }
 
-            loadingOverlay.classList.remove('hidden');
-            generatePdfBtn.disabled = true;
+            const gridTable = document.createElement('div'); // Using div for grid layout
+            gridTable.classList.add('puzzle-grid');
+            gridTable.style.gridTemplateRows = `repeat(${layout.layout.length}, auto)`;
 
-            try {
-                await generatePuzzlesPdf(words);
-            } catch (error) {
-                console.error('Error generating PDF:', error);
-                alert('Failed to generate PDF. Please try again. Error: ' + error.message);
-            } finally {
-                loadingOverlay.classList.add('hidden');
-                generatePdfBtn.disabled = false;
-            }
-        });
+            const cellSize = 40; // Base cell size for interactive grid
 
-        /**
-         * Helper function to draw a single crossword puzzle section.
-         * @param {PDFPage} page - The PDF page to draw on.
-         * @param {object} layout - The crossword layout object from crossword-layout-generator.
-         * @param {number} startX - X coordinate to start drawing the section.
-         * @param {number} currentY - Current Y coordinate on the page (top of the section).
-         * @param {number} availableWidth - Available width for the section.
-         * @param {number} availableHeight - Available height for the section.
-         * @param {PDFPage} font - The standard font.
-         * @param {PDFPage} boldFont - The bold font.
-         * @param {string} sectionTitle - Title for this crossword section (e.g., "Crossword Puzzle", "Crossword Puzzle (Part 1)").
-         * @returns {number} The new currentY after drawing the section.
-         */
-        async function drawCrosswordSection(page, layout, startX, currentY, availableWidth, availableHeight, font, boldFont, sectionTitle) {
-            const titleSize = 20;
-            const titleMarginBottom = 15;
-            const clueLineHeight = 15;
-            const clueImageWidth = 15;
-            const clueImageMargin = 5;
-
-            // Draw Section Title
-            page.drawText(sectionTitle, {
-                x: startX,
-                y: currentY - titleSize,
-                font: boldFont,
-                size: titleSize,
-                color: rgb(0, 0, 0),
-            });
-            currentY -= titleSize + titleMarginBottom;
-
-            const layoutRows = layout.layout.length;
-            const layoutCols = layout.layout[0].length;
-
-            const estimatedCluesHeight = layout.entries.length * clueLineHeight;
-            const remainingHeightForGrid = availableHeight - (titleSize + titleMarginBottom) - estimatedCluesHeight - 20; // 20px buffer below grid
-
-            let cellSize = Math.min(
-                availableWidth / layoutCols,
-                remainingHeightForGrid / layoutRows,
-                40 // Max cell size from reference
-            );
-            cellSize = Math.max(cellSize, 27); // Min cell size for readability from reference
-
-            const gridHeight = layoutRows * cellSize;
-            const gridWidth = layoutCols * cellSize;
-            const gridStartX = startX;
-            const gridStartY = currentY - gridHeight - 10; // 10px buffer below title
-            currentY = gridStartY; // Update currentY to be at the top of the grid
-
-            // Draw crossword grid
             for (let r = 0; r < layout.layout.length; r++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.classList.add('row');
+                rowDiv.style.gridTemplateColumns = `repeat(${layout.layout[r].length}, ${cellSize}px)`;
+
                 for (let c = 0; c < layout.layout[r].length; c++) {
                     const cell = layout.layout[r][c];
-                    const x = gridStartX + c * cellSize;
-                    const y = gridStartY + (layout.layout.length - 1 - r) * cellSize; // PDF coordinates are from bottom-left
+                    const cellDiv = document.createElement('div');
+                    cellDiv.classList.add('cell');
 
-                    if (cell === null) { // Black square (inactive in reference)
-                        page.drawRectangle({
-                            x: x, y: y, width: cellSize, height: cellSize, color: rgb(0, 0.5, 0), // Green background for inactive
-                        });
-                    } else { // White square (active in reference)
-                        page.drawRectangle({
-                            x: x, y: y, width: cellSize, height: cellSize,
-                            borderColor: rgb(0, 0.5, 0), // Green border
-                            borderWidth: 1, // 1px border
-                            color: rgb(1, 1, 1), // White background
-                        });
-                        if (cell.char) {
-                            page.drawText(cell.char, {
-                                x: x + cellSize / 2 - font.widthOfTextAtSize(cell.char, cellSize * 0.4) / 2, // Adjusted font size
-                                y: y + cellSize / 2 - (cellSize * 0.4) / 2 + 1, // Adjusted vertical alignment
-                                font: font, size: cellSize * 0.4, // Scale font with cell size
-                                color: rgb(0, 0, 0),
-                            });
-                        }
+                    if (cell === null) {
+                        cellDiv.classList.add('inactive'); // Black square
+                    } else {
+                        const input = document.createElement('input');
+                        input.type = 'text';
+                        input.maxLength = 1;
+                        input.dataset.row = r;
+                        input.dataset.col = c;
+                        input.dataset.char = cell.char; // Store correct char for potential validation/autofill
+                        cellDiv.appendChild(input);
+
                         if (cell.startWord) {
-                            page.drawText(cell.startWord.toString(), {
-                                x: x + 3, // Left offset from reference
-                                y: y + cellSize - (cellSize * 0.2) - 5, // Adjusted for top-left and bottom 45px relative
-                                font: font, size: cellSize * 0.2, // Small font size from reference
-                                color: rgb(0, 0, 0),
-                            });
+                            const numberSpan = document.createElement('span');
+                            numberSpan.classList.add('number');
+                            numberSpan.textContent = cell.startWord;
+                            cellDiv.appendChild(numberSpan);
                         }
                     }
+                    rowDiv.appendChild(cellDiv);
                 }
+                gridTable.appendChild(rowDiv);
             }
+            containerElement.appendChild(gridTable);
 
-            // Draw crossword clues and images
-            const clueStartX = gridStartX + gridWidth + 20;
-            let clueYOffset = gridStartY + gridHeight - 10; // Start clues near top of grid
-
-            page.drawText('Clues:', {
-                x: clueStartX,
-                y: clueYOffset,
-                font: boldFont,
-                size: 14,
-                color: rgb(0, 0, 0),
+            // Render Clues
+            layout.entries.forEach((entry, index) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${entry.position}</td>
+                    <td>${entry.clue}</td>
+                    <td>
+                        <button class="show-answer-btn" data-answer="${entry.word}">Show Answer</button>
+                        <span class="answer-text">${entry.word}</span>
+                    </td>
+                `;
+                crosswordCluesBody.appendChild(tr);
             });
-            clueYOffset -= 20;
 
-            for (const entry of layout.entries) {
-                const clueText = `${entry.position}. ${entry.clue}`;
-                // Simulate image fetching with placehold.co
-                const imageUrl = `https://placehold.co/${clueImageWidth}x${clueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${entry.word.charAt(0)}`;
-
-                try {
-                    const imageBytes = await fetch(imageUrl).then(res => res.arrayBuffer());
-                    const image = await pdfDoc.embedPng(imageBytes);
-                    page.drawImage(image, {
-                        x: clueStartX,
-                        y: clueYOffset - (clueLineHeight / 2) - (clueImageWidth / 2), // Center image vertically with text
-                        width: clueImageWidth,
-                        height: clueImageWidth,
-                    });
-                    page.drawText(clueText, {
-                        x: clueStartX + clueImageWidth + clueImageMargin, // Offset text to make space for image
-                        y: clueYOffset,
-                        font: font,
-                        size: 10,
-                        color: rgb(0, 0, 0),
-                    });
-                } catch (imgError) {
-                    console.warn(`Could not fetch image for ${entry.word}:`, imgError);
-                    page.drawText(clueText + ' (Image failed)', { // Fallback if image fails
-                        x: clueStartX,
-                        y: clueYOffset,
-                        font: font,
-                        size: 10,
-                        color: rgb(0, 0, 0),
-                    });
-                }
-                clueYOffset -= clueLineHeight;
-            }
-
-            return Math.min(currentY, clueYOffset - 10); // Return the lowest Y used by this section
+            // Add event listeners for show answer buttons
+            document.querySelectorAll('.show-answer-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const answerText = e.target.nextElementSibling;
+                    if (answerText) {
+                        answerText.style.visibility = 'visible';
+                    }
+                });
+            });
         }
 
+
+        // --- Main Puzzle Generation & PDF Logic ---
 
         /**
          * Generates the PDF document with crossword and word search puzzles.
+         * This function now takes pre-generated layout data.
          * @param {string[]} words - The list of words for the puzzles.
+         * @param {Array<object>} crosswordLayouts - Array of crossword layout objects (can be one or two).
+         * @param {Array<Array<string>>} wordSearchGridData - The generated word search grid.
          */
-        async function generatePuzzlesPdf(words) {
+        async function generatePuzzlesPdf(words, crosswordLayouts, wordSearchGridData) {
             const pdfDoc = await PDFDocument.create();
             const margin = 30;
             const { width, height } = { width: 595.28, height: 841.89 }; // A4 dimensions
@@ -622,116 +1040,32 @@
             }
 
             let page1 = pdfDoc.addPage();
-            let currentYPage1 = drawPageBorderAndHeader(page1, 1);
-
-            const crosswordsToDraw = [];
-            const crosswordWordsFormatted = words.map(word => ({
-                word: word,
-                clue: scrambleWord(word.toLowerCase()) + ` (${word.length} letters)`
-            }));
-
-            // --- Attempt to generate a single crossword first ---
-            try {
-                const maxWordLength = Math.max(...words.map(w => w.length));
-                const crosswordGridProposedSize = Math.max(15, maxWordLength + 5, words.length * 2);
-                const fullCrosswordLayout = window.CrosswordLayout.generate(crosswordWordsFormatted, {
-                    maxGridSize: crosswordGridProposedSize,
-                    maxAttempts: 1000 // Increased attempts
-                });
-
-                if (fullCrosswordLayout && fullCrosswordLayout.layout.length > 0) {
-                    crosswordsToDraw.push({ layout: fullCrosswordLayout, title: 'Crossword Puzzle' });
-                } else {
-                    throw new Error("Single crossword layout failed, attempting split.");
-                }
-            } catch (e) {
-                console.warn(e.message);
-                // --- If single crossword fails, split and attempt two ---
-                // Shuffle words to distribute complexity
-                const shuffledWords = [...crosswordWordsFormatted].sort(() => 0.5 - Math.random());
-                const mid = Math.ceil(shuffledWords.length / 2);
-                const wordsPart1 = shuffledWords.slice(0, mid);
-                const wordsPart2 = shuffledWords.slice(mid);
-
-                let layout1 = null;
-                if (wordsPart1.length >= 3) { // Require at least 3 words for a meaningful puzzle
-                    try {
-                        const maxWordLength1 = Math.max(...wordsPart1.map(w => w.word.length || 0)); // Handle empty array
-                        const gridProposedSize1 = Math.max(12, maxWordLength1 + 3, wordsPart1.length * 2);
-                        layout1 = window.CrosswordLayout.generate(wordsPart1, {
-                            maxGridSize: gridProposedSize1,
-                            maxAttempts: 500
-                        });
-                        if (layout1 && layout1.layout.length > 0) {
-                            crosswordsToDraw.push({ layout: layout1, title: 'Crossword Puzzle (Part 1)' });
-                        }
-                    } catch (subError) { console.warn("Part 1 crossword failed:", subError.message); }
-                }
-
-                let layout2 = null;
-                if (wordsPart2.length >= 3) {
-                    try {
-                        const maxWordLength2 = Math.max(...wordsPart2.map(w => w.word.length || 0)); // Handle empty array
-                        const gridProposedSize2 = Math.max(12, maxWordLength2 + 3, wordsPart2.length * 2);
-                        layout2 = window.CrosswordLayout.generate(wordsPart2, {
-                            maxGridSize: gridProposedSize2,
-                            maxAttempts: 500
-                        });
-                        if (layout2 && layout2.layout.length > 0) {
-                            crosswordsToDraw.push({ layout: layout2, title: 'Crossword Puzzle (Part 2)' });
-                        }
-                    } catch (subError) { console.warn("Part 2 crossword failed:", subError.message); }
-                }
-
-                if (crosswordsToDraw.length === 0) {
-                    page1.drawText("Crossword puzzle(s) could not be generated with the given words. Please try different words or fewer words.", {
-                        x: margin, y: currentYPage1 - 50, font: font, size: 10, color: rgb(1, 0, 0)
-                    });
-                    currentYPage1 -= 60;
-                }
-            }
-
+            let currentYPage = drawPageBorderAndHeader(page1, 1);
+            let currentPage = page1;
 
             // --- Draw Crosswords ---
-            let currentPageForWS = page1; // This page will hold the Word Search and Word Bank
-            let currentYForWS = currentYPage1;
+            for (let i = 0; i < crosswordLayouts.length; i++) {
+                const layout = crosswordLayouts[i].layout;
+                const title = crosswordLayouts[i].title;
 
-            if (crosswordsToDraw.length > 0) {
-                // Draw the first crossword on page1
-                const availableCrosswordHeight1 = currentYPage1 - margin - 20; // currentY to bottom margin, less some buffer
-                currentYForWS = await drawCrosswordSection(
-                    page1,
-                    crosswordsToDraw[0].layout,
+                if (i > 0) { // If it's the second crossword, add a new page
+                    currentPage = pdfDoc.addPage();
+                    currentYPage = drawPageBorderAndHeader(currentPage, i + 1);
+                }
+
+                const availableCrosswordHeight = currentYPage - margin - 20; // currentY to bottom margin, less some buffer
+                currentYPage = await drawCrosswordSection(
+                    currentPage,
+                    layout,
                     margin,
-                    currentYPage1, // Pass the starting Y for the section
+                    currentYPage, // Pass the starting Y for the section
                     contentWidth,
-                    availableCrosswordHeight1,
+                    availableCrosswordHeight,
                     font,
                     boldFont,
-                    crosswordsToDraw[0].title
+                    title
                 );
-                currentYForWS -= 30; // Buffer space after first crossword section
-            }
-
-            // --- If there's a second crossword, add a new page for it ---
-            if (crosswordsToDraw.length > 1) {
-                let page2 = pdfDoc.addPage();
-                let currentYPage2 = drawPageBorderAndHeader(page2, 2); // Draw header on second page
-
-                const availableCrosswordHeight2 = currentYPage2 - margin - 20; // currentY to bottom margin, less some buffer
-                currentYForWS = await drawCrosswordSection(
-                    page2,
-                    crosswordsToDraw[1].layout,
-                    margin,
-                    currentYPage2, // Pass the starting Y for the section
-                    contentWidth,
-                    availableCrosswordHeight2,
-                    font,
-                    boldFont,
-                    crosswordsToDraw[1].title
-                );
-                currentPageForWS = page2; // Word Search and Word Bank will go on page 2
-                currentYForWS -= 30; // Buffer space after second crossword section
+                currentYPage -= 30; // Buffer space after crossword section
             }
 
 
@@ -740,25 +1074,24 @@
             const wordSearchTitleMarginBottom = 15;
             const wordBankLineHeight = 15;
 
-            currentYForWS -= wordSearchTitleSize + wordSearchTitleMarginBottom + 20; // Extra space before word search title
+            currentYPage -= wordSearchTitleSize + wordSearchTitleMarginBottom + 20; // Extra space before word search title
 
-            currentPageForWS.drawText('Word Search Puzzle', {
+            currentPage.drawText('Word Search Puzzle', {
                 x: margin,
-                y: currentYForWS,
+                y: currentYPage,
                 font: boldFont,
                 size: wordSearchTitleSize,
                 color: rgb(0, 0, 0),
             });
-            currentYForWS -= wordSearchTitleSize + wordSearchTitleMarginBottom;
+            currentYPage -= wordSearchTitleSize + wordSearchTitleMarginBottom;
 
-            const wordSearchGridSize = Math.max(12, Math.ceil(Math.sqrt(words.join('').length)) + 3);
-            const wordSearchGrid = generateWordSearch(words, wordSearchGridSize);
+            const wordSearchGrid = wordSearchGridData; // Use the pre-generated grid
 
             const layoutRowsWS = wordSearchGrid.length;
             const layoutColsWS = wordSearchGrid[0].length;
 
             // Calculate remaining available vertical space for word search grid + word bank
-            const remainingSpaceForWS = currentYForWS - margin - 20; // 20px buffer for bottom margin
+            const remainingSpaceForWS = currentYPage - margin - 20; // 20px buffer for bottom margin
 
             let wsCellSize = Math.min(
                 (contentWidth / layoutColsWS), // Fit horizontally
@@ -772,8 +1105,8 @@
             const wsGridHeight = layoutRowsWS * wsCellSize;
             const wsGridWidth = layoutColsWS * wsCellSize;
             const wsGridStartX = margin;
-            const wsGridStartY = currentYForWS - wsGridHeight - 10; // 10px buffer below title
-            currentYForWS = wsGridStartY; // Update currentY to below the grid
+            const wsGridStartY = currentYPage - wsGridHeight - 10; // 10px buffer below title
+            currentYPage = wsGridStartY; // Update currentY to below the grid
 
             // Draw word search grid
             for (let r = 0; r < wordSearchGrid.length; r++) {
@@ -782,12 +1115,12 @@
                     const x = wsGridStartX + c * wsCellSize;
                     const y = wsGridStartY + (wordSearchGrid.length - 1 - r) * wsCellSize;
 
-                    currentPageForWS.drawRectangle({
+                    currentPage.drawRectangle({
                         x: x, y: y, width: wsCellSize, height: wsCellSize,
                         borderColor: rgb(0.3, 0.3, 0.3), // Darker border for word search
                         borderWidth: 0.7, // Slightly thicker border
                     });
-                    currentPageForWS.drawText(char, {
+                    currentPage.drawText(char, {
                         x: x + wsCellSize / 2 - font.widthOfTextAtSize(char, wsCellSize * 0.6) / 2,
                         y: y + wsCellSize / 2 - (wsCellSize * 0.6) / 2 + 1, // +1 for slight vertical adjustment
                         font: font, size: wsCellSize * 0.6, // Scale font with cell size
@@ -800,7 +1133,7 @@
             const wordBankStartX = wsGridStartX + wsGridWidth + 20;
             let wordBankYOffset = wsGridStartY + wsGridHeight - 10; // Align with top of word search grid
 
-            currentPageForWS.drawText('Word Bank:', {
+            currentPage.drawText('Word Bank:', {
                 x: wordBankStartX,
                 y: wordBankYOffset,
                 font: boldFont,
@@ -816,7 +1149,7 @@
                 const x = wordBankStartX + (col * 100); // Offset for second column
                 const y = wordBankYOffset - (i % wordsPerColumn) * wordBankLineHeight;
 
-                currentPageForWS.drawText(word, {
+                currentPage.drawText(word, {
                     x: x, y: y, font: font, size: 10, color: rgb(0, 0, 0),
                 });
             }
@@ -828,6 +1161,178 @@
             const url = URL.createObjectURL(blob);
             window.open(url, '_blank');
         }
+
+        // --- Event Listeners ---
+        wordInput.addEventListener('input', () => {
+            if (!validateInput(wordInput.value)) {
+                errorMessage.classList.remove('hidden');
+                generatePuzzlesBtn.disabled = true;
+            } else {
+                errorMessage.classList.add('hidden');
+                generatePuzzlesBtn.disabled = false;
+            }
+        });
+
+        easyAnimalsBtn.addEventListener('click', () => {
+            wordInput.value = themes.easyAnimals.join(', ');
+            applyThemeStyling('easyAnimals');
+            errorMessage.classList.add('hidden'); // Clear error if any
+            generatePuzzlesBtn.disabled = false;
+        });
+
+        farmAnimalsBtn.addEventListener('click', () => {
+            wordInput.value = themes.farmAnimals.join(', ');
+            applyThemeStyling('farmAnimals');
+            errorMessage.classList.add('hidden');
+            generatePuzzlesBtn.disabled = false;
+        });
+
+        oceanAnimalsBtn.addEventListener('click', () => {
+            wordInput.value = themes.oceanAnimals.join(', ');
+            applyThemeStyling('oceanAnimals');
+            errorMessage.classList.add('hidden');
+            generatePuzzlesBtn.disabled = false;
+        });
+
+        resetBtn.addEventListener('click', resetApp);
+
+        generatePuzzlesBtn.addEventListener('click', async () => {
+            const rawWords = wordInput.value;
+            if (!validateInput(rawWords)) {
+                errorMessage.classList.remove('hidden');
+                return;
+            }
+            errorMessage.classList.add('hidden');
+
+            const words = rawWords.split(/[\n,]+/)
+                                  .map(word => word.trim().toUpperCase()) // Convert to uppercase for consistency
+                                  .filter(word => word.length > 0);
+
+            if (words.length === 0) {
+                alert('Please enter some words to generate puzzles.');
+                return;
+            }
+
+            loadingOverlay.classList.remove('hidden');
+            generatePuzzlesBtn.disabled = true;
+
+            activeWordsForPuzzles = words; // Store words for both interactive and PDF generation
+
+            try {
+                // --- Generate Crossword Layout(s) ---
+                generatedCrosswordLayouts = [];
+                const crosswordWordsFormatted = words.map(word => ({
+                    word: word,
+                    clue: scrambleWord(word.toLowerCase()) + ` (${word.length} letters)`
+                }));
+
+                try {
+                    const maxWordLength = Math.max(...words.map(w => w.length));
+                    const crosswordGridProposedSize = Math.max(15, maxWordLength + 5, words.length * 2);
+                    const fullCrosswordLayout = window.CrosswordLayout.generate(crosswordWordsFormatted, {
+                        maxGridSize: crosswordGridProposedSize,
+                        maxAttempts: 1000
+                    });
+
+                    if (fullCrosswordLayout && fullCrosswordLayout.layout.length > 0) {
+                        generatedCrosswordLayouts.push({ layout: fullCrosswordLayout, title: 'Crossword Puzzle' });
+                    } else {
+                        throw new Error("Single crossword layout failed, attempting split.");
+                    }
+                } catch (e) {
+                    console.warn(e.message);
+                    const shuffledWords = [...crosswordWordsFormatted].sort(() => 0.5 - Math.random());
+                    const mid = Math.ceil(shuffledWords.length / 2);
+                    const wordsPart1 = shuffledWords.slice(0, mid);
+                    const wordsPart2 = shuffledWords.slice(mid);
+
+                    if (wordsPart1.length >= 3) {
+                        try {
+                            const maxWordLength1 = Math.max(...wordsPart1.map(w => w.word.length || 0));
+                            const gridProposedSize1 = Math.max(12, maxWordLength1 + 3, wordsPart1.length * 2);
+                            const layout1 = window.CrosswordLayout.generate(wordsPart1, { maxGridSize: gridProposedSize1, maxAttempts: 500 });
+                            if (layout1 && layout1.layout.length > 0) {
+                                generatedCrosswordLayouts.push({ layout: layout1, title: 'Crossword Puzzle (Part 1)' });
+                            }
+                        } catch (subError) { console.warn("Part 1 crossword failed:", subError.message); }
+                    }
+
+                    if (wordsPart2.length >= 3) {
+                        try {
+                            const maxWordLength2 = Math.max(...wordsPart2.map(w => w.word.length || 0));
+                            const gridProposedSize2 = Math.max(12, maxWordLength2 + 3, wordsPart2.length * 2);
+                            const layout2 = window.CrosswordLayout.generate(wordsPart2, { maxGridSize: gridProposedSize2, maxAttempts: 500 });
+                            if (layout2 && layout2.layout.length > 0) {
+                                generatedCrosswordLayouts.push({ layout: layout2, title: 'Crossword Puzzle (Part 2)' });
+                            }
+                        } catch (subError) { console.warn("Part 2 crossword failed:", subError.message); }
+                    }
+                }
+
+                // --- Generate Word Search Grid ---
+                wsGridSize = Math.max(12, Math.ceil(Math.sqrt(words.join('').length)) + 3);
+                wsInitializeGrid(); // Reset interactive WS state
+                const wordsForWSGeneration = [...words].sort((a, b) => b.length - a.length); // Ensure sorted for placement
+                let allWsWordsPlaced = true;
+                for (const word of wordsForWSGeneration) {
+                    if (!wsPlaceWord(word)) {
+                        console.warn(`Could not place word in word search grid: ${word}`);
+                        allWsWordsPlaced = false;
+                    }
+                }
+                wsFillEmptySpaces();
+                generatedWordSearchGrid = wsGrid; // Store the generated grid for PDF
+
+                // --- Render Interactive Puzzles ---
+                if (generatedCrosswordLayouts.length > 0) {
+                    renderInteractiveCrossword(generatedCrosswordLayouts[0].layout, interactiveCrosswordGrid);
+                    // If there's a second crossword, display a note or handle it differently for interactive view
+                    if (generatedCrosswordLayouts.length > 1) {
+                        // For simplicity, we'll only render the first crossword interactively on page 1.
+                        // The second will only appear in the PDF.
+                        // A more complex interactive UI would allow switching between crosswords.
+                        console.warn("Multiple crosswords generated. Only the first is displayed interactively. All will be in PDF.");
+                    }
+                } else {
+                    interactiveCrosswordGrid.innerHTML = '<p class="text-red-500 font-semibold">Crossword puzzle could not be generated with these words.</p>';
+                }
+
+                generateInteractiveWordSearch(); // Renders the word search grid to the DOM
+
+                // Show puzzle section, hide input section
+                appContainer.classList.add('hidden');
+                puzzlesSection.classList.remove('hidden');
+
+            } catch (error) {
+                console.error('Error generating puzzles:', error);
+                alert('Failed to generate puzzles. Please try again. Error: ' + error.message);
+            } finally {
+                loadingOverlay.classList.add('hidden');
+                generatePuzzlesBtn.disabled = false;
+            }
+        });
+
+        // Event listener for Print to PDF button
+        printPdfBtn.addEventListener('click', async () => {
+            loadingOverlay.classList.remove('hidden');
+            printPdfBtn.disabled = true;
+            try {
+                // Pass the stored generated data to the PDF function
+                await generatePuzzlesPdf(activeWordsForPuzzles, generatedCrosswordLayouts, generatedWordSearchGrid);
+            } catch (error) {
+                console.error('Error printing PDF:', error);
+                alert('Failed to print PDF. Please try again. Error: ' + error.message);
+            } finally {
+                loadingOverlay.classList.add('hidden');
+                printPdfBtn.disabled = false;
+            }
+        });
+
+        // Event listener for Back to Input button
+        backToInputBtn.addEventListener('click', () => {
+            resetApp(); // This will clear everything and go back to input screen
+        });
+
 
         // Initial check for generate button state
         wordInput.dispatchEvent(new Event('input'));
