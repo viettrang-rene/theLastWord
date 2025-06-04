@@ -1000,9 +1000,10 @@
          * @param {string} instructionsVi - Vietnamese instructions for this section.
          * @param {boolean} isUnscrambleSection - True if this section is for unscrambling words.
          * @param {boolean} isCrosswordSectionEmpty - True if the crossword grid is empty.
+         * @param {boolean} isWordSearchSection - True if this section is for the word search.
          * @returns {number} The new currentY after drawing the section.
          */
-        async function drawPuzzleSection(page, layout, startX, currentY, availableWidth, availableHeight, font, boldFont, sectionTitleEn, sectionTitleVi, instructionsEn, instructionsVi, isUnscrambleSection, isCrosswordSectionEmpty) {
+        async function drawPuzzleSection(page, layout, startX, currentY, availableWidth, availableHeight, font, boldFont, sectionTitleEn, sectionTitleVi, instructionsEn, instructionsVi, isUnscrambleSection, isCrosswordSectionEmpty, isWordSearchSection) {
             const titleSize = 20;
             const instructionSize = 10;
             const instructionLineHeight = 12;
@@ -1051,7 +1052,7 @@
             });
             currentY -= instructionSize + 15; // Gap after instructions
 
-            if (!isUnscrambleSection && !isCrosswordSectionEmpty) { // Only draw grid for the main crossword if not empty
+            if (!isUnscrambleSection && !isCrosswordSectionEmpty && !isWordSearchSection) { // Main Crossword Grid
                 const layoutRows = layout.layout.length;
                 const layoutCols = layout.layout[0].length;
 
@@ -1101,6 +1102,47 @@
                         }
                     }
                 }
+            } else if (isWordSearchSection) { // Word Search Grid
+                const wsGrid = layout.layout; // layout.layout will be the actual wordSearchGrid
+                const layoutRowsWS = wsGrid.length;
+                const layoutColsWS = wsGrid[0].length;
+
+                // Calculate remaining available vertical space for word search grid
+                const remainingSpaceForWS = availableHeight - (titleSize + instructionLineHeight * 2 + 15); // Adjusted for instructions
+
+                let wsCellSize = Math.min(
+                    (availableWidth / layoutColsWS), // Fit horizontally
+                    (remainingSpaceForWS - 20) / layoutRowsWS, // Fit grid vertically (20px buffer)
+                    15 // Max cell size
+                );
+                wsCellSize = Math.max(wsCellSize, 8);
+
+                const wsGridHeight = layoutRowsWS * wsCellSize;
+                const wsGridWidth = layoutColsWS * wsCellSize;
+                const wsGridStartX = startX;
+                const wsGridStartY = currentY - wsGridHeight - 10; // 10px buffer below instructions
+                currentY = wsGridStartY; // Update currentY to be at the top of the grid for the grid itself
+
+                // Draw word search grid
+                for (let r = 0; r < wsGrid.length; r++) {
+                    for (let c = 0; c < wsGrid[r].length; c++) {
+                        const char = wsGrid[r][c];
+                        const x = wsGridStartX + c * wsCellSize;
+                        const y = wsGridStartY + (wsGrid.length - 1 - r) * wsCellSize; // PDF coordinates are from bottom-left
+
+                        page.drawRectangle({
+                            x: x, y: y, width: wsCellSize, height: wsCellSize,
+                            borderColor: rgb(0.3, 0.3, 0.3),
+                            borderWidth: 0.7,
+                        });
+                        page.drawText(char, {
+                            x: x + wsCellSize / 2 - font.widthOfTextAtSize(char, wsCellSize * 0.6) / 2,
+                            y: y + wsCellSize / 2 - (wsCellSize * 0.6) / 2 + 1,
+                            font: font, size: wsCellSize * 0.6,
+                            color: rgb(0, 0, 0),
+                        });
+                    }
+                }
             } else if (isCrosswordSectionEmpty) {
                 // If crossword section is empty, just print a message instead of a grid
                 page.drawText('No crossword puzzle could be generated with the provided words.', {
@@ -1125,7 +1167,7 @@
             let clueYOffset = isUnscrambleSection || isCrosswordSectionEmpty ? currentY : (gridStartY + gridHeight - 10);
 
             // Draw "Clues:" on the same line as the first clue
-            if (layout.entries.length > 0) {
+            if (layout.entries.length > 0 && !isWordSearchSection) { // Ensure clues are not drawn for word search
                 const firstEntry = layout.entries[0];
                 let firstClueText;
                 if (isUnscrambleSection) {
@@ -1308,7 +1350,8 @@
                     instructionsEn,
                     instructionsVi,
                     true, // Indicate this is an unscramble section
-                    false // Not an empty crossword grid
+                    false, // Not an empty crossword grid
+                    false // Not a word search section
                 );
                 currentYPage -= 30;
             }
@@ -1348,7 +1391,8 @@
                 crosswordInstructionsEn,
                 crosswordInstructionsVi,
                 false, // Not an unscramble section
-                isCrosswordEmpty // Indicate if the crossword grid is empty
+                isCrosswordEmpty, // Indicate if the crossword grid is empty
+                false // Not a word search section
             );
             currentYPage -= 30;
 
@@ -1372,7 +1416,7 @@
 
             currentYPage = await drawPuzzleSection(
                 currentPage,
-                { layout: wordSearchGrid, entries: [] }, // Dummy layout for word search section
+                { layout: wordSearchGrid, entries: [] }, // Pass wordSearchGrid as layout.layout
                 margin,
                 currentYPage,
                 contentWidth,
@@ -1384,44 +1428,10 @@
                 wordSearchInstructionsEn,
                 wordSearchInstructionsVi,
                 false, // Not unscramble
-                false // Not an empty crossword
+                false, // Not an empty crossword
+                true // THIS IS THE NEW PARAMETER
             );
-
-            // Adjust Y for word search grid drawing (after instructions)
-            const wsGridStartX = margin;
-            const wsGridStartY = currentYPage - 10; // Start 10px below instructions
-
-            let wsCellSize = Math.min(
-                (contentWidth / layoutColsWS), // Fit horizontally
-                (wsGridStartY - margin - 20) / layoutRowsWS, // Fit grid vertically (remaining space below instructions)
-                15 // Max cell size
-            );
-            wsCellSize = Math.max(wsCellSize, 8);
-
-            const wsGridHeight = layoutRowsWS * wsCellSize;
-            const wsGridWidth = layoutColsWS * wsCellSize;
-
-            // Draw word search grid
-            for (let r = 0; r < wordSearchGrid.length; r++) {
-                for (let c = 0; c < wordSearchGrid[r].length; c++) {
-                    const char = wordSearchGrid[r][c];
-                    const x = wsGridStartX + c * wsCellSize;
-                    const y = wsGridStartY - wsGridHeight + (r * wsCellSize); // Adjust Y for PDF coordinates
-
-                    currentPage.drawRectangle({
-                        x: x, y: y, width: wsCellSize, height: wsCellSize,
-                        borderColor: rgb(0.3, 0.3, 0.3), // Darker border for word search
-                        borderWidth: 0.7, // Slightly thicker border
-                    });
-                    currentPage.drawText(char, {
-                        x: x + wsCellSize / 2 - font.widthOfTextAtSize(char, wsCellSize * 0.6) / 2,
-                        y: y + wsCellSize / 2 - (wsCellSize * 0.6) / 2 + 1, // +1 for slight vertical adjustment
-                        font: font, size: wsCellSize * 0.6, // Scale font with cell size
-                        color: rgb(0, 0, 0),
-                    });
-                }
-            }
-            currentYPage = wsGridStartY - wsGridHeight - 10; // Update Y after drawing grid
+            currentYPage -= 30; // Buffer space after word search section
 
 
             // Save the PDF
