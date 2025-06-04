@@ -1,227 +1,210 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Puzzle Fun! - Crossword & Word Search Generator</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <style>
-        /* [Previous CSS styles remain the same] */
-        body {
-            font-family: 'Arial', sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        
-        .container {
-            background-color: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        /* [Rest of your existing CSS styles...] */
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Puzzle Fun Generator</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #fff;
+      color: #000;
+    }
+    h1, h2 {
+      text-align: center;
+    }
+    .theme-green { --accent: green; }
+    .theme-brown { --accent: brown; }
+    .theme-blue { --accent: blue; }
+    :root {
+      --accent: #000;
+    }
+    .accent {
+      color: var(--accent);
+    }
+    textarea {
+      width: 100%;
+      height: 100px;
+    }
+    .button-group button {
+      margin: 5px;
+      padding: 8px 16px;
+    }
+    .preview, .pdf-output {
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
-    <!-- [Previous HTML structure remains the same] -->
-    <div class="container">
-        <h1>Puzzle Fun!</h1>
-        <p class="subtitle">Create custom crossword and word search puzzles</p>
-        
-        <!-- [Rest of your existing HTML...] -->
+  <h1 class="accent">Puzzle Fun!</h1>
+  <h2 class="accent">Made by Rene</h2>
+  <p><strong>Student name:</strong> ________________</p>
+
+  <div class="input-section">
+    <textarea id="wordInput" placeholder="Enter words (e.g., apple, banana, dolphin) or choose a theme below."></textarea>
+    <div class="button-group">
+      <button id="easyBtn" style="background: green; color: white">Easy Animals</button>
+      <button id="farmBtn" style="background: brown; color: white">Farm Animals</button>
+      <button id="oceanBtn" style="background: blue; color: white">Ocean Animals</button>
+      <button id="resetBtn">Reset</button>
+      <button id="generateBtn">Generate PDF</button>
     </div>
+  </div>
 
-    <script>
-        // [Previous theme and word bank definitions remain the same]
-        const themes = {
-            'easy-animals': ['cat', 'dog', 'fish', 'bird', 'frog', 'bear', 'lion', 'duck'],
-            'farm-animals': ['cow', 'pig', 'goat', 'sheep', 'horse', 'chicken', 'duck', 'turkey'],
-            'ocean-animals': ['whale', 'shark', 'dolphin', 'octopus', 'seal', 'jellyfish', 'starfish', 'turtle']
-        };
+  <div class="preview" id="previewArea"></div>
 
-        // Improved PDF generation function
-        async function generatePDF() {
-            const words = getWords();
-            if (!words) return;
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script>
+    const themes = {
+      easy: { words: ["cat", "dog", "bat", "fox", "owl", "rat", "bee", "ant"], color: 'green', class: 'theme-green' },
+      farm: { words: ["cow", "pig", "goat", "sheep", "horse", "duck", "hen", "dog"], color: 'brown', class: 'theme-brown' },
+      ocean: { words: ["shark", "whale", "fish", "crab", "octopus", "seal", "eel", "dolphin"], color: 'blue', class: 'theme-blue' }
+    };
 
-            try {
-                // Check if jsPDF is loaded
-                if (typeof window.jspdf === 'undefined') {
-                    showError('PDF library failed to load. Please refresh the page.');
-                    return;
-                }
+    function loadTheme(theme) {
+      const { words, class: themeClass } = themes[theme];
+      document.getElementById("wordInput").value = words.join(", ");
+      document.body.className = themeClass;
+    }
 
-                const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
-                
-                // Set safe margins
-                const margin = 15;
-                let yPosition = margin;
-                
-                // Add header
-                doc.setFontSize(24);
-                doc.setTextColor(40, 40, 40);
-                doc.text('Puzzle Fun!', 105, yPosition, { align: 'center' });
-                yPosition += 10;
-                
-                doc.setFontSize(12);
-                doc.text('Made by Rene', 105, yPosition, { align: 'center' });
-                yPosition += 10;
-                
-                doc.setFontSize(14);
-                doc.text('Student name: _________________', 105, yPosition, { align: 'center' });
-                yPosition += 20;
+    function resetInput() {
+      document.getElementById("wordInput").value = "";
+      document.body.className = "";
+    }
 
-                // Generate crossword
-                const crossword = generateCrossword(words);
-                if (!crossword || !crossword.grid) {
-                    showError('Failed to generate crossword. Please try different words.');
-                    return;
-                }
+    function shuffle(word) {
+      const arr = word.split("");
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr.join("");
+    }
 
-                // Add crossword section
-                doc.setFontSize(16);
-                doc.text('Crossword Puzzle', margin, yPosition);
-                yPosition += 10;
-
-                // Draw crossword grid
-                const cellSize = 5;
-                const gridWidth = crossword.size * cellSize;
-                const gridStartX = margin + (doc.internal.pageSize.width - 2 * margin - gridWidth) / 2;
-                
-                // Ensure crossword fits on page
-                if (yPosition + crossword.size * cellSize > doc.internal.pageSize.height - 50) {
-                    doc.addPage();
-                    yPosition = margin;
-                }
-
-                for (let i = 0; i < crossword.size; i++) {
-                    for (let j = 0; j < crossword.size; j++) {
-                        const x = gridStartX + j * cellSize;
-                        const y = yPosition + i * cellSize;
-                        
-                        if (crossword.grid[i][j] === '') {
-                            doc.setFillColor(0, 0, 0);
-                            doc.rect(x, y, cellSize, cellSize, 'F');
-                        } else {
-                            doc.rect(x, y, cellSize, cellSize);
-                            
-                            // Add number
-                            const coord = `${i},${j}`;
-                            if (crossword.numbers[coord]) {
-                                doc.setFontSize(6);
-                                doc.text(crossword.numbers[coord].toString(), x + 1, y + 2);
-                            }
-                            
-                            // Add letter
-                            doc.setFontSize(10);
-                            doc.text(crossword.grid[i][j], x + cellSize/2, y + cellSize/2 + 1, { align: 'center' });
-                        }
-                    }
-                }
-                
-                yPosition += crossword.size * cellSize + 15;
-
-                // Add clues
-                doc.setFontSize(12);
-                doc.text('Clues:', margin, yPosition);
-                yPosition += 7;
-
-                // Split clues into columns if needed
-                const cluesPerColumn = Math.floor((doc.internal.pageSize.height - yPosition - 20) / 7);
-                const columnWidth = 90;
-                let column = 0;
-                
-                words.forEach((word, index) => {
-                    if (yPosition > doc.internal.pageSize.height - 20) {
-                        doc.addPage();
-                        yPosition = margin;
-                        column = 0;
-                    }
-                    
-                    if (index > 0 && index % cluesPerColumn === 0) {
-                        column++;
-                        yPosition = margin + 30; // Below the title
-                    }
-                    
-                    doc.text(`${index + 1}. ${scrambleWord(word.toLowerCase())} (${word.length} letters)`, 
-                            margin + column * columnWidth, 
-                            yPosition);
-                    yPosition += 7;
-                });
-
-                // Add word search section (on a new page)
-                doc.addPage();
-                yPosition = margin;
-                
-                doc.setFontSize(16);
-                doc.text('Word Search', margin, yPosition);
-                yPosition += 10;
-
-                // Generate word search
-                const wordsearch = generateWordSearch(words);
-                if (!wordsearch || !wordsearch.grid) {
-                    showError('Failed to generate word search. Please try different words.');
-                    return;
-                }
-
-                // Draw word search grid
-                const wsCellSize = 5;
-                const wsGridWidth = wordsearch.size * wsCellSize;
-                const wsGridStartX = margin + (doc.internal.pageSize.width - 2 * margin - wsGridWidth) / 2;
-                
-                // Ensure word search fits on page
-                if (yPosition + wordsearch.size * wsCellSize > doc.internal.pageSize.height - 50) {
-                    doc.addPage();
-                    yPosition = margin;
-                }
-
-                for (let i = 0; i < wordsearch.size; i++) {
-                    for (let j = 0; j < wordsearch.size; j++) {
-                        const x = wsGridStartX + j * wsCellSize;
-                        const y = yPosition + i * wsCellSize;
-                        
-                        doc.rect(x, y, wsCellSize, wsCellSize);
-                        doc.setFontSize(10);
-                        doc.text(wordsearch.grid[i][j], x + wsCellSize/2, y + wsCellSize/2 + 1, { align: 'center' });
-                    }
-                }
-                
-                yPosition += wordsearch.size * wsCellSize + 10;
-
-                // Add word bank
-                doc.setFontSize(12);
-                doc.text('Word Bank:', margin, yPosition);
-                doc.text(words.join(', ').toUpperCase(), margin, yPosition + 7);
-
-                // Add theme color if selected
-                if (currentTheme) {
-                    doc.setDrawColor(themeColors[currentTheme]);
-                    doc.setLineWidth(1);
-                    doc.rect(5, 5, doc.internal.pageSize.width - 10, doc.internal.pageSize.height - 10);
-                }
-
-                // Save the PDF
-                doc.save('puzzle-fun.pdf');
-
-                // Update previews
-                updatePreviews();
-
-            } catch (error) {
-                console.error('PDF Generation Error:', error);
-                showError('An error occurred while generating the PDF. Please try with fewer or shorter words.');
+    function generateWordSearch(words, size = 12) {
+      const grid = Array.from({ length: size }, () => Array(size).fill(""));
+      const directions = [
+        [0, 1], [1, 0], [1, 1], [-1, 1]
+      ];
+      function placeWord(word) {
+        for (let attempt = 0; attempt < 100; attempt++) {
+          const dir = directions[Math.floor(Math.random() * directions.length)];
+          const x = Math.floor(Math.random() * size);
+          const y = Math.floor(Math.random() * size);
+          let fit = true;
+          for (let i = 0; i < word.length; i++) {
+            const nx = x + dir[0] * i;
+            const ny = y + dir[1] * i;
+            if (nx < 0 || ny < 0 || nx >= size || ny >= size || (grid[nx][ny] && grid[nx][ny] !== word[i])) {
+              fit = false;
+              break;
             }
+          }
+          if (fit) {
+            for (let i = 0; i < word.length; i++) {
+              const nx = x + dir[0] * i;
+              const ny = y + dir[1] * i;
+              grid[nx][ny] = word[i];
+            }
+            return true;
+          }
         }
+        return false;
+      }
+      words.forEach(word => placeWord(word.toUpperCase()));
+      for (let i = 0; i < size; i++) {
+        for (let j = 0; j < size; j++) {
+          if (!grid[i][j]) grid[i][j] = String.fromCharCode(65 + Math.floor(Math.random() * 26));
+        }
+      }
+      return grid;
+    }
 
-        // [Rest of your existing JavaScript functions...]
-    </script>
+    function generatePDF() {
+      const raw = document.getElementById("wordInput").value;
+      let words = raw.split(/[\n,]+/).map(w => w.trim().toLowerCase()).filter(w => /^[a-zA-Z]+$/.test(w));
+
+      if (words.length === 0) {
+        alert("Only letters allowed. Please try again!");
+        return;
+      }
+
+      const scrambled = words.map(w => shuffle(w));
+      const grid = generateWordSearch(words);
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      doc.setFontSize(16);
+      doc.text("Puzzle Fun!", 105, 20, null, null, 'center');
+      doc.setFontSize(12);
+      doc.text("Made by Rene", 105, 28, null, null, 'center');
+      doc.text("Student name: ________________", 20, 38);
+
+      // Crossword Clues
+      let y = 48;
+      doc.setFontSize(14);
+      doc.text("Crossword Clues (scrambled):", 20, y);
+      y += 10;
+      for (let i = 0; i < scrambled.length; i++) {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+          doc.setFontSize(14);
+          doc.text("Crossword Clues (continued):", 20, y);
+          y += 10;
+        }
+        doc.text(`${i + 1}. ${scrambled[i]} (${words[i].length} letters)`, 25, y);
+        y += 8;
+      }
+
+      // Word Search Grid
+      if (y > 200) {
+        doc.addPage();
+        y = 20;
+      } else {
+        y += 10;
+      }
+      doc.setFontSize(14);
+      doc.text("Word Search:", 20, y);
+      y += 10;
+      doc.setFontSize(10);
+      grid.forEach((row, i) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(row.join(" "), 25, y);
+        y += 5;
+      });
+
+      // Word Bank
+      if (y > 240) {
+        doc.addPage();
+        y = 20;
+      } else {
+        y += 10;
+      }
+      doc.setFontSize(12);
+      doc.text("Word Bank:", 20, y);
+      y += 8;
+      words.forEach((w, i) => {
+        if (y > 270) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(w, 25, y);
+        y += 6;
+      });
+
+      doc.save("puzzle_fun.pdf");
+    }
+
+    document.getElementById("easyBtn").addEventListener("click", () => loadTheme('easy'));
+    document.getElementById("farmBtn").addEventListener("click", () => loadTheme('farm'));
+    document.getElementById("oceanBtn").addEventListener("click", () => loadTheme('ocean'));
+    document.getElementById("resetBtn").addEventListener("click", resetInput);
+    document.getElementById("generateBtn").addEventListener("click", generatePDF);
+  </script>
 </body>
 </html>
