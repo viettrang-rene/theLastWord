@@ -444,18 +444,14 @@
             const layoutCols = layout.layout[0].length;
 
             const estimatedCluesHeight = layout.entries.length * clueLineHeight;
-            const spaceForGrid = availableHeight - (currentY - (height - margin)); // Space from currentY down to bottom margin, accounting for header already drawn
-            // Re-calculate spaceForGrid more accurately:
-            // availableHeight passed in is the total height from currentY down to where content can be drawn.
-            // We need to subtract the title and clue height from this availableHeight to get space for grid.
             const remainingHeightForGrid = availableHeight - (titleSize + titleMarginBottom) - estimatedCluesHeight - 20; // 20px buffer below grid
 
             let cellSize = Math.min(
                 availableWidth / layoutCols,
                 remainingHeightForGrid / layoutRows,
-                15 // Max cell size
+                40 // Max cell size from reference
             );
-            cellSize = Math.max(cellSize, 8); // Min cell size for readability
+            cellSize = Math.max(cellSize, 27); // Min cell size for readability from reference
 
             const gridHeight = layoutRows * cellSize;
             const gridWidth = layoutCols * cellSize;
@@ -470,27 +466,30 @@
                     const x = gridStartX + c * cellSize;
                     const y = gridStartY + (layout.layout.length - 1 - r) * cellSize; // PDF coordinates are from bottom-left
 
-                    if (cell === null) { // Black square
+                    if (cell === null) { // Black square (inactive in reference)
                         page.drawRectangle({
-                            x: x, y: y, width: cellSize, height: cellSize, color: rgb(0.2, 0.2, 0.2),
+                            x: x, y: y, width: cellSize, height: cellSize, color: rgb(0, 0.5, 0), // Green background for inactive
                         });
-                    } else { // White square
+                    } else { // White square (active in reference)
                         page.drawRectangle({
                             x: x, y: y, width: cellSize, height: cellSize,
-                            borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 0.5,
+                            borderColor: rgb(0, 0.5, 0), // Green border
+                            borderWidth: 1, // 1px border
+                            color: rgb(1, 1, 1), // White background
                         });
                         if (cell.char) {
                             page.drawText(cell.char, {
-                                x: x + cellSize / 2 - font.widthOfTextAtSize(cell.char, cellSize * 0.5) / 2,
-                                y: y + cellSize / 2 - (cellSize * 0.5) / 2,
-                                font: font, size: cellSize * 0.5, // Scale font with cell size
+                                x: x + cellSize / 2 - font.widthOfTextAtSize(cell.char, cellSize * 0.4) / 2, // Adjusted font size
+                                y: y + cellSize / 2 - (cellSize * 0.4) / 2 + 1, // Adjusted vertical alignment
+                                font: font, size: cellSize * 0.4, // Scale font with cell size
                                 color: rgb(0, 0, 0),
                             });
                         }
                         if (cell.startWord) {
                             page.drawText(cell.startWord.toString(), {
-                                x: x + 1, y: y + cellSize - (cellSize * 0.4) - 2, // Adjust for top-left
-                                font: font, size: cellSize * 0.4, // Scale font with cell size
+                                x: x + 3, // Left offset from reference
+                                y: y + cellSize - (cellSize * 0.2) - 5, // Adjusted for top-left and bottom 45px relative
+                                font: font, size: cellSize * 0.2, // Small font size from reference
                                 color: rgb(0, 0, 0),
                             });
                         }
