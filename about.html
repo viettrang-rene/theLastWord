@@ -4,13 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Puzzle Fun Generator</title>
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Inter font from Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-    <!-- PDF-LIB for PDF generation -->
     <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
-    <!-- Crossword Layout Generator -->
     <script src="https://unpkg.com/crossword-layout-generator@1.0.0/dist/crossword-layout-generator.umd.js"></script>
     <style>
         body {
@@ -411,258 +407,357 @@
         });
 
         /**
+         * Helper function to draw a single crossword puzzle section.
+         * @param {PDFPage} page - The PDF page to draw on.
+         * @param {object} layout - The crossword layout object from crossword-layout-generator.
+         * @param {number} startX - X coordinate to start drawing the section.
+         * @param {number} currentY - Current Y coordinate on the page (top of the section).
+         * @param {number} availableWidth - Available width for the section.
+         * @param {number} availableHeight - Available height for the section.
+         * @param {PDFPage} font - The standard font.
+         * @param {PDFPage} boldFont - The bold font.
+         * @param {string} sectionTitle - Title for this crossword section (e.g., "Crossword Puzzle", "Crossword Puzzle (Part 1)").
+         * @returns {number} The new currentY after drawing the section.
+         */
+        async function drawCrosswordSection(page, layout, startX, currentY, availableWidth, availableHeight, font, boldFont, sectionTitle) {
+            const titleSize = 20;
+            const titleMarginBottom = 15;
+            const clueLineHeight = 15;
+            const clueImageWidth = 15;
+            const clueImageMargin = 5;
+
+            // Draw Section Title
+            page.drawText(sectionTitle, {
+                x: startX,
+                y: currentY - titleSize,
+                font: boldFont,
+                size: titleSize,
+                color: rgb(0, 0, 0),
+            });
+            currentY -= titleSize + titleMarginBottom;
+
+            const layoutRows = layout.layout.length;
+            const layoutCols = layout.layout[0].length;
+
+            const estimatedCluesHeight = layout.entries.length * clueLineHeight;
+            const spaceForGrid = availableHeight - (startY - currentY) - estimatedCluesHeight - 20; // 20px buffer below grid
+
+            let cellSize = Math.min(
+                availableWidth / layoutCols,
+                spaceForGrid / layoutRows,
+                15 // Max cell size
+            );
+            cellSize = Math.max(cellSize, 8); // Min cell size for readability
+
+            const gridHeight = layoutRows * cellSize;
+            const gridWidth = layoutCols * cellSize;
+            const gridStartX = startX;
+            const gridStartY = currentY - gridHeight - 10; // 10px buffer below title
+            currentY = gridStartY; // Update currentY to be at the top of the grid
+
+            // Draw crossword grid
+            for (let r = 0; r < layout.layout.length; r++) {
+                for (let c = 0; c < layout.layout[r].length; c++) {
+                    const cell = layout.layout[r][c];
+                    const x = gridStartX + c * cellSize;
+                    const y = gridStartY + (layout.layout.length - 1 - r) * cellSize; // PDF coordinates are from bottom-left
+
+                    if (cell === null) { // Black square
+                        page.drawRectangle({
+                            x: x, y: y, width: cellSize, height: cellSize, color: rgb(0.2, 0.2, 0.2),
+                        });
+                    } else { // White square
+                        page.drawRectangle({
+                            x: x, y: y, width: cellSize, height: cellSize,
+                            borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 0.5,
+                        });
+                        if (cell.char) {
+                            page.drawText(cell.char, {
+                                x: x + cellSize / 2 - font.widthOfTextAtSize(cell.char, cellSize * 0.5) / 2,
+                                y: y + cellSize / 2 - (cellSize * 0.5) / 2,
+                                font: font, size: cellSize * 0.5, // Scale font with cell size
+                                color: rgb(0, 0, 0),
+                            });
+                        }
+                        if (cell.startWord) {
+                            page.drawText(cell.startWord.toString(), {
+                                x: x + 1, y: y + cellSize - (cellSize * 0.4) - 2, // Adjust for top-left
+                                font: font, size: cellSize * 0.4, // Scale font with cell size
+                                color: rgb(0, 0, 0),
+                            });
+                        }
+                    }
+                }
+            }
+
+            // Draw crossword clues and images
+            const clueStartX = gridStartX + gridWidth + 20;
+            let clueYOffset = gridStartY + gridHeight - 10; // Start clues near top of grid
+
+            page.drawText('Clues:', {
+                x: clueStartX,
+                y: clueYOffset,
+                font: boldFont,
+                size: 14,
+                color: rgb(0, 0, 0),
+            });
+            clueYOffset -= 20;
+
+            for (const entry of layout.entries) {
+                const clueText = `${entry.position}. ${entry.clue}`;
+                // Simulate image fetching with placehold.co
+                const imageUrl = `https://placehold.co/${clueImageWidth}x${clueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${entry.word.charAt(0)}`;
+
+                try {
+                    const imageBytes = await fetch(imageUrl).then(res => res.arrayBuffer());
+                    const image = await pdfDoc.embedPng(imageBytes);
+                    page.drawImage(image, {
+                        x: clueStartX,
+                        y: clueYOffset - (clueLineHeight / 2) - (clueImageWidth / 2), // Center image vertically with text
+                        width: clueImageWidth,
+                        height: clueImageWidth,
+                    });
+                    page.drawText(clueText, {
+                        x: clueStartX + clueImageWidth + clueImageMargin, // Offset text to make space for image
+                        y: clueYOffset,
+                        font: font,
+                        size: 10,
+                        color: rgb(0, 0, 0),
+                    });
+                } catch (imgError) {
+                    console.warn(`Could not fetch image for ${entry.word}:`, imgError);
+                    page.drawText(clueText + ' (Image failed)', { // Fallback if image fails
+                        x: clueStartX,
+                        y: clueYOffset,
+                        font: font,
+                        size: 10,
+                        color: rgb(0, 0, 0),
+                    });
+                }
+                clueYOffset -= clueLineHeight;
+            }
+
+            return Math.min(currentY, clueYOffset - 10); // Return the lowest Y used by this section
+        }
+
+
+        /**
          * Generates the PDF document with crossword and word search puzzles.
          * @param {string[]} words - The list of words for the puzzles.
          */
         async function generatePuzzlesPdf(words) {
             const pdfDoc = await PDFDocument.create();
-            const page = pdfDoc.addPage();
-            const { width, height } = page.getSize();
+            const margin = 30;
+            const { width, height } = { width: 595.28, height: 841.89 }; // A4 dimensions
+            const contentWidth = width - 2 * margin;
+
             const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
             const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-
-            const margin = 30;
-            const contentWidth = width - 2 * margin;
-            const contentHeight = height - 2 * margin;
             const accentColor = currentThemeColor ? currentThemeColor.pdf : rgb(0.8, 0.8, 0.8); // Default light gray border
 
-            // Draw border
-            page.drawRectangle({
-                x: margin / 2,
-                y: margin / 2,
-                width: width - margin,
-                height: height - margin,
-                borderColor: accentColor,
-                borderWidth: 5,
-                opacity: 0.8,
-                borderOpacity: 0.8,
-                lineCap: 'round',
-                lineJoin: 'round',
-                dashArray: [5, 5],
-            });
+            // --- Helper to draw page border and header ---
+            function drawPageBorderAndHeader(page, pageNum) {
+                // Draw border
+                page.drawRectangle({
+                    x: margin / 2,
+                    y: margin / 2,
+                    width: width - margin,
+                    height: height - margin,
+                    borderColor: accentColor,
+                    borderWidth: 5,
+                    opacity: 0.8,
+                    borderOpacity: 0.8,
+                    lineCap: 'round',
+                    lineJoin: 'round',
+                    dashArray: [5, 5],
+                });
 
-            let currentY = height - margin; // Start from top margin for content
+                let currentY = height - margin; // Start from top margin for content
 
-            // --- Header ---
-            const headerTitleSize = 36;
-            const headerSubtitleSize = 14;
-            const studentNameLineSize = 12;
-            const headerSpacing = 20; // Space between header elements
+                // Header
+                const headerTitleSize = 36;
+                const headerSubtitleSize = 14;
+                const studentNameLineSize = 12;
+                const headerSpacing = 20;
 
-            page.drawText('Puzzle Fun!', {
-                x: margin,
-                y: currentY - headerTitleSize,
-                font: boldFont,
-                size: headerTitleSize,
-                color: rgb(0, 0, 0),
-            });
-            currentY -= headerTitleSize + headerSpacing;
+                page.drawText('Puzzle Fun!', {
+                    x: margin,
+                    y: currentY - headerTitleSize,
+                    font: boldFont,
+                    size: headerTitleSize,
+                    color: rgb(0, 0, 0),
+                });
+                currentY -= headerTitleSize + headerSpacing;
 
-            page.drawText('Made by Rene', {
-                x: margin,
-                y: currentY - headerSubtitleSize,
-                font: font,
-                size: headerSubtitleSize,
-                color: rgb(0.3, 0.3, 0.3),
-            });
-            currentY -= headerSubtitleSize + headerSpacing;
+                page.drawText('Made by Rene', {
+                    x: margin,
+                    y: currentY - headerSubtitleSize,
+                    font: font,
+                    size: headerSubtitleSize,
+                    color: rgb(0.3, 0.3, 0.3),
+                });
+                currentY -= headerSubtitleSize + headerSpacing;
 
-            page.drawText('Student name: _________________', {
-                x: margin,
-                y: currentY - studentNameLineSize,
-                font: font,
-                size: studentNameLineSize,
-                color: rgb(0, 0, 0),
-            });
-            currentY -= studentNameLineSize + 40; // More space after header block
+                page.drawText('Student name: _________________', {
+                    x: margin,
+                    y: currentY - studentNameLineSize,
+                    font: font,
+                    size: studentNameLineSize,
+                    color: rgb(0, 0, 0),
+                });
+                currentY -= studentNameLineSize + 40; // More space after header block
 
+                if (pageNum > 1) {
+                    page.drawText(`Page ${pageNum}`, { x: width - margin - 50, y: height - margin + 10, font: font, size: 8 });
+                }
 
-            // --- Crossword Puzzle Section ---
-            const crosswordTitleSize = 20;
-            const crosswordTitleMarginBottom = 15;
-            const crosswordClueLineHeight = 15; // Approx height per clue line
-            const crosswordClueImageWidth = 15;
-            const crosswordClueImageMargin = 5; // Space between image and text
+                return currentY;
+            }
 
-            page.drawText('Crossword Puzzle', {
-                x: margin,
-                y: currentY - crosswordTitleSize,
-                font: boldFont,
-                size: crosswordTitleSize,
-                color: rgb(0, 0, 0),
-            });
-            currentY -= crosswordTitleSize + crosswordTitleMarginBottom;
+            let page1 = pdfDoc.addPage();
+            let currentYPage1 = drawPageBorderAndHeader(page1, 1);
 
+            const crosswordsToDraw = [];
             const crosswordWordsFormatted = words.map(word => ({
                 word: word,
                 clue: scrambleWord(word.toLowerCase()) + ` (${word.length} letters)`
             }));
 
-            let crosswordLayout;
-            let crosswordGridHeight = 0;
-            let crosswordGridWidth = 0;
-            let crosswordCellSize = 0;
-            const crosswordGridStartX = margin;
-            let crosswordGridStartY = 0;
-
+            // --- Attempt to generate a single crossword first ---
             try {
                 const maxWordLength = Math.max(...words.map(w => w.length));
-                // Ensure grid is large enough for words, but not excessively large
                 const crosswordGridProposedSize = Math.max(15, maxWordLength + 5, words.length * 2);
-
-                crosswordLayout = window.CrosswordLayout.generate(crosswordWordsFormatted, {
+                const fullCrosswordLayout = window.CrosswordLayout.generate(crosswordWordsFormatted, {
                     maxGridSize: crosswordGridProposedSize,
-                    maxAttempts: 1000 // Increased attempts for better layout success rate
+                    maxAttempts: 1000 // Increased attempts
                 });
 
-                if (!crosswordLayout || crosswordLayout.layout.length === 0) {
-                    throw new Error("Failed to generate crossword layout.");
+                if (fullCrosswordLayout && fullCrosswordLayout.layout.length > 0) {
+                    crosswordsToDraw.push({ layout: fullCrosswordLayout, title: 'Crossword Puzzle' });
+                } else {
+                    throw new Error("Single crossword layout failed, attempting split.");
                 }
-
-                const layoutRows = crosswordLayout.layout.length;
-                const layoutCols = crosswordLayout.layout[0].length;
-
-                // Calculate estimated height for clues and grid to fit
-                const estimatedCluesHeight = crosswordLayout.entries.length * crosswordClueLineHeight;
-                // Remaining height for both puzzles: currentY - bottom margin - buffer
-                const remainingPageHeight = currentY - margin - 20; // 20px buffer before next section
-
-                // Distribute space: roughly 60% for crossword, 40% for word search (adjustable)
-                // Or, calculate based on actual content needed
-                const requiredCrosswordGridHeight = layoutRows * 15; // Assuming max 15px cell size initially
-                const requiredCrosswordCluesHeight = estimatedCluesHeight;
-                const totalRequiredCrosswordHeight = requiredCrosswordGridHeight + requiredCrosswordCluesHeight + 20; // 20px buffer between grid and clues
-
-                // If total required crossword height is too much for 60% of remaining height, scale down
-                const maxCrosswordHeightAllowed = remainingPageHeight * 0.6; // Allocate 60% of remaining space to crossword
-
-                crosswordCellSize = Math.min(
-                    (contentWidth / layoutCols), // Fit horizontally
-                    (maxCrosswordHeightAllowed - requiredCrosswordCluesHeight - 20) / layoutRows, // Fit grid vertically within allocated space
-                    15 // Max cell size
-                );
-                // Ensure min cell size for readability
-                crosswordCellSize = Math.max(crosswordCellSize, 8);
-
-
-                crosswordGridHeight = layoutRows * crosswordCellSize;
-                crosswordGridWidth = layoutCols * crosswordCellSize;
-                crosswordGridStartY = currentY - crosswordGridHeight - 10; // 10px buffer below title
-                currentY = crosswordGridStartY; // Update currentY to below the grid
-
             } catch (e) {
-                console.warn('Crossword layout failed:', e);
-                page.drawText("Crossword puzzle could not be generated with the given words. Please try different words.", {
-                    x: margin, y: currentY - 50, font: font, size: 10, color: rgb(1, 0, 0)
-                });
-                currentY -= 60; // Adjust yOffset for error message
-                crosswordLayout = null; // Ensure it's null if generation fails
-            }
+                console.warn(e.message);
+                // --- If single crossword fails, split and attempt two ---
+                // Shuffle words to distribute complexity
+                const shuffledWords = [...crosswordWordsFormatted].sort(() => 0.5 - Math.random());
+                const mid = Math.ceil(shuffledWords.length / 2);
+                const wordsPart1 = shuffledWords.slice(0, mid);
+                const wordsPart2 = shuffledWords.slice(mid);
 
-
-            // --- Draw Crossword Grid (if generated) ---
-            if (crosswordLayout) {
-                for (let r = 0; r < crosswordLayout.layout.length; r++) {
-                    for (let c = 0; c < crosswordLayout.layout[r].length; c++) {
-                        const cell = crosswordLayout.layout[r][c];
-                        const x = crosswordGridStartX + c * crosswordCellSize;
-                        const y = crosswordGridStartY + (crosswordLayout.layout.length - 1 - r) * crosswordCellSize;
-
-                        if (cell === null) { // Black square
-                            page.drawRectangle({
-                                x: x, y: y, width: crosswordCellSize, height: crosswordCellSize, color: rgb(0.2, 0.2, 0.2),
-                            });
-                        } else { // White square
-                            page.drawRectangle({
-                                x: x, y: y, width: crosswordCellSize, height: crosswordCellSize,
-                                borderColor: rgb(0.5, 0.5, 0.5), borderWidth: 0.5,
-                            });
-                            if (cell.char) {
-                                page.drawText(cell.char, {
-                                    x: x + crosswordCellSize / 2 - font.widthOfTextAtSize(cell.char, crosswordCellSize * 0.5) / 2,
-                                    y: y + crosswordCellSize / 2 - (crosswordCellSize * 0.5) / 2,
-                                    font: font, size: crosswordCellSize * 0.5, // Scale font with cell size
-                                    color: rgb(0, 0, 0),
-                                });
-                            }
-                            if (cell.startWord) {
-                                page.drawText(cell.startWord.toString(), {
-                                    x: x + 1, y: y + crosswordCellSize - (crosswordCellSize * 0.4) - 2, // Adjust for top-left
-                                    font: font, size: crosswordCellSize * 0.4, // Scale font with cell size
-                                    color: rgb(0, 0, 0),
-                                });
-                            }
-                        }
-                    }
-                }
-
-                // Draw crossword clues and images
-                const clueStartX = crosswordGridStartX + crosswordGridWidth + 20;
-                // Start clues near top of grid, but ensure enough space below
-                let clueYOffset = crosswordGridStartY + crosswordGridHeight - 10;
-
-                page.drawText('Clues:', {
-                    x: clueStartX,
-                    y: clueYOffset,
-                    font: boldFont,
-                    size: 14,
-                    color: rgb(0, 0, 0),
-                });
-                clueYOffset -= 20;
-
-                for (const entry of crosswordLayout.entries) {
-                    const clueText = `${entry.position}. ${entry.clue}`;
-                    // Simulate image fetching with placehold.co
-                    const imageUrl = `https://placehold.co/${crosswordClueImageWidth}x${crosswordClueImageWidth}/${Math.floor(Math.random()*16777215).toString(16)}/FFF?text=${entry.word.charAt(0)}`;
-
+                let layout1 = null;
+                if (wordsPart1.length >= 3) { // Require at least 3 words for a meaningful puzzle
                     try {
-                        const imageBytes = await fetch(imageUrl).then(res => res.arrayBuffer());
-                        const image = await pdfDoc.embedPng(imageBytes);
-                        page.drawImage(image, {
-                            x: clueStartX,
-                            y: clueYOffset - (crosswordClueLineHeight / 2) - (crosswordClueImageWidth / 2), // Center image vertically with text
-                            width: crosswordClueImageWidth,
-                            height: crosswordClueImageWidth,
+                        const maxWordLength1 = Math.max(...wordsPart1.map(w => w.word.length || 0)); // Handle empty array
+                        const gridProposedSize1 = Math.max(12, maxWordLength1 + 3, wordsPart1.length * 2);
+                        layout1 = window.CrosswordLayout.generate(wordsPart1, {
+                            maxGridSize: gridProposedSize1,
+                            maxAttempts: 500
                         });
-                        page.drawText(clueText, {
-                            x: clueStartX + crosswordClueImageWidth + crosswordClueImageMargin, // Offset text to make space for image
-                            y: clueYOffset,
-                            font: font,
-                            size: 10,
-                            color: rgb(0, 0, 0),
-                        });
-                    } catch (imgError) {
-                        console.warn(`Could not fetch image for ${entry.word}:`, imgError);
-                        page.drawText(clueText + ' (Image failed)', { // Fallback if image fails
-                            x: clueStartX,
-                            y: clueYOffset,
-                            font: font,
-                            size: 10,
-                            color: rgb(0, 0, 0),
-                        });
-                    }
-                    clueYOffset -= crosswordClueLineHeight;
+                        if (layout1 && layout1.layout.length > 0) {
+                            crosswordsToDraw.push({ layout: layout1, title: 'Crossword Puzzle (Part 1)' });
+                        }
+                    } catch (subError) { console.warn("Part 1 crossword failed:", subError.message); }
                 }
-                // Update currentY to be below the lowest point of crossword clues or grid, whichever is lower
-                currentY = Math.min(currentY, clueYOffset - 10);
+
+                let layout2 = null;
+                if (wordsPart2.length >= 3) {
+                    try {
+                        const maxWordLength2 = Math.max(...wordsPart2.map(w => w.word.length || 0)); // Handle empty array
+                        const gridProposedSize2 = Math.max(12, maxWordLength2 + 3, wordsPart2.length * 2);
+                        layout2 = window.CrosswordLayout.generate(wordsPart2, {
+                            maxGridSize: gridProposedSize2,
+                            maxAttempts: 500
+                        });
+                        if (layout2 && layout2.layout.length > 0) {
+                            crosswordsToDraw.push({ layout: layout2, title: 'Crossword Puzzle (Part 2)' });
+                        }
+                    } catch (subError) { console.warn("Part 2 crossword failed:", subError.message); }
+                }
+
+                if (crosswordsToDraw.length === 0) {
+                    page1.drawText("Crossword puzzle(s) could not be generated with the given words. Please try different words or fewer words.", {
+                        x: margin, y: currentYPage1 - 50, font: font, size: 10, color: rgb(1, 0, 0)
+                    });
+                    currentYPage1 -= 60;
+                }
             }
 
 
-            // --- Word Search Puzzle Section ---
+            // --- Draw Crosswords ---
+            let currentPageForWS = page1; // This page will hold the Word Search and Word Bank
+            let currentYForWS = currentYPage1;
+
+            if (crosswordsToDraw.length > 0) {
+                // Draw the first crossword on page1
+                const availableCrosswordHeight1 = currentYPage1 - margin - 20; // currentY to bottom margin, less some buffer
+                currentYForWS = await drawCrosswordSection(
+                    page1,
+                    crosswordsToDraw[0].layout,
+                    margin,
+                    currentYPage1,
+                    contentWidth,
+                    availableCrosswordHeight1,
+                    font,
+                    boldFont,
+                    crosswordsToDraw[0].title
+                );
+                currentYForWS -= 30; // Buffer space after first crossword section
+            }
+
+            // --- If there's a second crossword, add a new page for it ---
+            if (crosswordsToDraw.length > 1) {
+                let page2 = pdfDoc.addPage();
+                let currentYPage2 = drawPageBorderAndHeader(page2, 2); // Draw header on second page
+
+                const availableCrosswordHeight2 = currentYPage2 - margin - 20; // currentY to bottom margin, less some buffer
+                await drawCrosswordSection(
+                    page2,
+                    crosswordsToDraw[1].layout,
+                    margin,
+                    currentYPage2,
+                    contentWidth,
+                    availableCrosswordHeight2,
+                    font,
+                    boldFont,
+                    crosswordsToDraw[1].title
+                );
+                currentPageForWS = page2; // Word Search and Word Bank will go on page 2
+                currentYForWS = currentYPage2; // Reset Y for page 2 to its top, will adjust after drawing second crossword
+                // We just drew the second crossword. Its draw function returns the *lowest* Y coordinate used.
+                // We need to capture that and use it as currentYForWS.
+                // Re-calling drawCrosswordSection here from outside of the loop:
+                currentYForWS = await drawCrosswordSection(
+                    page2,
+                    crosswordsToDraw[1].layout,
+                    margin,
+                    currentYPage2, // Pass the starting Y for the section
+                    contentWidth,
+                    availableCrosswordHeight2,
+                    font,
+                    boldFont,
+                    crosswordsToDraw[1].title
+                );
+                currentYForWS -= 30; // Buffer space after second crossword section
+            }
+
+
+            // --- Word Search Puzzle Section (always follows the last drawn crossword or header if no crosswords) ---
             const wordSearchTitleSize = 20;
             const wordSearchTitleMarginBottom = 15;
             const wordBankLineHeight = 15;
 
-            currentY -= wordSearchTitleSize + wordSearchTitleMarginBottom + 20; // Extra space before word search title
+            currentYForWS -= wordSearchTitleSize + wordSearchTitleMarginBottom + 20; // Extra space before word search title
 
-            page.drawText('Word Search Puzzle', {
+            currentPageForWS.drawText('Word Search Puzzle', {
                 x: margin,
-                y: currentY,
+                y: currentYForWS,
                 font: boldFont,
                 size: wordSearchTitleSize,
                 color: rgb(0, 0, 0),
             });
-            currentY -= wordSearchTitleSize + wordSearchTitleMarginBottom;
+            currentYForWS -= wordSearchTitleSize + wordSearchTitleMarginBottom;
 
             const wordSearchGridSize = Math.max(12, Math.ceil(Math.sqrt(words.join('').length)) + 3);
             const wordSearchGrid = generateWordSearch(words, wordSearchGridSize);
@@ -671,7 +766,7 @@
             const layoutColsWS = wordSearchGrid[0].length;
 
             // Calculate remaining available vertical space for word search grid + word bank
-            const remainingSpaceForWS = currentY - margin - 20; // 20px buffer for bottom margin
+            const remainingSpaceForWS = currentYForWS - margin - 20; // 20px buffer for bottom margin
 
             let wsCellSize = Math.min(
                 (contentWidth / layoutColsWS), // Fit horizontally
@@ -685,8 +780,8 @@
             const wsGridHeight = layoutRowsWS * wsCellSize;
             const wsGridWidth = layoutColsWS * wsCellSize;
             const wsGridStartX = margin;
-            const wsGridStartY = currentY - wsGridHeight - 10; // 10px buffer below title
-            currentY = wsGridStartY; // Update currentY to below the grid
+            const wsGridStartY = currentYForWS - wsGridHeight - 10; // 10px buffer below title
+            currentYForWS = wsGridStartY; // Update currentY to below the grid
 
             // Draw word search grid
             for (let r = 0; r < wordSearchGrid.length; r++) {
@@ -695,12 +790,12 @@
                     const x = wsGridStartX + c * wsCellSize;
                     const y = wsGridStartY + (wordSearchGrid.length - 1 - r) * wsCellSize;
 
-                    page.drawRectangle({
+                    currentPageForWS.drawRectangle({
                         x: x, y: y, width: wsCellSize, height: wsCellSize,
                         borderColor: rgb(0.3, 0.3, 0.3), // Darker border for word search
                         borderWidth: 0.7, // Slightly thicker border
                     });
-                    page.drawText(char, {
+                    currentPageForWS.drawText(char, {
                         x: x + wsCellSize / 2 - font.widthOfTextAtSize(char, wsCellSize * 0.6) / 2,
                         y: y + wsCellSize / 2 - (wsCellSize * 0.6) / 2 + 1, // +1 for slight vertical adjustment
                         font: font, size: wsCellSize * 0.6, // Scale font with cell size
@@ -713,7 +808,7 @@
             const wordBankStartX = wsGridStartX + wsGridWidth + 20;
             let wordBankYOffset = wsGridStartY + wsGridHeight - 10; // Align with top of word search grid
 
-            page.drawText('Word Bank:', {
+            currentPageForWS.drawText('Word Bank:', {
                 x: wordBankStartX,
                 y: wordBankYOffset,
                 font: boldFont,
@@ -729,7 +824,7 @@
                 const x = wordBankStartX + (col * 100); // Offset for second column
                 const y = wordBankYOffset - (i % wordsPerColumn) * wordBankLineHeight;
 
-                page.drawText(word, {
+                currentPageForWS.drawText(word, {
                     x: x, y: y, font: font, size: 10, color: rgb(0, 0, 0),
                 });
             }
