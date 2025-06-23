@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Scene Drag and Drop</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .main-container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            gap: 20px;
+        }
+        
+        .scene-container {
+            flex: 2; /* 2/3 of space */
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        
+        .drag-container {
+            flex: 1; /* 1/3 of space */
+            background-color: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        #farm-scene {
+            width: 100%;
+            height: auto;
+            border: 2px solid #ddd;
+            display: block;
+        }
+        
+        .draggable-item {
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-align: center;
+            cursor: move;
+            user-select: none;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+        
+        .draggable-item:hover {
+            background-color: #45a049;
+        }
+        
+        .draggable-item img {
+            width: 80px;
+            height: 80px;
+            object-fit: contain;
+            display: block;
+            margin: 0 auto 5px;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border-radius: 8px;
+            text-align: center;
+            font-style: italic;
+        }
+        
+        .reset-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .reset-btn:hover {
+            background-color: #0069d9;
+        }
+        
+        .dropped-item {
+            position: absolute;
+            z-index: 10;
+            cursor: move;
+        }
+    </style>
+</head>
+<body>
+    <h1>Farm Scene Drag and Drop Activity</h1>
+    
+    <div class="main-container">
+        <!-- 2/3 space for farm scene -->
+        <div class="scene-container" id="drop-zone">
+            <img id="farm-scene" src="farmscene.jpg" alt="Farm Scene">
+        </div>
+        
+        <!-- 1/3 space for draggable items -->
+        <div class="drag-container">
+            <h3>Drag these to the farm:</h3>
+            <div class="draggable-item" draggable="true" data-type="sun">
+                <img src="sun.jpg" alt="Sun">
+                <span>Sun</span>
+            </div>
+            <div class="draggable-item" draggable="true" data-type="cloud">
+                <img src="cloud.jpg" alt="Cloud">
+                <span>Cloud</span>
+            </div>
+            <div class="draggable-item" draggable="true" data-type="rooster">
+                <img src="rooster.jpg" alt="Rooster">
+                <span>Rooster</span>
+            </div>
+        </div>
+    </div>
+    
+    <p class="instructions">
+        Drag the items from the right panel onto the farm scene image. 
+        You can move them around after placing them.
+    </p>
+    
+    <button class="reset-btn" id="reset-btn">Reset Activity</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dropZone = document.getElementById('drop-zone');
+            const draggableItems = document.querySelectorAll('.draggable-item');
+            const resetBtn = document.getElementById('reset-btn');
+            const farmScene = document.getElementById('farm-scene');
+            
+            let draggedItem = null;
+            let offsetX, offsetY;
+            
+            // Make original items draggable
+            draggableItems.forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    draggedItem = this.cloneNode(true);
+                    draggedItem.classList.add('dropped-item');
+                    
+                    // Calculate center offset for better dragging experience
+                    const rect = this.getBoundingClientRect();
+                    offsetX = e.clientX - rect.left;
+                    offsetY = e.clientY - rect.top;
+                    
+                    e.dataTransfer.setData('text/plain', this.dataset.type);
+                    e.dataTransfer.effectAllowed = 'copy';
+                });
+            });
+            
+            // Set up drop zone
+            dropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+            });
+            
+            dropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                
+                if (!draggedItem) return;
+                
+                // Calculate position relative to the drop zone
+                const dropRect = this.getBoundingClientRect();
+                const x = e.clientX - dropRect.left - offsetX;
+                const y = e.clientY - dropRect.top - offsetY;
+                
+                // Position the dragged item
+                draggedItem.style.left = x + 'px';
+                draggedItem.style.top = y + 'px';
+                
+                // Add to drop zone
+                this.appendChild(draggedItem);
+                
+                // Make the new item draggable
+                makeDroppedItemDraggable(draggedItem);
+                draggedItem = null;
+            });
+            
+            // Make dropped items draggable within the scene
+            function makeDroppedItemDraggable(item) {
+                let isDragging = false;
+                let startX, startY, initialLeft, initialTop;
+                
+                item.addEventListener('mousedown', function(e) {
+                    if (e.button !== 0) return; // Only left mouse button
+                    
+                    isDragging = true;
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    
+                    // Get current position
+                    initialLeft = parseInt(item.style.left) || 0;
+                    initialTop = parseInt(item.style.top) || 0;
+                    
+                    // Bring to front
+                    const items = document.querySelectorAll('.dropped-item');
+                    const maxZ = Math.max(...Array.from(items).map(el => 
+                        parseInt(window.getComputedStyle(el).zIndex) || 0
+                    ));
+                    item.style.zIndex = maxZ + 1;
+                    
+                    e.preventDefault();
+                });
+                
+                document.addEventListener('mousemove', function(e) {
+                    if (!isDragging) return;
+                    
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    
+                    item.style.left = (initialLeft + dx) + 'px';
+                    item.style.top = (initialTop + dy) + 'px';
+                });
+                
+                document.addEventListener('mouseup', function() {
+                    isDragging = false;
+                });
+            }
+            
+            // Reset button
+            resetBtn.addEventListener('click', function() {
+                const droppedItems = document.querySelectorAll('.dropped-item');
+                droppedItems.forEach(item => item.remove());
+            });
+            
+            // Prevent default drag behavior for images
+            document.addEventListener('dragstart', function(e) {
+                if (e.target.tagName === 'IMG') {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
