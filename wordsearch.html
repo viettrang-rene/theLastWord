@@ -4,160 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Custom Word Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            text-align: center;
-            background-color: #f5f9ff;
-        }
-        h1 {
-            color: #2c3e50;
-        }
-        .input-area {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #e6f2ff;
-            border-radius: 8px;
-            border: 1px solid #b3d1ff;
-        }
-        .word-inputs {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        .word-inputs input {
-            padding: 8px;
-            border: 1px solid #b3d1ff;
-            border-radius: 4px;
-            width: 120px;
-        }
-        .word-search-container {
-            margin: 30px auto;
-        }
-        .word-search {
-            border: 2px solid #4a89dc;
-            border-collapse: collapse;
-            margin: 0 auto;
-            background-color: #e6f2ff;
-        }
-        .word-search td {
-            width: 30px;
-            height: 30px;
-            text-align: center;
-            font-size: 20px;
-            font-weight: bold;
-            border: 1px solid #b3d1ff;
-            background-color: #e6f2ff;
-            color: #2c3e50;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.3s ease;
-        }
-        .word-search td:hover {
-            background-color: #cce0ff;
-        }
-        .word-search td.found-word {
-            background-color: #ffebee !important;
-            color: #c62828 !important;
-            border-color: #ef9a9a !important;
-        }
-        .word-list {
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #e6f2ff;
-            border-radius: 8px;
-            border: 1px solid #b3d1ff;
-        }
-        .word-list h3 {
-            margin-top: 0;
-            color: #2c3e50;
-        }
-        .word-list ul {
-            list-style-type: none;
-            padding: 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-        }
-        .word-list li {
-            font-size: 18px;
-            font-weight: bold;
-            padding: 8px 15px;
-            border-radius: 6px;
-            background-color: #d9e6ff;
-            color: #2c3e50;
-        }
-        .word-list li.found {
-            background-color: #ffebee;
-            color: #c62828;
-            position: relative;
-        }
-        .word-list li.found::after {
-            content: "";
-            position: absolute;
-            left: 10%;
-            top: 50%;
-            width: 80%;
-            height: 2px;
-            background-color: #c62828;
-            transform: translateY(-50%);
-        }
-        button {
-            background-color: #4a89dc;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            margin: 15px;
-            transition: all 0.3s;
-        }
-        button:hover {
-            background-color: #3a70c2;
-            transform: translateY(-2px);
-        }
-        .highlight {
-            background-color: #fff3e0;
-        }
-        .stats {
-            margin: 20px 0;
-            font-size: 18px;
-            background-color: #e6f2ff;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #b3d1ff;
-        }
-        .congrats {
-            color: #c62828;
-            font-weight: bold;
-            font-size: 20px;
-            margin: 20px 0;
-            padding: 15px;
-            background-color: #ffebee;
-            border-radius: 8px;
-            display: none;
-        }
-    </style>
+    <link rel="stylesheet" href="css/club.css">
+    <link rel="stylesheet" href="css/wordsearch.css"> <!-- New file for page-specific styles -->
 </head>
 <body>
-    <nav class="club-nav">
-       <ul>
-            <li><a href="../theLastWord/index.html">Home</a></li>
-       </ul>  
+    <!-- ==============================================
+        MAIN NAVIGATION (Consistent with index.html)
+    =============================================== -->
+    <nav class="club-nav" aria-label="Main navigation">
+        <div class="club-nav-container">
+            <button class="mobile-menu-toggle" aria-expanded="false" aria-controls="primary-navigation">
+                <i class="fas fa-bars"></i>
+                <span class="sr-only">Menu</span>
+            </button>
+            <ul id="primary-navigation">
+                <li><a href="../theLastWord/index.html">Home</a></li>
+                <li><a href="../theLastWord/club.html">Speaking Club</a></li>
+                <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
+                <li><a href="../theLastWord/mathpractice.html">Math</a></li>
+                <li><a href="../theLastWord/wordsearch.html">Word Search</a></li>
+                <li><a href="../theLastWord/label.html">Labeling</a></li>
+                <li><a href="../theLastWord/about.html">Crossword</a></li>
+            </ul>
+        </div>
     </nav>
     
     <h1>Custom Word Search</h1>
     
     <div class="input-area">
-        <h3>Enter up to 10 words (3-12 letters each):</h3>
+        <div class="theme-selection">
+            <h3>Choose a Theme:</h3>
+            <select id="theme-select" class="theme-dropdown">
+                <option value="">-- Select a Theme --</option>
+                <option value="sea-animals">Sea Animals</option>
+                <option value="farm-animals">Farm Animals</option>
+                <option value="school-things">School Things</option>
+            </select>
+            <button id="clear-words-btn" class="btn secondary">Clear Words</button>
+        </div>
+
+        <h3>Or Enter up to 10 custom words (3-12 letters each):</h3>
         <div class="word-inputs" id="word-inputs">
             <input type="text" maxlength="12" placeholder="Word 1">
             <input type="text" maxlength="12" placeholder="Word 2">
@@ -170,7 +58,7 @@
             <input type="text" maxlength="12" placeholder="Word 9">
             <input type="text" maxlength="12" placeholder="Word 10">
         </div>
-        <button id="generate-btn">Generate Word Search</button>
+        <button id="generate-btn" class="btn primary">Generate Word Search</button>
     </div>
     
     <div class="stats" style="display: none;">
@@ -189,257 +77,21 @@
     <div class="word-search-container">
         <table class="word-search" id="wordSearch"></table>
     </div>
+
+    <!-- ==============================================
+        FOOTER SECTION (Consistent with index.html)
+    =============================================== -->
+    <footer class="club-footer">
+        <p><i class="far fa-copyright"></i> 2023 ESL Study Guides. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+    </footer>
     
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const maxWords = 10;
-            let gridSize = 15;
-            let grid = [];
-            let wordPositions = {};
-            let foundWords = new Set();
-            let activeWords = [];
-            
-            // Initialize word inputs
-            const wordInputs = document.querySelectorAll('.word-inputs input');
-            const generateBtn = document.getElementById('generate-btn');
-            const statsDiv = document.querySelector('.stats');
-            const wordListDiv = document.querySelector('.word-list');
-            
-            generateBtn.addEventListener('click', function() {
-                activeWords = [];
-                wordInputs.forEach(input => {
-                    const word = input.value.trim().toUpperCase();
-                    if (word.length >= 3 && word.length <= 12) {
-                        activeWords.push(word);
-                    }
-                });
-                
-                if (activeWords.length > 0) {
-                    generateWordSearch();
-                    statsDiv.style.display = 'block';
-                    wordListDiv.style.display = 'block';
-                    document.getElementById('total-words').textContent = activeWords.length;
-                } else {
-                    alert('Please enter at least one valid word (3-12 letters)');
-                }
-            });
-            
-            function initializeGrid() {
-                grid = [];
-                wordPositions = {};
-                foundWords.clear();
-                updateFoundCount();
-                document.getElementById('congrats-message').style.display = 'none';
-                
-                for (let i = 0; i < gridSize; i++) {
-                    grid[i] = [];
-                    for (let j = 0; j < gridSize; j++) {
-                        grid[i][j] = '';
-                    }
-                }
-                
-                const wordsList = document.getElementById('words-to-find');
-                wordsList.innerHTML = '';
-                activeWords.forEach(word => {
-                    const li = document.createElement('li');
-                    li.textContent = word;
-                    li.dataset.word = word;
-                    wordsList.appendChild(li);
-                });
-                
-                const cells = document.querySelectorAll('#wordSearch td');
-                cells.forEach(cell => {
-                    cell.classList.remove('found-word');
-                });
-            }
-            
-            function updateFoundCount() {
-                const foundCount = foundWords.size;
-                const totalWords = activeWords.length;
-                document.getElementById('found-count').textContent = foundCount;
-                document.getElementById('total-words').textContent = totalWords;
-                
-                if (foundCount === totalWords) {
-                    document.getElementById('congrats-message').style.display = 'block';
-                }
-            }
-            
-            const directions = [
-                [1, 0], [0, 1], [1, 1], [-1, 1],
-                [-1, 0], [0, -1], [-1, -1], [1, -1]
-            ];
-            
-            function canPlaceWord(word, row, col, direction) {
-                const [rowDir, colDir] = direction;
-                const endRow = row + (word.length - 1) * rowDir;
-                const endCol = col + (word.length - 1) * colDir;
-                
-                if (endRow < 0 || endRow >= gridSize || endCol < 0 || endCol >= gridSize) {
-                    return false;
-                }
-                
-                for (let i = 0; i < word.length; i++) {
-                    const r = row + i * rowDir;
-                    const c = col + i * colDir;
-                    
-                    if (grid[r][c] !== '' && grid[r][c] !== word[i]) {
-                        return false;
-                    }
-                }
-                
-                return true;
-            }
-            
-            function placeWord(word) {
-                let placed = false;
-                let attempts = 0;
-                
-                while (!placed && attempts < 100) {
-                    attempts++;
-                    const direction = directions[Math.floor(Math.random() * directions.length)];
-                    const [rowDir, colDir] = direction;
-                    
-                    let row, col;
-                    
-                    if (rowDir === 1) {
-                        row = Math.floor(Math.random() * (gridSize - word.length));
-                    } else if (rowDir === -1) {
-                        row = Math.floor(Math.random() * (gridSize - word.length)) + word.length - 1;
-                    } else {
-                        row = Math.floor(Math.random() * gridSize);
-                    }
-                    
-                    if (colDir === 1) {
-                        col = Math.floor(Math.random() * (gridSize - word.length));
-                    } else if (colDir === -1) {
-                        col = Math.floor(Math.random() * (gridSize - word.length)) + word.length - 1;
-                    } else {
-                        col = Math.floor(Math.random() * gridSize);
-                    }
-                    
-                    if (canPlaceWord(word, row, col, direction)) {
-                        wordPositions[word] = {
-                            start: {row, col},
-                            direction: [rowDir, colDir],
-                            letters: []
-                        };
-                        
-                        for (let i = 0; i < word.length; i++) {
-                            const r = row + i * rowDir;
-                            const c = col + i * colDir;
-                            grid[r][c] = word[i];
-                            wordPositions[word].letters.push({row: r, col: c});
-                        }
-                        placed = true;
-                    }
-                }
-                
-                return placed;
-            }
-            
-            function fillEmptySpaces() {
-                const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                for (let i = 0; i < gridSize; i++) {
-                    for (let j = 0; j < gridSize; j++) {
-                        if (grid[i][j] === '') {
-                            grid[i][j] = letters.charAt(Math.floor(Math.random() * letters.length));
-                        }
-                    }
-                }
-            }
-            
-            function renderGrid() {
-                const table = document.getElementById('wordSearch');
-                table.innerHTML = '';
-                
-                for (let i = 0; i < gridSize; i++) {
-                    const row = document.createElement('tr');
-                    
-                    for (let j = 0; j < gridSize; j++) {
-                        const cell = document.createElement('td');
-                        cell.textContent = grid[i][j];
-                        cell.dataset.row = i;
-                        cell.dataset.col = j;
-                        row.appendChild(cell);
-                    }
-                    
-                    table.appendChild(row);
-                }
-                
-                addCellClickListeners();
-            }
-            
-            function addCellClickListeners() {
-                const cells = document.querySelectorAll('#wordSearch td');
-                cells.forEach(cell => {
-                    cell.addEventListener('click', handleCellClick);
-                });
-            }
-            
-            function handleCellClick(event) {
-                const cell = event.target;
-                const row = parseInt(cell.dataset.row);
-                const col = parseInt(cell.dataset.col);
-                
-                for (const word in wordPositions) {
-                    const positions = wordPositions[word].letters;
-                    const isPartOfWord = positions.some(pos => pos.row === row && pos.col === col);
-                    
-                    if (isPartOfWord && !foundWords.has(word)) {
-                        highlightWord(word);
-                        foundWords.add(word);
-                        markWordAsFound(word);
-                        updateFoundCount();
-                        return;
-                    }
-                }
-                
-                cell.classList.add('highlight');
-                setTimeout(() => {
-                    cell.classList.remove('highlight');
-                }, 500);
-            }
-            
-            function highlightWord(word) {
-                const positions = wordPositions[word].letters;
-                positions.forEach(pos => {
-                    const cell = document.querySelector(`#wordSearch td[data-row="${pos.row}"][data-col="${pos.col}"]`);
-                    if (cell) {
-                        cell.classList.add('found-word');
-                    }
-                });
-            }
-            
-            function markWordAsFound(word) {
-                const wordElement = document.querySelector(`#words-to-find li[data-word="${word}"]`);
-                if (wordElement) {
-                    wordElement.classList.add('found');
-                }
-            }
-            
-            function generateWordSearch() {
-                initializeGrid();
-                
-                // Sort words by length (longest first) for better placement
-                activeWords.sort((a, b) => b.length - a.length);
-                
-                // Try to place each word
-                let allPlaced = true;
-                activeWords.forEach(word => {
-                    if (!placeWord(word)) {
-                        console.warn(`Could not place word: ${word}`);
-                        allPlaced = false;
-                    }
-                });
-                
-                if (!allPlaced) {
-                    alert("Some words couldn't be placed. Try with fewer or shorter words.");
-                }
-                
-                fillEmptySpaces();
-                renderGrid();
-            }
-        });
-    </script>
+    <script src="js/main-nav.js" defer></script> <!-- For consistent navigation functionality -->
+    <script src="js/wordsearch.js" defer></script> <!-- New file for word search game logic -->
 </body>
 </html>
