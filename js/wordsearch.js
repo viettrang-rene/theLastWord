@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const maxWords = 20;
-    let gridSize = 18;
+    const maxWords = 20; // Increased from 10 to 20
+    let gridSize = 18; // Grid size remains 15 by default, user might have changed it to 18 in their local file.
     let grid = [];
     let wordPositions = {};
     let foundWords = new Set();
@@ -318,7 +318,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const statsDiv = document.querySelector('.stats');
     const wordListDiv = document.querySelector('.word-list');
     const clearWordsBtn = document.getElementById('clear-words-btn');
-    
+    const printButton = document.getElementById('print-wordsearch-btn'); // New: Print button element
+
     // Populate theme dropdown
     for (const category in THEMES_DATA) {
         for (const level in THEMES_DATA[category]) {
@@ -344,7 +345,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const [categoryKey, levelKey] = selectedValue.split('-');
             const wordsToLoad = THEMES_DATA[categoryKey][levelKey];
             
-            // Populate word inputs, max 10 words
+            // Populate word inputs, max 20 words (or fewer if theme has less)
             wordInputs.forEach((input, index) => {
                 if (wordsToLoad && wordsToLoad[index]) {
                     input.value = wordsToLoad[index];
@@ -381,6 +382,13 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('Please select a theme or enter at least one valid word (3-12 letters).');
         }
     });
+
+    // New: Event listener for print button
+    if (printButton) {
+        printButton.addEventListener('click', function() {
+            window.print();
+        });
+    }
     
     function initializeGrid() {
         grid = [];
@@ -584,11 +592,21 @@ document.addEventListener('DOMContentLoaded', function() {
         activeWords = activeWords.filter(word => word.length > 0);
         activeWords.sort((a, b) => b.length - a.length);
 
-        if (activeWords.length > gridSize * gridSize) {
-            alert('Too many words for the current grid size. Please reduce the number of words or increase the grid size (not yet implemented).');
-            return;
+        // Alert if too many words for the current grid size, considering maxWords.
+        // gridSize * gridSize gives total cells.
+        // A rough estimate: if avg word length is 5, then activeWords.length * 5 should be less than gridSize * gridSize.
+        // Or, more simply, if activeWords.length exceeds a certain proportion of gridSize * gridSize.
+        // For simplicity, based on previous alert, just check if activeWords.length > maxWords or if words are too long
+        // for the current grid.
+        if (activeWords.length > maxWords) {
+             alert(`You have entered more than the maximum allowed ${maxWords} words. Only the first ${maxWords} words will be used.`);
+             activeWords = activeWords.slice(0, maxWords);
         }
-
+        if (activeWords.some(word => word.length > gridSize)) {
+            alert('Some words are too long for the current grid size. Please reduce the length of words or increase the grid size.');
+            return; // Stop generation if words are too long for grid
+        }
+        
         let allPlaced = true;
         activeWords.forEach(word => {
             if (!placeWord(word)) {
