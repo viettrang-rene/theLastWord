@@ -137,3 +137,57 @@ button:hover {
     border-radius: 8px;
     display: none;
 }
+
+/* Print-specific styles */
+@media print {
+    /* Hide elements not needed in print */
+    .club-nav,
+    .input-area,
+    .stats,
+    .congrats,
+    #print-wordsearch-btn, /* Hide the print button itself */
+    .club-footer {
+        display: none !important;
+    }
+
+    /* Adjust layout for printing */
+    body {
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    h1 {
+        text-align: center;
+        margin-top: 20px;
+        margin-bottom: 20px;
+    }
+
+    .word-search-container {
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    .word-list {
+        margin-top: 30px;
+        border: none;
+        background-color: transparent;
+    }
+
+    .word-list h3 {
+        text-align: center;
+    }
+
+    .word-list ul {
+        justify-content: flex-start; /* Align words to left for easier reading */
+        gap: 10px 20px; /* Adjust spacing */
+    }
+
+    .word-list li {
+        background-color: transparent;
+        border: 1px dashed #ccc; /* Optional: add a light border for visual separation */
+        color: #333;
+        padding: 5px 10px;
+        font-size: 16px; /* Adjust font size for print */
+    }
+}
