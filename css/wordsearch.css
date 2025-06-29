@@ -200,7 +200,7 @@ button:hover {
     }
 
     .word-list li {
-        font-size: 18px; /* Matched original font-size */
+        font-size: 12px; /* Matched original font-size */
         font-weight: bold;
         padding: 8px 15px; /* Matched original padding */
         border-radius: 6px; /* Matched original border-radius */
