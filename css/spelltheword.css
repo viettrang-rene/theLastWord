@@ -1,0 +1,218 @@
+/* Page-specific styles for Spell the Word game */
+
+.game-container {
+    max-width: 1000px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.game-area {
+    display: flex;
+    flex-direction: column; /* Stack on small screens */
+    gap: 30px;
+    margin-top: 30px;
+}
+
+/* Responsive layout: 2/3 left, 1/3 right for larger screens */
+@media (min-width: 768px) {
+    .game-area {
+        flex-direction: row; /* Side-by-side on larger screens */
+        align-items: flex-start; /* Align sections to the top */
+    }
+
+    .letters-section {
+        flex: 2; /* Takes 2/3 of the space */
+        padding-right: 20px; /* Add some spacing between sections */
+    }
+
+    .image-section {
+        flex: 1; /* Takes 1/3 of the space */
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+}
+
+.word-display-area {
+    margin-bottom: 20px;
+    min-height: 80px; /* To prevent layout shift */
+}
+
+.word-display {
+    font-size: 2.5em;
+    font-weight: bold;
+    letter-spacing: 5px;
+    min-height: 1.5em;
+    border-bottom: 2px solid #ccc;
+    padding-bottom: 5px;
+    margin-bottom: 10px;
+    color: #34495e;
+}
+
+.feedback {
+    font-size: 1.2em;
+    font-weight: bold;
+    min-height: 1.5em;
+    color: #3498db;
+}
+
+.letter-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px dashed #ddd;
+    border-radius: 5px;
+}
+
+.letter-tile {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #4a6fa5;
+    color: white;
+    font-size: 1.8em;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s;
+    user-select: none; /* Prevent text selection */
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.letter-tile:hover {
+    background-color: #3a5a8a;
+    transform: translateY(-2px);
+}
+
+.letter-tile.clicked {
+    background-color: #ccc;
+    cursor: default;
+    opacity: 0.7;
+    transform: none;
+    pointer-events: none; /* Disable further clicks */
+}
+
+.letter-tile.correct-feedback {
+    background-color: #28a745; /* Green for correct */
+    animation: pulse-green 0.5s ease-out;
+}
+
+.letter-tile.incorrect-feedback {
+    background-color: #dc3545; /* Red for incorrect */
+    animation: shake 0.3s;
+}
+
+.game-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.game-controls .btn {
+    padding: 10px 25px;
+    font-size: 1.1em;
+    font-weight: bold;
+}
+
+.word-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border: 1px solid #eee;
+}
+
+/* Animations */
+@keyframes pulse-green {
+    0% { transform: scale(1); background-color: #28a745; }
+    50% { transform: scale(1.1); background-color: #28a745; }
+    100% { transform: scale(1); background-color: #28a745; }
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+/* Print Styles */
+@media print {
+    .club-nav,
+    .game-controls,
+    .feedback,
+    .club-footer {
+        display: none !important;
+    }
+
+    body {
+        padding: 0;
+        margin: 0;
+    }
+
+    .game-container {
+        box-shadow: none;
+        border-radius: 0;
+        padding: 10mm;
+    }
+
+    .game-area {
+        flex-direction: row;
+        align-items: flex-start;
+        page-break-inside: avoid;
+    }
+
+    .letters-section {
+        flex: 2;
+        padding-right: 15mm;
+        border-right: 1px dashed #ccc;
+    }
+
+    .image-section {
+        flex: 1;
+        padding-left: 15mm;
+    }
+
+    .word-display-area {
+        margin-bottom: 20px;
+        min-height: auto;
+        text-align: center;
+    }
+
+    .word-display {
+        font-size: 2em; /* Slightly smaller for print */
+        border-bottom: 1px solid #ccc;
+        color: #000;
+        letter-spacing: 3px;
+    }
+
+    .letter-tiles {
+        border: 1px solid #ccc;
+        padding: 5mm;
+    }
+
+    .letter-tile {
+        background-color: #f0f0f0; /* Lighter for print */
+        color: #333;
+        box-shadow: none;
+        border: 1px solid #bbb;
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .word-image {
+        box-shadow: none;
+        border: none;
+    }
+}
