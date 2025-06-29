@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const maxWords = 20; // Increased from 10 to 20
+    const maxWords = 30; // Increased from 10 to 20
     let gridSize = 18; // Grid size remains 15 by default, user might have changed it to 18 in their local file.
     let grid = [];
     let wordPositions = {};
