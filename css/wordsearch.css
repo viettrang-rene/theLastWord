@@ -179,7 +179,7 @@ button:hover {
     }
 
     .word-list ul {
-        justify-content: flex-start; /* Align words to left for easier reading */
+        justify-content: center; 
         gap: 10px 20px; /* Adjust spacing */
     }
 
