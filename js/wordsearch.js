@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const maxWords = 25;
+    const maxWords = 20;
     let gridSize = 18;
     let grid = [];
     let wordPositions = {};
