@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const maxWords = 10;
-    let gridSize = 15;
+    const maxWords = 20;
+    let gridSize = 18;
     let grid = [];
     let wordPositions = {};
     let foundWords = new Set();
