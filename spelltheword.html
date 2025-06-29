@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Spell the Word Game</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <link rel="stylesheet" href="css/club.css" />
+    <link rel="stylesheet" href="css/spelltheword.css" />
+</head>
+<body>
+    <nav class="club-nav" aria-label="Main navigation">
+        <div class="club-nav-container">
+            <button class="mobile-menu-toggle" aria-expanded="false" aria-controls="primary-navigation">
+                <i class="fas fa-bars"></i>
+                <span class="sr-only">Menu</span>
+            </button>
+            <ul id="primary-navigation">
+                <li><a href="../theLastWord/index.html">Home</a></li>
+                <li><a href="../theLastWord/club.html">Speaking Club</a></li>
+                <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
+                <li><a href="../theLastWord/mathpractice.html">Math</a></li>
+                <li><a href="../theLastWord/wordsearch.html">Word Search</a></li>
+                <li><a href="../theLastWord/label.html">Labeling</a></li>
+                <li><a href="../theLastWord/about.html">Crossword</a></li>
+                <li><a href="../theLastWord/spelltheword.html">Spell the Word</a></li> </ul>
+        </div>
+    </nav>
+
+    <main class="game-container">
+        <h1>Spell the Word!</h1>
+
+        <div class="game-area">
+            <div class="letters-section">
+                <div class="word-display-area">
+                    <div id="word-display" class="word-display"></div>
+                    <div id="feedback" class="feedback"></div>
+                </div>
+                <div id="letter-tiles" class="letter-tiles">
+                    </div>
+                <div class="game-controls">
+                    <button id="clear-button" class="btn secondary">Clear</button>
+                    <button id="new-word-button" class="btn primary">New Word</button>
+                </div>
+            </div>
+            <div class="image-section">
+                <img id="word-image" src="" alt="Word to spell" class="word-image">
+            </div>
+        </div>
+    </main>
+
+    <footer class="club-footer">
+        <p><i class="far fa-copyright"></i> 2023 ESL Study Guides. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+    </footer>
+
+    <script src="js/main-nav.js" defer></script> <script src="js/spelltheword.js" defer></script>
+</body>
+</html>
