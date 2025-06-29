@@ -5,18 +5,369 @@ document.addEventListener('DOMContentLoaded', function() {
     let wordPositions = {};
     let foundWords = new Set();
     let activeWords = [];
-    
-    // Initialize word inputs
+
+    // Thematic Vocabulary Data
+    const THEMES_DATA = {
+        "Animals": {
+            "starters": [
+                "animal", "hippo", "bear", "horse", "bee", "jellyfish", "bird", "lizard", "cat", "monkey",
+                "chicken", "mouse", "mice", "cow", "pet", "crocodile", "polarbear", "dog", "sheep", "donkey",
+                "snake", "duck", "spider", "elephant", "tail", "fish", "tiger", "frog", "zebra", "giraffe",
+                "goat", "zoo"
+            ],
+            "movers": [
+                "bat", "cage", "dolphin", "fly", "kangaroo", "kitten", "lion", "panda", "parrot", "penguin",
+                "puppy", "rabbit", "shark", "snail", "whale"
+            ],
+            "flyers": [
+                "beetle", "butterfly", "camel", "creature", "dinosaur", "eagle", "extinct", "fur", "insect", "nest",
+                "octopus", "swan", "tortoise", "wild", "wing"
+            ]
+        },
+        "TheBody": {
+            "starters": [
+                "arm", "body", "hand", "head", "face", "ear", "leg", "eye", "mouth", "nose", "fair", "foot",
+                "feet", "smile", "hair"
+            ],
+            "movers": [
+                "back", "beard", "neck", "shoulder", "blonde", "stomach", "knee", "curly", "thin", "tooth",
+                "teeth", "fat", "moustache"
+            ],
+            "flyers": [
+                "elbow", "finger", "toe"
+            ]
+        },
+        "Clothes": {
+            "starters": [
+                "bag", "shoe", "baseballcap", "shorts", "boots", "skirt", "clothes", "sock", "dress", "trousers",
+                "glasses", "tshirt", "handbag", "wear", "hat", "jacket", "jeans", "shirt"
+            ],
+            "movers": [
+                "coat", "helmet", "scarf", "sweater", "swimsuit"
+            ],
+            "flyers": [
+                "belt", "ring", "bracelet", "spot", "spotted", "costume", "crown", "stripe", "striped", "glove",
+                "necklace", "pajamas", "pyjamas", "pocket", "trainers", "umbrella"
+            ]
+        },
+        "Colours": {
+            "starters": [
+                "black", "orange", "blue", "pink", "brown", "purple", "colour", "color", "red", "gray", "grey",
+                "white", "green", "yellow"
+            ],
+            "movers": [], // No specific movers words listed
+            "flyers": [
+                "gold", "silver", "spot", "spotted", "stripe", "striped"
+            ]
+        },
+        "FamilyAndFriends": {
+            "starters": [
+                "baby", "boy", "grandmother", "grandpa", "brother", "kid", "child", "children", "live", "classmate",
+                "man", "men", "cousin", "mother", "dad", "mum", "family", "old", "father", "person", "people",
+                "friend", "sister", "girl", "woman", "women", "grandfather", "grandma", "young"
+            ],
+            "movers": [
+                "aunt", "daughter", "granddaughter", "grandparent", "grandson", "grownup", "parent", "son", "uncle"
+            ],
+            "flyers": [
+                "husband", "married", "surname", "wife"
+            ]
+        },
+        "FoodAndDrink": {
+            "starters": [
+                "apple", "juice", "banana", "kiwi", "bean", "lemon", "bread", "lemonade", "breakfast", "lime",
+                "burger", "mango", "cake", "meat", "candy", "sweets", "carrot", "meatballs", "chicken", "milk",
+                "chips", "fries", "onion", "chocolate", "orange", "coconut", "pea", "dinner", "pear", "drink",
+                "pineapple", "eat", "potato", "egg", "rice", "fish", "sausage", "food", "sweet", "tomato", "fruit",
+                "water", "grape", "watermelon", "icecream"
+            ],
+            "movers": [
+                "bottle", "bowl", "cheese", "coffee", "cup", "glass", "hungry", "milkshake", "noodles", "pancake",
+                "pasta", "picnic", "plate", "salad", "sandwich", "sauce", "soup", "tea", "thirsty", "vegetable"
+            ],
+            "flyers": [
+                "biscuit", "cookie", "butter", "cereal", "chopsticks", "flour", "fork", "honey", "jam", "knife",
+                "meal", "olives", "pepper", "piece", "pizza", "salt", "smell", "snack", "spoon", "strawberry",
+                "sugar", "taste", "yoghurt"
+            ]
+        },
+        "Health": {
+            "starters": [], // No specific starters words listed
+            "movers": [
+                "cold", "cough", "cry", "dentist", "doctor", "earache", "fall", "fine", "headache", "hospital",
+                "ill", "matter", "nurse", "sick", "stomachache", "temperature", "tired", "toothache"
+            ],
+            "flyers": [
+                "bandage", "chemist", "cut", "fallover", "medicine", "xray"
+            ]
+        },
+        "TheHome": {
+            "starters": [
+                "apartment", "flat", "house", "kitchen", "armchair", "lamp", "bath", "livingroom", "bathroom", "mat",
+                "bed", "mirror", "bedroom", "phone", "bookcase", "picture", "box", "camera", "radio", "room",
+                "chair", "rug", "clock", "sleep", "computer", "sofa", "cupboard", "table", "desk", "television",
+                "tv", "diningroom", "toy", "doll", "tree", "door", "wall", "flower", "watch", "garden", "hall",
+                "home", "window", "wash"
+            ],
+            "movers": [
+                "address", "balcony", "basement", "blanket", "downstairs", "dream", "elevator", "lift", "floor",
+                "internet", "message", "roof", "seat", "shower", "stairs", "stair", "toothbrush", "toothpaste",
+                "towel", "upstairs"
+            ],
+            "flyers": [
+                "brush", "comb", "cooker", "cushion", "diary", "entrance", "envelope", "fridge", "gate", "key",
+                "letter", "mail", "oven", "screen", "shampoo", "shelf", "soap", "stamp", "step", "swing", "telephone"
+            ]
+        },
+        "Materials": {
+            "starters": ["paper"],
+            "movers": ["card", "glass", "gold", "metal"],
+            "flyers": ["plastic", "silver", "wood", "wool"]
+        },
+        "Names": {
+            "starters": [
+                "alex", "alice", "ann", "anna", "ben", "bill", "dan", "eva", "grace", "hugo", "jill", "kim",
+                "lucy", "mark", "matt", "may", "nick", "pat", "sam", "sue", "tom"
+            ],
+            "movers": [
+                "charlie", "clare", "daisy", "fred", "jack", "jane", "jim", "julia", "lily", "mary", "paul"
+            ],
+            "flyers": [
+                "betty", "richard", "david", "robert", "emma", "sarah", "frank", "sophia", "george", "william",
+                "harry", "helen", "holly", "katy", "michael", "oliver"
+            ]
+        },
+        "Numbers": {
+            "starters": [
+                "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
+                "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen", "twenty"
+            ],
+            "movers": (function() {
+                let nums = [];
+                for (let i = 21; i <= 99; i++) {
+                    let word = '';
+                    if (i < 20) word = ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"][i - 1];
+                    else {
+                        const tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"];
+                        const units = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+                        word = tens[Math.floor(i / 10)] + units[i % 10];
+                    }
+                    nums.push(word);
+                }
+                nums.push("onehundred", "hundred");
+                const ordinals = ["first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth", "tenth", "eleventh", "twelfth", "thirteenth", "fourteenth", "fifteenth", "sixteenth", "seventeenth", "eighteenth", "nineteenth", "twentieth"];
+                nums.push(...ordinals);
+                nums.push("pair");
+                return nums;
+            })(),
+            "flyers": (function() {
+                let nums = ["onehundredone", "twohundred", "onethousand", "thousand", "million", "several"];
+                const ordinalsTens = ["", "", "twenty", "thirty"];
+                const ordinalsUnits = ["", "first", "second", "third", "fourth", "fifth", "sixth", "seventh", "eighth", "ninth"];
+                for (let i = 21; i <= 31; i++) {
+                    let word = '';
+                    if (i === 20) word = "twentieth";
+                    else if (i === 30) word = "thirtieth";
+                    else if (i === 31) word = "thirtyfirst";
+                    else word = ordinalsTens[Math.floor(i / 10)] + ordinalsUnits[i % 10];
+                    nums.push(word);
+                }
+                return nums;
+            })()
+        },
+        "PlacesAndDirections": {
+            "starters": [
+                "behind", "between", "bookshop", "end", "here", "in", "infrontof", "on", "park", "playground",
+                "shop", "store", "there", "under", "zoo", "street"
+            ],
+            "movers": [
+                "above", "below", "building", "busstation", "busstop", "cafe", "carpark", "centre", "center",
+                "cinema", "circus", "city", "town", "towncentre", "farm", "funfair", "hospital", "library", "map",
+                "market", "middle", "near", "opposite", "place", "shoppingcentre", "sportscentre", "square",
+                "station", "straight", "supermarket", "swimmingpool"
+            ],
+            "flyers": [
+                "airport", "museum", "bank", "north", "bridge", "over", "castle", "path", "chemist", "club",
+                "policestation", "postoffice", "college", "restaurant", "corner", "right", "east", "factory",
+                "firestation", "skyscraper", "south", "front", "hotel", "kilometre", "kilometer", "straighton",
+                "theatre", "theater", "left", "university", "way", "london", "west"
+            ]
+        },
+        "School": {
+            "starters": [
+                "alphabet", "mouse", "answer", "ask", "board", "book", "bookcase", "open", "page", "class",
+                "painting", "classroom", "paper", "close", "part", "colour", "color", "pen", "computer", "pencil",
+                "correct", "picture", "crayon", "playground", "cross", "poster", "cupboard", "question", "desk",
+                "read", "door", "right", "draw", "rubber", "eraser", "english", "ruler", "example", "school",
+                "find", "sentence", "floor", "sit", "keyboard", "spell", "learn", "stand", "lesson", "story",
+                "letter", "tell", "line", "tick", "listen", "understand", "look", "wall", "window", "word", "write"
+            ],
+            "movers": [
+                "break", "art", "homework", "mistake", "teach", "text", "website"
+            ],
+            "flyers": [
+                "backpack", "rucksack", "bin", "club", "college", "competition", "dictionary", "flag", "geography",
+                "glue", "group", "gym", "history", "language", "maths", "math", "online", "project", "science",
+                "scissors", "screen", "shelf", "student", "study", "subject", "timetable", "university"
+            ]
+        },
+        "SportsAndLeisure": {
+            "starters": [
+                "badminton", "ball", "listen", "music", "baseball", "photo", "basketball", "piano", "bat", "picture",
+                "beach", "play", "bike", "radio", "boat", "read", "book", "ride", "bounce", "run", "camera", "sing",
+                "catch", "skateboard", "doll", "skateboarding", "soccer", "football", "drawing", "song", "drive",
+                "sport", "enjoy", "favourite", "favorite", "story", "swim", "fishing", "fly", "tabletennis",
+                "takeaphoto", "takeapicture", "game", "television", "tv", "guitar", "tennis", "hobby", "tennisracket",
+                "hockey", "throw", "jump", "toy", "kick", "walk", "kite", "watch", "score"
+            ],
+            "movers": [
+                "band", "cd", "cinema", "comic", "comicbook", "dance", "drive", "dvd", "email", "film", "movie",
+                "fish", "goshopping", "goal", "holiday", "hop", "iceskates", "iceskating", "kick", "net", "party",
+                "player", "pool", "practice", "practise", "present", "ride", "rollerskating", "rollerskates", "sail"
+            ],
+            "flyers": [
+                "skate", "skip", "backpack", "rucksack", "cartoon", "score", "channel", "ski", "chess", "sledge",
+                "collect", "snowball", "concert", "snowboard", "diary", "snowboarding", "drum", "snowman", "festival",
+                "stage", "flashlight", "suitcase", "swing", "golf", "hotel", "team", "instrument", "tent",
+                "invitation", "torch", "join", "tune", "magazine", "tyre", "tire", "match", "umbrella", "meet",
+                "member", "online", "violin", "volleyball", "popmusic", "winner", "prize", "programme", "program",
+                "puzzle", "pyramid", "quiz", "race", "rockmusic"
+            ]
+        },
+        "Time": {
+            "starters": [
+                "afternoon", "birthday", "clock", "day", "evening", "in", "morning", "night", "today", "watch",
+                "year", "after", "always", "before", "every", "never", "oclock", "sometimes", "week", "weekend",
+                "yesterday"
+            ],
+            "movers": [
+                "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"
+            ],
+            "flyers": [
+                "am", "quarter", "spring", "summer", "ago", "autumn", "fall", "calendar", "century", "date",
+                "early", "end", "future", "hour", "howlong", "late", "later", "midday", "midnight", "minute",
+                "month", "pm", "past", "november", "december", "january", "february", "march", "april", "may",
+                "june", "july", "august", "september", "october"
+            ]
+        },
+        "Toys": {
+            "starters": [
+                "alien", "ball", "helicopter", "lorry", "truck", "balloon", "monster", "baseball", "motorbike",
+                "basketball", "plane", "bike", "robot", "boardgame", "boat", "soccer", "football", "car", "teddy",
+                "doll", "toy", "train", "game"
+            ],
+            "movers": ["model"],
+            "flyers": [] // No specific flyers words listed
+        },
+        "Transport": {
+            "starters": [
+                "bike", "boat", "plane", "ride", "bus", "run", "car", "ship", "drive", "swim", "fly", "train",
+                "go", "helicopter", "truck", "lorry"
+            ],
+            "movers": [
+                "busstation", "busstop", "driver", "ride", "station", "ticket", "tractor", "trip", "platform", "wheel"
+            ],
+            "flyers": [
+                "ambulance", "bicycle", "racing", "railway", "rocket", "fireengine", "firetruck", "journey",
+                "spaceship", "lift", "taxi", "motorway", "passenger", "tour", "traffic"
+            ]
+        },
+        "Weather": {
+            "starters": ["sun"],
+            "movers": [
+                "cloud", "cloudy", "snow", "sunny", "fog", "foggy", "ice", "weather", "storm", "rain", "wind",
+                "rainbow", "sky", "windy"
+            ],
+            "flyers": [] // No specific flyers words listed
+        },
+        "Work": {
+            "starters": [
+                "teacher", "circus", "clown", "cook", "dentist", "doctor", "driver", "farmer", "film", "movie",
+                "star", "hospital", "nurse", "pirate", "popstar", "work"
+            ],
+            "movers": [
+                "actor", "airport", "ambulance", "artist", "astronaut", "business", "businessman", "businesswoman",
+                "designer", "engineer", "factory", "fireengine", "firetruck", "firefighter", "job", "journalist"
+            ],
+            "flyers": [
+                "manager", "mechanic", "meeting", "news", "newspaper", "office", "photographer", "pilot",
+                "policeofficer", "policestation", "queen", "rocket", "singer", "taxi", "waiter"
+            ]
+        },
+        "TheWorldAroundUs": {
+            "starters": [
+                "beach", "sand", "sea", "shell", "street", "sun", "tree", "water"
+            ],
+            "movers": [
+                "building", "city", "country", "countryside", "field", "forest", "grass", "ground", "island", "lake",
+                "leaf", "leaves", "moon", "river", "road", "rock", "sky", "star", "town", "village", "waterfall",
+                "wave", "world"
+            ],
+            "flyers": [
+                "mountain", "plant", "air", "bridge", "land", "ocean", "castle", "planet", "cave", "pond", "desert",
+                "space", "earth", "stone", "entrance", "stream", "environment", "view", "exit", "wood", "fire",
+                "future", "hill"
+            ]
+        }
+    };
+
+    // DOM elements
+    const themeSelect = document.getElementById('theme-select');
     const wordInputs = document.querySelectorAll('.word-inputs input');
     const generateBtn = document.getElementById('generate-btn');
     const statsDiv = document.querySelector('.stats');
     const wordListDiv = document.querySelector('.word-list');
+    const clearWordsBtn = document.getElementById('clear-words-btn');
     
+    // Populate theme dropdown
+    for (const category in THEMES_DATA) {
+        for (const level in THEMES_DATA[category]) {
+            // Only add options if there are words for that level
+            if (THEMES_DATA[category][level].length > 0) {
+                const option = document.createElement('option');
+                // Format category names for display
+                const displayCategory = category.replace(/([A-Z])/g, ' $1').trim().replace(/And/g, '&');
+                const displayLevel = level.charAt(0).toUpperCase() + level.slice(1);
+                
+                option.value = `${category}-${level}`;
+                option.textContent = `${displayCategory} - ${displayLevel}`;
+                themeSelect.appendChild(option);
+            }
+        }
+    }
+
+    // Event listener for theme selection
+    themeSelect.addEventListener('change', function() {
+        const selectedValue = this.value;
+        clearWordInputs(); // Clear manual inputs first
+        if (selectedValue) {
+            const [categoryKey, levelKey] = selectedValue.split('-');
+            const wordsToLoad = THEMES_DATA[categoryKey][levelKey];
+            
+            // Populate word inputs, max 10 words
+            wordInputs.forEach((input, index) => {
+                if (wordsToLoad && wordsToLoad[index]) {
+                    input.value = wordsToLoad[index];
+                } else {
+                    input.value = '';
+                }
+            });
+        }
+    });
+
+    // Event listener for clearing words
+    clearWordsBtn.addEventListener('click', clearWordInputs);
+
+    function clearWordInputs() {
+        wordInputs.forEach(input => input.value = '');
+    }
+    
+    // Original generate button logic
     generateBtn.addEventListener('click', function() {
         activeWords = [];
         wordInputs.forEach(input => {
             const word = input.value.trim().toUpperCase();
-            if (word.length >= 3 && word.length <= 12) {
+            if (word.length >= 3 && word.length <= 12) { // Validate length for word search
                 activeWords.push(word);
             }
         });
@@ -27,7 +378,7 @@ document.addEventListener('DOMContentLoaded', function() {
             wordListDiv.style.display = 'block';
             document.getElementById('total-words').textContent = activeWords.length;
         } else {
-            alert('Please enter at least one valid word (3-12 letters)');
+            alert('Please select a theme or enter at least one valid word (3-12 letters).');
         }
     });
     
@@ -66,8 +417,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('found-count').textContent = foundCount;
         document.getElementById('total-words').textContent = totalWords;
         
-        if (foundCount === totalWords) {
+        if (foundCount === totalWords && totalWords > 0) {
             document.getElementById('congrats-message').style.display = 'block';
+        } else {
+            document.getElementById('congrats-message').style.display = 'none';
         }
     }
     
@@ -108,19 +461,19 @@ document.addEventListener('DOMContentLoaded', function() {
             
             let row, col;
             
-            if (rowDir === 1) {
-                row = Math.floor(Math.random() * (gridSize - word.length));
-            } else if (rowDir === -1) {
-                row = Math.floor(Math.random() * (gridSize - word.length)) + word.length - 1;
-            } else {
+            if (rowDir === 1) { // Down
+                row = Math.floor(Math.random() * (gridSize - word.length + 1));
+            } else if (rowDir === -1) { // Up
+                row = Math.floor(Math.random() * (gridSize - word.length + 1)) + word.length - 1;
+            } else { // No vertical movement
                 row = Math.floor(Math.random() * gridSize);
             }
             
-            if (colDir === 1) {
-                col = Math.floor(Math.random() * (gridSize - word.length));
-            } else if (colDir === -1) {
-                col = Math.floor(Math.random() * (gridSize - word.length)) + word.length - 1;
-            } else {
+            if (colDir === 1) { // Right
+                col = Math.floor(Math.random() * (gridSize - word.length + 1));
+            } else if (colDir === -1) { // Left
+                col = Math.floor(Math.random() * (gridSize - word.length + 1)) + word.length - 1;
+            } else { // No horizontal movement
                 col = Math.floor(Math.random() * gridSize);
             }
             
@@ -227,10 +580,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function generateWordSearch() {
         initializeGrid();
         
-        // Sort words by length (longest first) for better placement
+        // Filter out empty words and sort by length (longest first) for better placement
+        activeWords = activeWords.filter(word => word.length > 0);
         activeWords.sort((a, b) => b.length - a.length);
-        
-        // Try to place each word
+
+        if (activeWords.length > gridSize * gridSize) {
+            alert('Too many words for the current grid size. Please reduce the number of words or increase the grid size (not yet implemented).');
+            return;
+        }
+
         let allPlaced = true;
         activeWords.forEach(word => {
             if (!placeWord(word)) {
@@ -240,7 +598,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         if (!allPlaced) {
-            alert("Some words couldn't be placed. Try with fewer or shorter words.");
+            alert("Some words couldn't be placed. Try with fewer or shorter words or regenerate.");
         }
         
         fillEmptySpaces();
