@@ -1,3 +1,10 @@
+To make the "Words to find" list centered and have the same look as the webpage when printed, you need to adjust the CSS rules within the `@media print` block in your `css/wordsearch.css` file.
+
+The key change is setting `justify-content: center;` for the `ul` element within `.word-list` and also aligning the appearance of the list items (`li`) to match the non-print styles.
+
+Here's the updated `css/wordsearch.css` code:
+
+```css
 body {
     font-family: Arial, sans-serif;
     max-width: 800px;
@@ -154,8 +161,8 @@ button:hover {
     body {
         max-width: 100% !important;
         padding: 0 !important;
-        margin: 0 !important;
-        text-align: center;
+        margin: 0 auto !important; /* Ensure body itself is centered if max-width is less than page */
+        text-align: center; /* Ensures block-level elements within body are centered via auto margins */
     }
 
     h1 {
@@ -165,18 +172,22 @@ button:hover {
     }
 
     .word-search-container {
-        margin: 0 auto;
+        margin: 0 auto; /* Center the grid container */
         padding: 0;
     }
 
     .word-list {
-        margin-top: 30px;
-        border: none;
-        background-color: transparent;
+        margin: 20px auto 0 auto; /* Center the word-list container and adjust margin-top */
+        padding: 15px; /* Match original padding */
+        background-color: #e6f2ff; /* Match original background */
+        border: 1px solid #b3d1ff; /* Match original border */
+        border-radius: 8px; /* Match original border-radius */
     }
 
     .word-list h3 {
         text-align: center;
+        margin-top: 0; /* Match original margin-top */
+        color: #2c3e50; /* Match original color */
     }
 
     .word-list ul {
@@ -184,15 +195,35 @@ button:hover {
         padding: 0;
         display: flex;
         flex-wrap: wrap;
-        justify-content: center;
-        gap: 15px;
+        justify-content: center; /* Changed from flex-start to center to align list items */
+        gap: 15px; /* Matched original gap */
     }
 
     .word-list li {
-        background-color: transparent;
-        border: 1px dashed #ccc; /* Optional: add a light border for visual separation */
-        color: #333;
-        padding: 5px 10px;
-        font-size: 16px; /* Adjust font size for print */
+        font-size: 18px; /* Matched original font-size */
+        font-weight: bold;
+        padding: 8px 15px; /* Matched original padding */
+        border-radius: 6px; /* Matched original border-radius */
+        background-color: #d9e6ff; /* Matched original background-color */
+        color: #2c3e50; /* Matched original color */
+        position: relative;
+    }
+
+    /* Retain found-word styling if desired for print */
+    .word-list li.found {
+        background-color: #ffebee;
+        color: #c62828;
+        position: relative;
+    }
+    .word-list li.found::after {
+        content: "";
+        position: absolute;
+        left: 10%;
+        top: 50%;
+        width: 80%;
+        height: 2px;
+        background-color: #c62828;
+        transform: translateY(-50%);
     }
 }
+```
