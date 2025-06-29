@@ -415,7 +415,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         const cells = document.querySelectorAll('#wordSearch td');
         cells.forEach(cell => {
-            cell.classList.remove('found-word');
+            cell.addEventListener('click', handleCellClick);
         });
     }
     
@@ -592,18 +592,15 @@ document.addEventListener('DOMContentLoaded', function() {
         activeWords = activeWords.filter(word => word.length > 0);
         activeWords.sort((a, b) => b.length - a.length);
 
-        // Alert if too many words for the current grid size, considering maxWords.
-        // gridSize * gridSize gives total cells.
-        // A rough estimate: if avg word length is 5, then activeWords.length * 5 should be less than gridSize * gridSize.
-        // Or, more simply, if activeWords.length exceeds a certain proportion of gridSize * gridSize.
-        // For simplicity, based on previous alert, just check if activeWords.length > maxWords or if words are too long
-        // for the current grid.
-        if (activeWords.length > maxWords) {
-             alert(`You have entered more than the maximum allowed ${maxWords} words. Only the first ${maxWords} words will be used.`);
-             activeWords = activeWords.slice(0, maxWords);
+        // Alert if too many words for the current input fields
+        if (activeWords.length > wordInputs.length) { // Max words limited by input fields
+             alert(`You can only enter up to ${wordInputs.length} words. Only the first ${wordInputs.length} words will be used.`);
+             activeWords = activeWords.slice(0, wordInputs.length);
         }
+
+        // Alert if words are too long for the grid
         if (activeWords.some(word => word.length > gridSize)) {
-            alert('Some words are too long for the current grid size. Please reduce the length of words or increase the grid size.');
+            alert('Some words are too long for the current grid size. Please reduce the length of words or increase the grid size (if implemented).');
             return; // Stop generation if words are too long for grid
         }
         
