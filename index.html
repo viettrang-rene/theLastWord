@@ -8,7 +8,142 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/club.css">
-    
+    <style>
+        /* Additional styles for the carousel */
+        .carousel-container {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            margin: 20px 0;
+        }
+        
+        .carousel-track {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        
+        .carousel-card {
+            flex: 0 0 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            position: absolute;
+            width: 100%;
+        }
+        
+        .carousel-card.active {
+            opacity: 1;
+            position: relative;
+        }
+        
+        .carousel-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        
+        .carousel-nav button {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 0 10px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .carousel-nav button:hover {
+            background: #3a5a80;
+        }
+        
+        .carousel-pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        .carousel-pagination-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        
+        .carousel-pagination-dot.active {
+            background: #4a6fa5;
+        }
+        
+        /* Testimonial carousel styles */
+        .testimonial-carousel {
+            position: relative;
+            min-height: 150px;
+        }
+        
+        .testimonial {
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            position: absolute;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .testimonial.active {
+            opacity: 1;
+        }
+        
+        .testimonial-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        .testimonial-nav button {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            margin: 0 10px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .testimonial-dots {
+            display: flex;
+            margin: 0 15px;
+        }
+        
+        .testimonial-dots .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #ccc;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+        
+        .testimonial-dots .dot.active {
+            background: #4a6fa5;
+        }
+        
+        @media (min-width: 768px) {
+            .carousel-card {
+                flex: 0 0 calc(100% / 3);
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="club-nav" aria-label="Main navigation">
@@ -19,7 +154,7 @@
             </button>
             <ul id="primary-navigation">
                 <li><a href="../theLastWord/index.html">Home</a></li>
-                <li><a href="../theLastWord/AnswerEverything.html</li>
+                <li><a href="../theLastWord/AnswerEverything.html">Answer Everything</a></li>
                 <!-- <li><a href="../theLastWord/club.html">Speaking Club</a></li>
                 <li><a href="../theLastWord/kidpreneur.html">Kidpreneur</a></li>
                 <li><a href="../theLastWord/mathpractice.html">Math</a></li>
@@ -59,19 +194,19 @@
             <div class="carousel-container">
                 <div class="carousel-track">
                     <div class="carousel-card active">
-                        <img src="/images/english-grammar-in-use.png" alt="English Grammar in Use book cover" loading="lazy" class="loading">
+                        <img src="/images/english-grammar-in-use.png" alt="English Grammar in Use book cover" loading="lazy">
                         <h3>English Grammar in Use</h3>
                         <p>Master English grammar with our comprehensive guide</p>
                         <a href="books/english-grammar-in-use.html" class="btn"><i class="fas fa-book-reader"></i> View Guide</a>
                     </div>
                     <div class="carousel-card">
-                        <img src="/images/math-practice.jpg" alt="Math practice materials" loading="lazy" class="loading">
+                        <img src="/images/math-practice.jpg" alt="Math practice materials" loading="lazy">
                         <h3>Math Practice Tool</h3>
                         <p>Interactive exercises for all skill levels</p>
                         <a href="math-practice.html" class="btn"><i class="fas fa-play-circle"></i> Try Now</a>
                     </div>
                     <div class="carousel-card">
-                        <img src="/images/entrepreneur-club.jpg" alt="Entrepreneur club meeting" loading="lazy" class="loading">
+                        <img src="/images/entrepreneur-club.jpg" alt="Entrepreneur club meeting" loading="lazy">
                         <h3>Entrepreneur Club</h3>
                         <p>Develop business and speaking skills</p>
                         <a href="entrepreneur-club.html" class="btn"><i class="fas fa-sign-in-alt"></i> Join Now</a>
@@ -108,9 +243,9 @@
             <div class="testimonial-nav">
                 <button class="testimonial-prev"><i class="fas fa-chevron-left"></i></button>
                 <div class="testimonial-dots">
-                    <span class="dot active"></span>
-                    <span class="dot"></span>
-                    <span class="dot"></span>
+                    <span class="dot active" data-index="0"></span>
+                    <span class="dot" data-index="1"></span>
+                    <span class="dot" data-index="2"></span>
                 </div>
                 <button class="testimonial-next"><i class="fas fa-chevron-right"></i></button>
             </div>
@@ -127,6 +262,97 @@
         </div>
     </footer>
 
-    <script src="js/index.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Featured Resources Carousel
+            const carouselCards = document.querySelectorAll('.carousel-card');
+            const carouselDots = document.querySelectorAll('.carousel-pagination-dot');
+            const prevButton = document.querySelector('.carousel-prev');
+            const nextButton = document.querySelector('.carousel-next');
+            let currentIndex = 0;
+            
+            // Testimonial Carousel
+            const testimonials = document.querySelectorAll('.testimonial');
+            const testimonialDots = document.querySelectorAll('.testimonial-dots .dot');
+            const testimonialPrev = document.querySelector('.testimonial-prev');
+            const testimonialNext = document.querySelector('.testimonial-next');
+            let testimonialIndex = 0;
+            
+            // Update carousel display
+            function updateCarousel() {
+                carouselCards.forEach((card, index) => {
+                    card.classList.remove('active');
+                    carouselDots[index].classList.remove('active');
+                    
+                    if (index === currentIndex) {
+                        card.classList.add('active');
+                        carouselDots[index].classList.add('active');
+                    }
+                });
+            }
+            
+            // Update testimonial display
+            function updateTestimonial() {
+                testimonials.forEach((testimonial, index) => {
+                    testimonial.classList.remove('active');
+                    testimonialDots[index].classList.remove('active');
+                    
+                    if (index === testimonialIndex) {
+                        testimonial.classList.add('active');
+                        testimonialDots[index].classList.add('active');
+                    }
+                });
+            }
+            
+            // Featured Resources Carousel navigation
+            prevButton.addEventListener('click', () => {
+                currentIndex = (currentIndex - 1 + carouselCards.length) % carouselCards.length;
+                updateCarousel();
+            });
+            
+            nextButton.addEventListener('click', () => {
+                currentIndex = (currentIndex + 1) % carouselCards.length;
+                updateCarousel();
+            });
+            
+            // Featured Resources Carousel dot navigation
+            carouselDots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    currentIndex = parseInt(dot.getAttribute('data-index'));
+                    updateCarousel();
+                });
+            });
+            
+            // Testimonial navigation
+            testimonialPrev.addEventListener('click', () => {
+                testimonialIndex = (testimonialIndex - 1 + testimonials.length) % testimonials.length;
+                updateTestimonial();
+            });
+            
+            testimonialNext.addEventListener('click', () => {
+                testimonialIndex = (testimonialIndex + 1) % testimonials.length;
+                updateTestimonial();
+            });
+            
+            // Testimonial dot navigation
+            testimonialDots.forEach(dot => {
+                dot.addEventListener('click', () => {
+                    testimonialIndex = parseInt(dot.getAttribute('data-index'));
+                    updateTestimonial();
+                });
+            });
+            
+            // Auto-advance carousels
+            setInterval(() => {
+                currentIndex = (currentIndex + 1) % carouselCards.length;
+                updateCarousel();
+            }, 5000);
+            
+            setInterval(() => {
+                testimonialIndex = (testimonialIndex + 1) % testimonials.length;
+                updateTestimonial();
+            }, 6000);
+        });
+    </script>
 </body>
 </html>
