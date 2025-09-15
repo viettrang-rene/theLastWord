@@ -3,12 +3,273 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESL Study Guides</title>
-    
+    <title>Free Time Activities - ESL Study Guides</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/club.css">
-    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .club-nav {
+            background: linear-gradient(135deg, #4a6fa5, #2c3e50);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .club-nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .club-nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        .club-nav li {
+            margin-right: 20px;
+        }
+        
+        .club-nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .club-nav a:hover {
+            color: #ffd700;
+        }
+        
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: #2c3e50;
+            font-size: 2.5rem;
+        }
+        
+        .carousel-container {
+            position: relative;
+            max-width: 900px;
+            margin: 0 auto;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            background: white;
+        }
+        
+        .carousel {
+            display: flex;
+            transition: transform 0.5s ease;
+        }
+        
+        .carousel-item {
+            min-width: 100%;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .carousel-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #4a6fa5;
+            background: #f0f5ff;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .carousel-heading {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+        }
+        
+        .carousel-content {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #555;
+            text-align: center;
+            max-width: 800px;
+        }
+        
+        .carousel-content ul {
+            text-align: left;
+            margin: 1rem 0;
+            padding-left: 1.5rem;
+        }
+        
+        .carousel-content li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .carousel-nav {
+            display: flex;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+        
+        .carousel-btn {
+            background: #4a6fa5;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            margin: 0 10px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        
+        .carousel-btn:hover {
+            background: #3a5a80;
+        }
+        
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            margin-top: 1.5rem;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ccc;
+            margin: 0 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .dot.active {
+            background: #4a6fa5;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+            background: #2c3e50;
+            color: white;
+        }
+        
+        .social-links {
+            margin-top: 1rem;
+        }
+        
+        .social-links a {
+            color: white;
+            margin: 0 10px;
+            font-size: 1.2rem;
+        }
+        
+        @media (max-width: 768px) {
+            .club-nav ul {
+                display: none;
+            }
+            
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .carousel-item {
+                padding: 1.5rem;
+            }
+            
+            .carousel-heading {
+                font-size: 1.5rem;
+            }
+            
+            .carousel-content {
+                font-size: 1rem;
+            }
+        }
+        
+        .highlight {
+            background: linear-gradient(120deg, #f0f5ff 0%, #e6eeff 100%);
+            padding: 2rem;
+            border-radius: 12px;
+            margin: 2rem auto;
+            max-width: 900px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .highlight-title {
+            text-align: center;
+            color: #4a6fa5;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        
+        .two-column {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .column {
+            flex-basis: 48%;
+            min-width: 300px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .column-title {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .column-title i {
+            margin-right: 10px;
+            color: #4a6fa5;
+        }
+        
+        @media (max-width: 768px) {
+            .column {
+                flex-basis: 100%;
+            }
+        }
+    </style>
 </head>
 <body>
     <nav class="club-nav" aria-label="Main navigation">
@@ -19,71 +280,201 @@
             </button>
             <ul id="primary-navigation">
                 <li><a href="../theLastWord/index.html">Home</a></li>
-                <li><a href="../theLastWord/AnswerEverything.html</li>
+                <li><a href="../theLastWord/AnswerEverything.html">Answer Everything</a></li>
+                <!-- Other navigation items commented out -->
             </ul>
         </div>
     </nav>
 
-    <main>
-        <section class="discussion-slider">
-            <h2>ESL Discussion Points</h2>
-            <div class="slider-container">
-                <div class="slider-track">
-                    <div class="slider-card active">
-                        <h3>What do you like to do in you free time?</h3>
-                        <p>Free time = spare time = leisure time</p>
+    <div class="container">
+        <h1 class="page-title">What Do You Like to Do in Your Free Time?</h1>
+        
+        <div class="carousel-container">
+            <div class="carousel">
+                <!-- Slide 1 -->
+                <div class="carousel-item">
+                    <div class="carousel-icon">
+                        <i class="fas fa-comments"></i>
                     </div>
-                    <div class="slider-card">
-                        <h3>How to Answer</h3>
-                        <p>Say what you like doing: I like to play football.<br>Say why: It's fun and healthy.<br>I like to play football, because it's fun and healthy.</p>
+                    <h2 class="carousel-heading">How to Answer</h2>
+                    <div class="carousel-content">
+                        <p>Say what you like doing: <strong>I like to play football.</strong></p>
+                        <p>Say why: <strong>It's fun and healthy.</strong></p>
+                        <p>Put it together: <strong>I like to play football, because it's fun and healthy.</strong></p>
                     </div>
-                    <div class="slider-card">
-                        <h3>Make it Better!</h3>
-                        <p>Pronunciation: Liketa<br>Expressions: I'm a big fan of...<br>Add details</p>
+                </div>
+                
+                <!-- Slide 2 -->
+                <div class="carousel-item">
+                    <div class="carousel-icon">
+                        <i class="fas fa-volume-up"></i>
                     </div>
-                    <div class="slider-card">
-                        <h3>Pronunciation "Liketa"</h3>
-                        <p>I like to play football...<br>I like to go swimming...<br>I'm quite into... (playing football).<br>I'm a big fan of... (playing football).<br>I'm keen on... (playing football).<br>I'm interested in... (learning new languages).<br>(the health benefits are) - a huge plus</p>
+                    <h2 class="carousel-heading">Pronunciation "Liketa"</h2>
+                    <div class="carousel-content">
+                        <p>In natural speech, "like to" often sounds like "liketa":</p>
+                        <ul>
+                            <li>I like to play football... → I liketa play football...</li>
+                            <li>I like to go swimming... → I liketa go swimming...</li>
+                            <li>I like to do yoga... → I liketa do yoga...</li>
+                        </ul>
                     </div>
-                    <div class="slider-card">
-                        <h3>Expressions</h3>
-                        <p>I like to play football...<br>I like playing football...<br>I enjoy playing football...</p>
+                </div>
+                
+                <!-- Slide 3 -->
+                <div class="carousel-item">
+                    <div class="carousel-icon">
+                        <i class="fas fa-star"></i>
                     </div>
-                    <div class="slider-card">
-                        <h3>Grammar Note - like\\like to\\enjoy</h3>
-                        <p>I like to go swimming...<br>I like (going) swimming...<br>I enjoy (going) swimming...</p>
+                    <h2 class="carousel-heading">Expressions</h2>
+                    <div class="carousel-content">
+                        <p>Use these expressions to make your answer more interesting:</p>
+                        <ul>
+                            <li>I'm quite into... (playing football)</li>
+                            <li>I'm a big fan of... (playing football)</li>
+                            <li>I'm keen on... (playing football)</li>
+                            <li>I'm interested in... (learning new languages)</li>
+                            <li>(the health benefits are) ...a huge plus</li>
+                        </ul>
                     </div>
-                     <div class="slider-card">
-                        <h3>Grammar Note - feelings</h3>
-                        <p>I like to do yoga...<br>I like doing yoga...<br>I enjoy doing yoga.<br>Use -ing to talk about the thing causing the feeling<br>Enjoying is thrilling.<br>Learning a new language is interesting.</p>
+                </div>
+                
+                <!-- Slide 4 -->
+                <div class="carousel-item">
+                    <div class="carousel-icon">
+                        <i class="fas fa-language"></i>
                     </div>
-                     <div class="slider-card">
-                        <h3>Add Details</h3>
-                        <p>Use -ed to talk about the person feeling the emotion<br>I was thrilled to hear my wife is having a baby.<br>I'm interested in learning new languages.<br>Who - Who do you play with?<br>What - What do you do when you play football?<br>Where - Where do you play?<br>When - When do you play?<br>Why - Why do you play?<br>How - How often do you play?<br>How - How long have you been playing?<br>In my free time, I enjoy playing football. I'm quite into outdoor activities and friendly competition, so I think football is a lot a fun. I also like to stay fit, so the health benefits of playing football are another – huge plus. During the football season, I usually practice twice a week and play a match on the weekend. Most of the time, I play with my old school friends and some colleagues from work.</p>
+                    <h2 class="carousel-heading">Grammar Notes</h2>
+                    <div class="carousel-content">
+                        <p><strong>Like to vs. Like vs. Enjoy:</strong></p>
+                        <ul>
+                            <li>I like to play football / I like playing football / I enjoy playing football</li>
+                            <li>I like to go swimming / I like (going) swimming / I enjoy (going) swimming</li>
+                            <li>I like to do yoga / I like doing yoga / I enjoy doing yoga</li>
+                        </ul>
+                        
+                        <p><strong>Feelings:</strong></p>
+                        <ul>
+                            <li>Use -ing to talk about the thing causing the feeling: Skydiving is thrilling</li>
+                            <li>Use -ed to talk about the person feeling the emotion: I was thrilled to hear...</li>
+                        </ul>
                     </div>
-                     <div class="slider-card">
-                        <h3>What do you like to do in you free time?</h3>
-                        <p>Exciting: Playing video games with friends is always exciting.<br>Thrilling: Riding a roller coaster is a thrilling experience.<br>Entertaining: Watching a good movie is very entertaining.<br>Amusing: Listening to a comedy podcast can be quite amusing.<br>Invigorating: Going for a swim in the ocean is so invigorating.<br>Engaging: Debating a topic you're passionate about is really engaging.<br>Fascinating: Learning about ancient history is fascinating.</p>
+                </div>
+                
+                <!-- Slide 5 -->
+                <div class="carousel-item">
+                    <div class="carousel-icon">
+                        <i class="fas fa-info-circle"></i>
                     </div>
-                     <div class="slider-card">
-                        <h3>Adjectives for High-Energy & Fun Activities</h3>
-                        <p>Relaxing: Listening to quiet music is very relaxing.<br>Soothing: Gardening on a sunny afternoon is incredibly soothing.<br>Calming: Practicing yoga can be a calming way to end the day.<br>Rewarding: Volunteering for a good cause is a rewarding activity.<br>Fulfilling: Completing a big art project feels very fulfilling.<br>Satisfying: Finishing a challenging puzzle is so satisfying.<br>Inspiring: Visiting an art gallery can be very inspiring.<br>Refreshing: Taking a walk in the park is so refreshing after a long day.</p>
-                    </div>
-                     <div class="slider-card">
-                        <h3>Adjectives for Calm & Fulfilling Activities</h3>
-                        <p>Fulfilling implies meeting a deep, long-term need for meaning and purpose by fully developing one's abilities, leading to overall happiness and growth.<br>Rewarding suggests that something offers immediate or tangible benefits like knowledge, money, or the enjoyment of a particular experience, which may or may not lead to a deeper sense of purpose.<br>Satisfying simply means that a need or desire has been met, bringing contentment, pleasure, or gratification which can be more immediate and less profound than fulfillment.</p>
-                    </div>
-                     <div class="slider-card">
-                        <h3>FULFILLING - REWARDING - SATISFYING</h3>
-                        <p>Fulfilling implies meeting a deep, long-term need for meaning and purpose by fully developing one's abilities, leading to overall happiness and growth.<br>Rewarding suggests that something offers immediate or tangible benefits like knowledge, money, or the enjoyment of a particular experience, which may or may not lead to a deeper sense of purpose.<br>Satisfying simply means that a need or desire has been met, bringing contentment, pleasure, or gratification which can be more immediate and less profound than fulfillment.</p>
+                    <h2 class="carousel-heading">Add Details</h2>
+                    <div class="carousel-content">
+                        <p>Make your answer more complete by adding details:</p>
+                        <ul>
+                            <li><strong>Who</strong> - Who do you play with?</li>
+                            <li><strong>What</strong> - What do you do when you play football?</li>
+                            <li><strong>Where</strong> - Where do you play?</li>
+                            <li><strong>When</strong> - When do you play?</li>
+                            <li><strong>Why</strong> - Why do you play?</li>
+                            <li><strong>How</strong> - How often do you play?</li>
+                            <li><strong>How</strong> - How long have you been playing?</li>
+                        </ul>
                     </div>
                 </div>
             </div>
-            <div class="slider-pagination">
-                </div>
-            <div class="slider-nav">
-                <button class="slider-prev" aria-label="Previous discussion point"><i class="fas fa-chevron-left"></i></button>
-                <button class="slider-next" aria-label="Next discussion point"><i class="fas fa-chevron-right"></i></button>
+            
+            <div class="carousel-dots">
+                <span class="dot active" data-index="0"></span>
+                <span class="dot" data-index="1"></span>
+                <span class="dot" data-index="2"></span>
+                <span class="dot" data-index="3"></span>
+                <span class="dot" data-index="4"></span>
             </div>
-        </section>
-       
+        </div>
+        
+        <div class="carousel-nav">
+            <button class="carousel-btn" id="prev-btn">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <button class="carousel-btn" id="next-btn">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+        
+        <div class="highlight">
+            <h2 class="highlight-title">Example Answer</h2>
+            <div class="carousel-content">
+                <p>"In my free time, I enjoy playing football. I'm quite into outdoor activities and friendly competition, so I think football is a lot of fun. I also like to stay fit, so the health benefits of playing football are another huge plus. During the football season, I usually practice twice a week and play a match on the weekend. Most of the time, I play with my old school friends and some colleagues from work."</p>
+            </div>
+        </div>
+        
+        <div class="highlight">
+            <h2 class="highlight-title">Adjectives for Activities</h2>
+            <div class="two-column">
+                <div class="column">
+                    <h3 class="column-title"><i class="fas fa-running"></i> High-Energy & Exciting</h3>
+                    <ul>
+                        <li><strong>Exciting</strong> - Playing video games with friends is always exciting.</li>
+                        <li><strong>Thrilling</strong> - Riding a roller coaster is a thrilling experience.</li>
+                        <li><strong>Entertaining</strong> - Watching a good movie is very entertaining.</li>
+                        <li><strong>Amusing</strong> - Listening to a comedy podcast can be quite amusing.</li>
+                        <li><strong>Invigorating</strong> - Going for a swim in the ocean is so invigorating.</li>
+                        <li><strong>Engaging</strong> - Debating a topic you're passionate about is really engaging.</li>
+                        <li><strong>Fascinating</strong> - Learning about ancient history is fascinating.</li>
+                    </ul>
+                </div>
+                <div class="column">
+                    <h3 class="column-title"><i class="fas fa-couch"></i> Calm & Fulfilling</h3>
+                    <ul>
+                        <li><strong>Relaxing</strong> - Listening to quiet music is very relaxing.</li>
+                        <li><strong>Soothing</strong> - Gardening on a sunny afternoon is incredibly soothing.</li>
+                        <li><strong>Calming</strong> - Practicing yoga can be a calming way to start the day.</li>
+                        <li><strong>Rewarding</strong> - Volunteering for a good cause is a rewarding activity.</li>
+                        <li><strong>Fulfilling</strong> - Creating a piece of art is deeply fulfilling.</li>
+                        <li><strong>Satisfying</strong> - Finishing a challenging puzzle is so satisfying.</li>
+                        <li><strong>Inspiring</strong> - Visiting an art gallery can be very inspiring.</li>
+                        <li><strong>Refreshing</strong> - Taking a walk in the park is refreshing after a long day.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="highlight">
+            <h2 class="highlight-title">Word Differences</h2>
+            <div class="carousel-content">
+                <p><strong>Fulfilling</strong> - Implies meeting a deep, long-term need for meaning and purpose by fully developing one's abilities, leading to overall happiness and growth.</p>
+                <p><strong>Rewarding</strong> - Suggests that something offers immediate or tangible benefits, like knowledge, money, or the enjoyment of a particular experience, which may or may not lead to a deeper sense of purpose.</p>
+                <p><strong>Satisfying</strong> - Simply means that a need or desire has been met, bringing contentment, pleasure, or gratification, which can be more immediate and less profound than fulfillment.</p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p><i class="far fa-copyright"></i> 2023 ESL Study Guides. All rights reserved.</p>
+        <div class="social-links">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const carousel = document.querySelector('.carousel');
+            const items = document.querySelectorAll('.carousel-item');
+            const dots = document.querySelectorAll('.dot');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            let currentIndex = 0;
+            
+            function updateCarousel() {
+                carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
+                
+                // Update dots
+                dots.forEach((dot, index) => {
+                    if (index === currentIndex) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+            }
