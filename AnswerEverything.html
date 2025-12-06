@@ -1,518 +1,309 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Free Time Activities - ESL Study Guides</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
-        }
-        
-        .club-nav {
-            background: linear-gradient(135deg, #4a6fa5, #2c3e50);
-            color: white;
-            padding: 1rem 0;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        .club-nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .club-nav ul {
-            display: flex;
-            list-style: none;
-        }
-        
-        .club-nav li {
-            margin-right: 20px;
-        }
-        
-        .club-nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-            transition: color 0.3s;
-        }
-        
-        .club-nav a:hover {
-            color: #ffd700;
-        }
-        
-        .mobile-menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-        
-        .page-title {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: #2c3e50;
-            font-size: 2.5rem;
-        }
-        
-        .carousel-container {
-            position: relative;
-            max-width: 900px;
-            margin: 0 auto;
-            overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            background: white;
-        }
-        
-        .carousel {
-            display: flex;
-            transition: transform 0.5s ease;
-        }
-        
-        .carousel-item {
-            min-width: 100%;
-            padding: 2.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .carousel-icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            color: #4a6fa5;
-            background: #f0f5ff;
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .carousel-heading {
-            font-size: 1.8rem;
-            color: #2c3e50;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            font-weight: 600;
-        }
-        
-        .carousel-content {
-            font-size: 1.1rem;
-            line-height: 1.7;
-            color: #555;
-            text-align: center;
-            max-width: 800px;
-        }
-        
-        .carousel-content ul {
-            text-align: left;
-            margin: 1rem 0;
-            padding-left: 1.5rem;
-        }
-        
-        .carousel-content li {
-            margin-bottom: 0.5rem;
-        }
-        
-        .carousel-nav {
-            display: flex;
-            justify-content: center;
-            margin-top: 2rem;
-        }
-        
-        .carousel-btn {
-            background: #4a6fa5;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            margin: 0 10px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: background 0.3s;
-            display: flex;
-            align-items: center;
-        }
-        
-        .carousel-btn:hover {
-            background: #3a5a80;
-        }
-        
-        .carousel-dots {
-            display: flex;
-            justify-content: center;
-            margin-top: 1.5rem;
-        }
-        
-        .dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #ccc;
-            margin: 0 8px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .dot.active {
-            background: #4a6fa5;
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 2rem;
-            margin-top: 2rem;
-            background: #2c3e50;
-            color: white;
-        }
-        
-        .social-links {
-            margin-top: 1rem;
-        }
-        
-        .social-links a {
-            color: white;
-            margin: 0 10px;
-            font-size: 1.2rem;
-        }
-        
-        @media (max-width: 768px) {
-            .club-nav ul {
-                display: none;
-            }
-            
-            .mobile-menu-toggle {
-                display: block;
-            }
-            
-            .carousel-item {
-                padding: 1.5rem;
-            }
-            
-            .carousel-heading {
-                font-size: 1.5rem;
-            }
-            
-            .carousel-content {
-                font-size: 1rem;
-            }
-        }
-        
-        .highlight {
-            background: linear-gradient(120deg, #f0f5ff 0%, #e6eeff 100%);
-            padding: 2rem;
-            border-radius: 12px;
-            margin: 2rem auto;
-            max-width: 900px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        
-        .highlight-title {
-            text-align: center;
-            color: #4a6fa5;
-            margin-bottom: 1.5rem;
-            font-size: 1.8rem;
-        }
-        
-        .two-column {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: space-between;
-        }
-        
-        .column {
-            flex-basis: 48%;
-            min-width: 300px;
-            margin-bottom: 1.5rem;
-        }
-        
-        .column-title {
-            color: #2c3e50;
-            margin-bottom: 1rem;
-            font-size: 1.3rem;
-            display: flex;
-            align-items: center;
-        }
-        
-        .column-title i {
-            margin-right: 10px;
-            color: #4a6fa5;
-        }
-        
-        @media (max-width: 768px) {
-            .column {
-                flex-basis: 100%;
-            }
-        }
-    </style>
-</head>
-<body>
-    <nav class="club-nav" aria-label="Main navigation">
-        <div class="club-nav-container">
-            <button class="mobile-menu-toggle" aria-expanded="false" aria-controls="primary-navigation">
-                <i class="fas fa-bars"></i>
-                <span class="sr-only">Menu</span>
-            </button>
-            <ul id="primary-navigation">
-                <li><a href="../theLastWord/index.html">Home</a></li>
-                <li><a href="../theLastWord/AnswerEverything.html">Answer Everything</a></li>
-                <!-- Other navigation items commented out -->
-            </ul>
-        </div>
-    </nav>
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
 
-    <div class="container">
-        <h1 class="carousel-heading">What do you like to do in your free time?</h1>
-        
-        <div class="carousel-container">
-            <div class="carousel">
-                <!-- Slide 1 -->
-                <div class="carousel-item">
-                    <div class="carousel-icon">
-                        <i class="fas fa-comments"></i>
-                    </div>
-                    <h2 class="carousel-heading">How to Answer</h2>
-                    <div class="carousel-content">
-                        <p>(1) Say what you like doing:</p>
-                        <p>(2) Say why:</p>
-                        <p><strong>(1) I like to play football, (2) because it's fun and healthy.</strong></p>
-                    </div>
-                </div>
-                
-                <!-- Slide 2 -->
-                <div class="carousel-item">
-                    <div class="carousel-icon">
-                        <i class="fas fa-volume-up"></i>
-                    </div>
-                    <h2 class="carousel-heading">Pronunciation "Liketa"</h2>
-                    <div class="carousel-content">
-                        <p>In natural speech, "like to" often sounds like "liketa":</p>
-                        <ul>
-                            <li>I liketa play football.</li>
-                            <li>I liketa go swimming.</li>
-                            <li>I liketa do yoga.</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Slide 3 -->
-                <div class="carousel-item">
-                    <div class="carousel-icon">
-                        <i class="fas fa-star"></i>
-                    </div>
-                    <h2 class="carousel-heading">Expressions</h2>
-                    <div class="carousel-content">
-                        <p>Use these expressions to make your answer more interesting:</p>
-                        <ul>
-                            <li><strong>I'm quite into</strong> playing football.</li>
-                            <li><strong>I'm a big fan of</strong> playing football.</li>
-                            <li><strong>I'm keen on</strong> playing football.</li>
-                            <li><strong>I'm interested in</strong> learning new languages.</li>
-                            <li>The health benefits are <strong>a huge plus</strong>.</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Slide 4 -->
-                <div class="carousel-item">
-                    <div class="carousel-icon">
-                        <i class="fas fa-language"></i>
-                    </div>
-                    <h2 class="carousel-heading">Grammar Notes</h2>
-                    <div class="carousel-content">
-                        <p><strong>Like to vs. Like vs. Enjoy:</strong></p>
-                        <ul>
-                            <li>I like to play football / I like playing football / I enjoy playing football</li>
-                            <li>I like to go swimming / I like (going) swimming / I enjoy (going) swimming</li>
-                            <li>I like to do yoga / I like doing yoga / I enjoy doing yoga</li>
-                        </ul>
-                        
-                        <p><strong>Feelings:</strong></p>
-                        <ul>
-                            <li>Use -ing to talk about the thing causing the feeling: Skydiving is thrilling</li>
-                            <li>Use -ed to talk about the person feeling the emotion: I was thrilled to hear...</li>
-                        </ul>
-                    </div>
-                </div>
-                
-                <!-- Slide 5 -->
-                <div class="carousel-item">
-                    <div class="carousel-icon">
-                        <i class="fas fa-info-circle"></i>
-                    </div>
-                    <h2 class="carousel-heading">Add Details</h2>
-                    <div class="carousel-content">
-                        <p>Make your answer more complete by adding details:</p>
-                        <ul>
-                            <li><strong>Who</strong> do you play with?</li>
-                            <li><strong>What</strong> do you do when you play football?</li>
-                            <li><strong>Where</strong> do you play?</li>
-                            <li><strong>When</strong> do you play?</li>
-                            <li><strong>Why</strong> do you play?</li>
-                            <li><strong>How often</strong> do you play?</li>
-                            <li><strong>How long</strong> have you been playing?</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="carousel-dots">
-                <span class="dot active" data-index="0"></span>
-                <span class="dot" data-index="1"></span>
-                <span class="dot" data-index="2"></span>
-                <span class="dot" data-index="3"></span>
-                <span class="dot" data-index="4"></span>
-            </div>
-        </div>
-        
-        <div class="carousel-nav">
-            <button class="carousel-btn" id="prev-btn">
-                <i class="fas fa-chevron-left"></i> Previous
-            </button>
-            <button class="carousel-btn" id="next-btn">
-                Next <i class="fas fa-chevron-right"></i>
-            </button>
-        </div>
-        
-        <div class="highlight">
-            <h2 class="highlight-title">Example Answer</h2>
-            <div class="carousel-content">
-                <p>"In my free time, I enjoy playing football. I'm quite into outdoor activities and friendly competition, so I think football is a lot of fun. I also like to stay fit, so the health benefits of playing football are another huge plus. During the football season, I usually practice twice a week and play a match on the weekend. Most of the time, I play with my old school friends and some colleagues from work."</p>
-            </div>
-        </div>
-        
-        <div class="highlight">
-            <h2 class="highlight-title">Adjectives for Activities</h2>
-            <div class="two-column">
-                <div class="column">
-                    <h3 class="column-title"><i class="fas fa-running"></i> High-Energy & Exciting</h3>
-                    <ul>
-                        <li><strong>Exciting</strong> - Playing video games with friends is always exciting.</li>
-                        <li><strong>Thrilling</strong> - Riding a roller coaster is a thrilling experience.</li>
-                        <li><strong>Entertaining</strong> - Watching a good movie is very entertaining.</li>
-                        <li><strong>Amusing</strong> - Listening to a comedy podcast can be quite amusing.</li>
-                        <li><strong>Invigorating</strong> - Going for a swim in the ocean is so invigorating.</li>
-                        <li><strong>Engaging</strong> - Debating a topic you're passionate about is really engaging.</li>
-                        <li><strong>Fascinating</strong> - Learning about ancient history is fascinating.</li>
-                    </ul>
-                </div>
-                <div class="column">
-                    <h3 class="column-title"><i class="fas fa-couch"></i> Calm & Fulfilling</h3>
-                    <ul>
-                        <li><strong>Relaxing</strong> - Listening to quiet music is very relaxing.</li>
-                        <li><strong>Soothing</strong> - Gardening on a sunny afternoon is incredibly soothing.</li>
-                        <li><strong>Calming</strong> - Practicing yoga can be a calming way to start the day.</li>
-                        <li><strong>Rewarding</strong> - Volunteering for a good cause is a rewarding activity.</li>
-                        <li><strong>Fulfilling</strong> - Creating a piece of art is deeply fulfilling.</li>
-                        <li><strong>Satisfying</strong> - Finishing a challenging puzzle is so satisfying.</li>
-                        <li><strong>Inspiring</strong> - Visiting an art gallery can be very inspiring.</li>
-                        <li><strong>Refreshing</strong> - Taking a walk in the park is refreshing after a long day.</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-        
-        <div class="highlight">
-            <h2 class="highlight-title">Word Differences</h2>
-            <div class="carousel-content">
-                <p><strong>Fulfilling</strong> - Implies meeting a deep, long-term need for meaning and purpose by fully developing one's abilities, leading to overall happiness and growth.</p>
-                <p><strong>Rewarding</strong> - Suggests that something offers immediate or tangible benefits, like knowledge, money, or the enjoyment of a particular experience, which may or may not lead to a deeper sense of purpose.</p>
-                <p><strong>Satisfying</strong> - Simply means that a need or desire has been met, bringing contentment, pleasure, or gratification, which can be more immediate and less profound than fulfillment.</p>
-            </div>
-        </div>
-    </div>
+<script>
+    // Configure Tailwind to not break your existing website styles
+    tailwind.config = {
+        corePlugins: {
+            preflight: false, // Disable global resets
+        }
+    }
+</script>
 
-    <footer class="footer">
-        <p><i class="far fa-copyright"></i> 2023 ESL Study Guides. All rights reserved.</p>
-        <div class="social-links">
-            <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
-            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-            <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
-        </div>
-    </footer>
+<style>
+    /* Local Reset for the Game Container Only */
+    #esl-game-container {
+        font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        box-sizing: border-box;
+        line-height: 1.5;
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        background-color: #f1f5f9; /* Slate-100 */
+        padding: 1rem;
+        border-radius: 1rem;
+    }
+    #esl-game-container *, #esl-game-container *::before, #esl-game-container *::after {
+        box-sizing: border-box;
+        border-width: 0;
+        border-style: solid;
+        border-color: #e5e7eb;
+    }
+    /* Fix buttons losing style when Preflight is off */
+    #esl-game-container button {
+        cursor: pointer;
+        background-color: transparent;
+        background-image: none;
+    }
+    /* Animations */
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    .animate-pop { animation: pop 0.3s ease-in-out; }
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    .animate-shake { animation: shake 0.4s ease-in-out; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+</style>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const carousel = document.querySelector('.carousel');
-            const items = document.querySelectorAll('.carousel-item');
-            const dots = document.querySelectorAll('.dot');
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            let currentIndex = 0;
-            
-            function updateCarousel() {
-                carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
-                
-                // Update dots
-                dots.forEach((dot, index) => {
-                    if (index === currentIndex) {
-                        dot.classList.add('active');
-                    } else {
-                        dot.classList.remove('active');
-                    }
-                });
+<div id="esl-game-container">
+    <div id="root">Loading Game...</div>
+</div>
+
+<script type="text/babel">
+    const { useState, useEffect } = React;
+    const { 
+        Bug, Bird, Cat, Dog, Hexagon, Milk, 
+        Map: MapIcon, Library, Palette, Utensils, 
+        Dumbbell, Music, Flag, CheckCircle, XCircle, 
+        ArrowRight, RefreshCw, Trophy, AlertCircle 
+    } = lucideReact;
+
+    /* --- DATA --- */
+    const LOCATIONS = [
+        { id: 'art', label: 'Art Room', icon: <Palette className="w-8 h-8" /> },
+        { id: 'lib', label: 'Library', icon: <Library className="w-8 h-8" /> },
+        { id: 'can', label: 'Canteen', icon: <Utensils className="w-8 h-8" /> },
+        { id: 'gym', label: 'Gym', icon: <Dumbbell className="w-8 h-8" /> },
+        { id: 'mus', label: 'Music Room', icon: <Music className="w-8 h-8" /> },
+        { id: 'fld', label: 'Football Field', icon: <Flag className="w-8 h-8" /> },
+    ];
+
+    const STAGES = [
+        {
+            animal: 'Spider', icon: <Bug className="w-6 h-6" />, type: 'HANGMAN',
+            intro: "To catch the fly, I need a Spider! Solve these words to find one.",
+            questions: [
+                { answer: "ORGANISING", hint: "Planning/arranging" },
+                { answer: "DECORATE", hint: "Making the room look nice" },
+                { answer: "BALLOONS", hint: "Floating party items" },
+                { answer: "SUMMER", hint: "The season of the event" },
+                { answer: "AMAZING", hint: "Adjective for 'very good'" }
+            ]
+        },
+        {
+            animal: 'Bird', icon: <Bird className="w-6 h-6" />, type: 'CLOZE',
+            intro: "To catch the spider, I need a Bird! Choose the correct prepositions.",
+            questions: [
+                { text: "Thanks ___ your email.", options: ["at", "for", "on"], answer: "for" },
+                { text: "Give my love ___ your parents.", options: ["to", "at", "with"], answer: "to" },
+                { text: "Lots ___ love,", options: ["of", "off", "on"], answer: "of" },
+                { text: "Say 'Hi' ___ your sister.", options: ["to", "for", "by"], answer: "to" },
+                { text: "That's all ___ me.", options: ["from", "by", "of"], answer: "from" }
+            ]
+        },
+        {
+            animal: 'Cat', icon: <Cat className="w-6 h-6" />, type: 'UNSCRAMBLE',
+            intro: "To catch the bird, I need a Cat! Put the words in the correct order.",
+            questions: [
+                { words: ["How", "are", "things?"], answer: "How are things?" },
+                { words: ["I", "hope", "to", "see", "you", "soon."], answer: "I hope to see you soon." },
+                { words: ["The", "event", "is", "next", "Saturday."], answer: "The event is next Saturday." },
+                { words: ["It", "is", "going", "to", "be", "amazing."], answer: "It is going to be amazing." },
+                { words: ["We", "are", "selling", "pizza", "and", "ice cream."], answer: "We are selling pizza and ice cream." }
+            ]
+        },
+        {
+            animal: 'Dog', icon: <Dog className="w-6 h-6" />, type: 'ORDERING',
+            intro: "To catch the cat, I need a Dog! Arrange the sentence chunks logically.",
+            questions: [
+                { chunks: ["your email.", "Hi Sam,", "Thanks for"], answer: "Hi Sam, Thanks for your email." },
+                { chunks: ["exciting news.", "because I have", "I am writing"], answer: "I am writing because I have exciting news." },
+                { chunks: ["and dancing.", "students singing", "We have ten"], answer: "We have ten students singing and dancing." },
+                { chunks: ["watch the show?", "like to come", "Would you"], answer: "Would you like to come watch the show?" },
+                { chunks: ["Best wishes.", "for now,", "That's all"], answer: "That's all for now, Best wishes." }
+            ]
+        },
+        {
+            animal: 'Goat', icon: <Hexagon className="w-6 h-6" />, type: 'MULTIPLE_CHOICE',
+            intro: "To catch the dog, I need a Goat! Select the best phrase for the context.",
+            questions: [
+                { prompt: "You want to ask about their life.", options: ["How are things?", "Who are you?"], answer: "How are things?" },
+                { prompt: "You want to mention the time.", options: ["The event is next Saturday.", "The event is going to be amazing."], answer: "The event is next Saturday." },
+                { prompt: "You want to give them a ticket.", options: ["I can get you a free ticket.", "Buy a ticket now."], answer: "I can get you a free ticket." },
+                { prompt: "You want to say you are finished writing.", options: ["That's all from me.", "I am stopping."], answer: "That's all from me." },
+                { prompt: "You want to sign off warmly.", options: ["Best wishes,", "Goodbye sir,"], answer: "Best wishes," }
+            ]
+        }
+    ];
+
+    const WINNING_EMAIL = `
+Hi Sam,
+
+Thanks for your email. How are things?
+I am writing because I have exciting news.
+
+The event is next Saturday. We have ten students singing and dancing.
+It is going to be amazing. We are selling pizza and ice cream.
+
+I can get you a free ticket. Would you like to come watch the show?
+
+That's all for now. Give my love to your parents.
+
+Best wishes,
+[Your Name]
+    `;
+
+    /* --- COMPONENTS --- */
+
+    function OldLadySchoolGame() {
+        const [view, setView] = useState('intro');
+        const [stageIndex, setStageIndex] = useState(0); 
+        const [questionIndex, setQuestionIndex] = useState(0); 
+        const [inventory, setInventory] = useState([]);
+        const [currentLocation, setCurrentLocation] = useState(null);
+        
+        const handleStartGame = () => setView('map');
+        const handleLocationClick = (loc) => {
+            setCurrentLocation(loc);
+            setQuestionIndex(0);
+            setView('game');
+        };
+        const handleStageComplete = () => {
+            const collectedAnimal = STAGES[stageIndex].animal;
+            const newInventory = [...inventory, collectedAnimal];
+            setInventory(newInventory);
+            if (stageIndex < STAGES.length - 1) {
+                setStageIndex(stageIndex + 1);
+                setView('map');
+            } else {
+                setView('logicTrap');
             }
-            
-            function nextSlide() {
-                currentIndex = (currentIndex + 1) % items.length;
-                updateCarousel();
+        };
+        const handleLogicTrapSuccess = () => setView('victory');
+
+        return (
+            <div className="flex flex-col items-center p-2 md:p-4 text-slate-800">
+                {/* HEADER */}
+                <header className="w-full bg-white shadow-md rounded-xl p-4 mb-6 flex justify-between items-center border-b-4 border-slate-300">
+                    <div className="bg-yellow-400 p-2 rounded-full shadow-sm">
+                        <span className="font-bold text-yellow-900 text-xs md:text-base">$1B REWARD</span>
+                    </div>
+                    <div className="flex gap-2">
+                        {inventory.map((anim, i) => (
+                            <div key={i} className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold border border-green-300">
+                                {anim}
+                            </div>
+                        ))}
+                    </div>
+                </header>
+
+                <main className="w-full flex-grow">
+                    {view === 'intro' && <IntroScreen onStart={handleStartGame} />}
+                    {view === 'map' && <MapScreen onLocationSelect={handleLocationClick} stageIndex={stageIndex} />}
+                    {view === 'game' && (
+                    <GameEngine 
+                        stageData={STAGES[stageIndex]} 
+                        questionIndex={questionIndex}
+                        setQuestionIndex={setQuestionIndex}
+                        onStageComplete={handleStageComplete}
+                        currentLocation={currentLocation}
+                    />
+                    )}
+                    {view === 'logicTrap' && <LogicTrap inventory={inventory} onSuccess={handleLogicTrapSuccess} />}
+                    {view === 'victory' && <VictoryScreen />}
+                </main>
+            </div>
+        );
+    }
+
+    function IntroScreen({ onStart }) {
+        return (
+            <div className="bg-white p-8 rounded-2xl shadow-xl text-center border-2 border-slate-200">
+                <div className="mb-6 flex justify-center"><div className="w-24 h-24 bg-purple-100 rounded-full flex items-center justify-center"><span className="text-4xl">👵</span></div></div>
+                <h1 className="text-3xl font-extrabold text-slate-900 mb-4">The Old Lady's School Search</h1>
+                <p className="text-lg text-slate-600 mb-6">I swallowed a fly! Oh my, oh my! <br/>Help me find animals to catch it.</p>
+                <button onClick={onStart} className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full text-xl transition-all shadow-lg transform hover:scale-105">Start Searching</button>
+            </div>
+        );
+    }
+
+    function MapScreen({ onLocationSelect, stageIndex }) {
+        const currentTarget = STAGES[stageIndex];
+        return (
+            <div className="bg-white p-6 rounded-2xl shadow-xl border-2 border-slate-200">
+                <div className="text-center mb-6">
+                    <h2 className="text-xl font-bold text-slate-700">Where should we look?</h2>
+                    <div className="flex items-center justify-center gap-2 mt-2 text-purple-600 bg-purple-50 py-2 rounded-lg">
+                        <span>Hunting for:</span> {currentTarget.icon} <span className="font-bold">{currentTarget.animal}</span>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                    {LOCATIONS.map((loc) => (
+                    <button key={loc.id} onClick={() => onLocationSelect(loc)} className="flex flex-col items-center justify-center p-6 bg-slate-50 hover:bg-blue-50 border-2 border-slate-200 hover:border-blue-400 rounded-xl transition-all gap-2 group">
+                        <div className="text-slate-500 group-hover:text-blue-500 transition-colors">{loc.icon}</div>
+                        <span className="font-bold text-slate-700">{loc.label}</span>
+                    </button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    function VictoryScreen() {
+        return (
+            <div className="bg-white p-8 rounded-2xl shadow-xl border-4 border-yellow-400 text-center animate-fade-in">
+                <div className="flex justify-center mb-4"><Trophy className="w-20 h-20 text-yellow-500" /></div>
+                <h2 className="text-3xl font-bold text-slate-800 mb-2">CONGRATULATIONS!</h2>
+                <div className="bg-slate-50 p-6 rounded-lg text-left border border-slate-200 font-mono text-sm shadow-inner mb-6">
+                    <pre className="whitespace-pre-wrap font-sans text-slate-700">{WINNING_EMAIL}</pre>
+                </div>
+            </div>
+        );
+    }
+
+    function LogicTrap({ inventory, onSuccess }) {
+        const [sequence, setSequence] = useState([]);
+        const [error, setError] = useState(false);
+        const correctOrder = inventory; 
+        const handleSelect = (animal) => {
+            setError(false);
+            const newSeq = [...sequence, animal];
+            setSequence(newSeq);
+            const currentIndex = newSeq.length - 1;
+            if (newSeq[currentIndex] !== correctOrder[currentIndex]) {
+                setError(true);
+                setTimeout(() => setSequence([]), 1000); 
+            } else if (newSeq.length === correctOrder.length) {
+                setTimeout(onSuccess, 500);
             }
-            
-            function prevSlide() {
-                currentIndex = (currentIndex - 1 + items.length) % items.length;
-                updateCarousel();
-            }
-            
-            // Event listeners for buttons
-            nextBtn.addEventListener('click', nextSlide);
-            prevBtn.addEventListener('click', prevSlide);
-            
-            // Event listeners for dots
-            dots.forEach((dot, index) => {
-                dot.addEventListener('click', () => {
-                    currentIndex = index;
-                    updateCarousel();
-                });
-            });
-            
-            // Auto-advance the carousel every 8 seconds
-            setInterval(nextSlide, 8000);
-            
-            // Keyboard navigation
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'ArrowRight') {
-                    nextSlide();
-                } else if (e.key === 'ArrowLeft') {
-                    prevSlide();
-                }
-            });
-        });
-    </script>
-</body>
-</html>
+        };
+        return (
+            <div className="bg-white p-6 rounded-2xl shadow-xl text-center">
+                <h2 className="text-2xl font-bold text-red-600 mb-2">Wait! The Cow is stuck!</h2>
+                <p className="text-slate-600 mb-6">To return to the Old Lady, click the animals in the <strong>exact order</strong> you found them.</p>
+                <div className="flex justify-center gap-2 mb-8 h-12">
+                    {sequence.map((anim, i) => <span key={i} className="px-3 py-2 bg-blue-100 text-blue-800 rounded font-bold border border-blue-300 animate-pop">{anim}</span>)}
+                </div>
+                {error && <div className="mb-4 text-red-500 font-bold flex items-center justify-center gap-2"><AlertCircle size={20} /> Wrong order! Resetting...</div>}
+                <div className="flex flex-wrap justify-center gap-3">
+                    {[...new Set(inventory)].sort().map((anim) => (
+                    <button key={anim} disabled={sequence.includes(anim) || error} onClick={() => handleSelect(anim)} className="px-4 py-3 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 rounded-lg font-bold disabled:opacity-50 transition-colors">{anim}</button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    function GameEngine({ stageData, questionIndex, setQuestionIndex, onStageComplete, currentLocation }) {
+        const [status, setStatus] = useState('playing'); 
+        const handleCorrect = () => {
+            setStatus('correct');
+            setTimeout(() => {
+                setStatus('playing');
+                if (questionIndex < 4) setQuestionIndex(prev => prev + 1);
+                else onStageComplete();
+            }, 1500);
+        };
+        const handleWrong = () => {
+            setStatus('wrong');
+            setTimeout(() => setStatus('playing'), 1000);
+        };
+        const currentQuestion = stageData.questions[questionIndex];
+        const bgClass = status === 'correct' ? 'bg-green-50 border-green-400' : status === 'wrong' ? 'bg-red-50 border-red-400' : 'bg-white border-slate-200';
+
+        return (
+            <div className={`p-6 rounded-2xl shadow-xl border-4 transition-colors duration-300 ${bgClass} relative overflow-hidden`}>
+                <div className="flex justify-between items-center mb-4 text-sm font-bold text-slate-500">
+                    <div className="flex items-center
