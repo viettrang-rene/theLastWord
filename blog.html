@@ -1,155 +1,393 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vietnamese Recipes & Shopping List</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
+    <title>Old Lady Story Quiz</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
-        .card { background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        /* --- CORE STYLES --- */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a1a1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            user-select: none;
+        }
+
+        /* --- LOADING SCREEN --- */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #111;
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease;
+        }
+
+        .spinner {
+            border: 4px solid #333;
+            border-top: 4px solid #4ade80; /* Green for the fly/nature theme */
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* --- GAME CONTAINER --- */
+        #game-wrapper {
+            position: relative;
+            display: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.7);
+            border: 2px solid #555;
+            border-radius: 4px;
+        }
+
+        canvas {
+            background-color: #222;
+            display: block;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #fff;
+            text-shadow: 2px 2px 0px #000;
+            pointer-events: none;
+        }
+
+        /* --- MODALS (Game Over & Questions) --- */
+        .modal {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(20, 20, 20, 0.98);
+            padding: 30px;
+            text-align: center;
+            border-radius: 12px;
+            border: 2px solid #4ade80; /* Green border */
+            width: 80%;
+            max-width: 450px;
+            display: none;
+            z-index: 100;
+        }
+
+        .modal h2 { margin-top: 0; color: #4ade80; font-size: 28px; }
+        .modal p { font-size: 20px; margin-bottom: 24px; color: #fff; line-height: 1.4; }
+
+        /* Buttons */
+        .btn {
+            background-color: #166534; /* Dark green */
+            color: white;
+            border: 1px solid #4ade80;
+            padding: 12px 24px;
+            font-size: 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 8px 0;
+            width: 100%;
+            font-weight: 600;
+        }
+
+        .btn:hover { background-color: #4ade80; color: #000; }
+        .btn:active { transform: scale(0.98); }
+
+        /* Specific styles for Game Over */
+        #game-over-modal { border-color: #ef4444; }
+        #game-over-modal h2 { color: #ef4444; }
+        #restart-btn { width: auto; background-color: #991b1b; border-color: #ef4444; }
+        #restart-btn:hover { background-color: #ef4444; color: white; }
+
     </style>
 </head>
-<body class="p-6">
+<body>
 
-    <div class="max-w-4xl mx-auto space-y-6">
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <div style="color: #ccc; letter-spacing: 1px;">Loading Story Assets...</div>
+    </div>
+
+    <div id="game-wrapper">
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+        <div id="ui-layer">Score: <span id="score-display">0</span></div>
         
-        <header class="text-center mb-8">
-            <h1 class="text-3xl font-bold text-green-700 flex items-center justify-center gap-2">
-                <i data-lucide="chef-hat"></i>
-                Vietnamese Recipes & Shopping List
-            </h1>
-            <p class="text-gray-600">Lên thực đơn và danh sách mua sắm dễ dàng</p>
-        </header>
-
-        <div class="grid md:grid-cols-2 gap-6">
-            
-            <div class="card p-6">
-                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-orange-600">
-                    <i data-lucide="book-open"></i> Gợi ý Món Ăn
-                </h2>
-                
-                <div class="space-y-3" id="recipe-list">
-                    <div class="border p-3 rounded-lg hover:bg-orange-50 transition cursor-pointer group">
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium">Phở Bò</span>
-                            <button onclick="addRecipeToShoppingList('Phở Bò')" class="text-sm bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 flex items-center gap-1">
-                                <i data-lucide="plus" class="w-4 h-4"></i> Thêm
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Bánh phở, thịt bò, xương ống, thảo mộc...</p>
-                    </div>
-
-                    <div class="border p-3 rounded-lg hover:bg-orange-50 transition cursor-pointer group">
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium">Bánh Mì Chảo</span>
-                            <button onclick="addRecipeToShoppingList('Bánh Mì Chảo')" class="text-sm bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 flex items-center gap-1">
-                                <i data-lucide="plus" class="w-4 h-4"></i> Thêm
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Trứng, pate, xúc xích, dưa leo, bánh mì...</p>
-                    </div>
-
-                     <div class="border p-3 rounded-lg hover:bg-orange-50 transition cursor-pointer group">
-                        <div class="flex justify-between items-center">
-                            <span class="font-medium">Gỏi Cuốn</span>
-                            <button onclick="addRecipeToShoppingList('Gỏi Cuốn')" class="text-sm bg-green-100 text-green-700 px-2 py-1 rounded hover:bg-green-200 flex items-center gap-1">
-                                <i data-lucide="plus" class="w-4 h-4"></i> Thêm
-                            </button>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-1">Tôm, thịt ba chỉ, bánh tráng, rau sống...</p>
-                    </div>
+        <div id="question-modal" class="modal">
+            <h2 id="q-title">Quiz Time!</h2>
+            <p id="q-text">Question text goes here...</p>
+            <div id="q-options">
                 </div>
-            </div>
+        </div>
 
-            <div class="card p-6">
-                <h2 class="text-xl font-semibold mb-4 flex items-center gap-2 text-blue-600">
-                    <i data-lucide="shopping-cart"></i> Danh sách mua sắm
-                </h2>
-
-                <div class="flex gap-2 mb-4">
-                    <input type="text" id="newItemInput" placeholder="Thêm món cần mua..." 
-                        class="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
-                    <button onclick="addItem()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-                        <i data-lucide="plus"></i>
-                    </button>
-                </div>
-
-                <ul id="shopping-list" class="space-y-2 mb-4 max-h-80 overflow-y-auto">
-                    <li class="flex items-center gap-2 p-2 bg-gray-50 rounded">
-                        <input type="checkbox" class="w-5 h-5 accent-blue-600">
-                        <span class="flex-1">Nước mắm</span>
-                    </li>
-                </ul>
-
-                <div class="border-t pt-4 flex justify-between items-center">
-                    <span id="item-count" class="text-sm text-gray-500">1 mục</span>
-                    <button onclick="deleteSelected()" class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center gap-1">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i> Xóa mục đã chọn
-                    </button>
-                </div>
-            </div>
-
+        <div id="game-over-modal" class="modal">
+            <h2>GAME OVER</h2>
+            <p>Final Score: <span id="final-score-val" style="color: white; font-weight: bold;">0</span></p>
+            <button id="restart-btn" class="btn" onclick="resetGame()">Try Again</button>
         </div>
     </div>
 
     <script>
-        // 1. Initialize Icons
-        lucide.createIcons();
+        // --- CONFIGURATION ---
+        
+        // THEME: There Was an Old Lady Who Swallowed a Fly
+        const questionBank = [
+            { 
+                q: "What did the old lady swallow FIRST?", 
+                options: ["A spider", "A fly", "A bird", "A cow"], 
+                correct: 1 
+            },
+            { 
+                q: "I don't know why she swallowed a fly. Perhaps she'll ____.", 
+                options: ["cry", "fly", "die", "lie"], 
+                correct: 2 
+            },
+            { 
+                q: "She swallowed the spider to catch the ____.", 
+                options: ["bird", "cat", "fly", "dog"], 
+                correct: 2 
+            },
+            { 
+                q: "The spider wriggled and ____ inside her.", 
+                options: ["giggled", "jiggled", "danced", "jumped"], 
+                correct: 1 
+            },
+            { 
+                q: "How many legs does a spider have?", 
+                options: ["Six", "Eight", "Ten", "Four"], 
+                correct: 1 
+            },
+            { 
+                q: "What animal did she swallow to catch the spider?", 
+                options: ["A bird", "A cat", "A dog", "A horse"], 
+                correct: 0 
+            },
+            { 
+                q: "She swallowed the dog to catch the ____.", 
+                options: ["cat", "bird", "spider", "cow"], 
+                correct: 0 
+            },
+            { 
+                q: "Which animal was the BIGGEST?", 
+                options: ["The dog", "The goat", "The cow", "The horse"], 
+                correct: 3 
+            },
+            { 
+                q: "She's dead, of ____!", 
+                options: ["course", "horse", "force", "source"], 
+                correct: 0 
+            },
+            { 
+                q: "What happened after she swallowed the horse?", 
+                options: ["She felt full", "She died", "She slept", "She burped"], 
+                correct: 1 
+            }
+        ];
 
-        // 2. Shopping List Logic
-        const listEl = document.getElementById('shopping-list');
-        const inputEl = document.getElementById('newItemInput');
-        const countEl = document.getElementById('item-count');
+        const QUESTION_INTERVAL = 50; // Ask question every 50 points
 
-        // Allow pressing Enter to add
-        inputEl.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') addItem();
-        });
+        // --- DOM ELEMENTS ---
+        const loadingOverlay = document.getElementById('loading-overlay');
+        const gameWrapper = document.getElementById('game-wrapper');
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score-display');
+        
+        // Modals
+        const questionModal = document.getElementById('question-modal');
+        const qText = document.getElementById('q-text');
+        const qOptions = document.getElementById('q-options');
+        
+        const gameOverModal = document.getElementById('game-over-modal');
+        const finalScoreVal = document.getElementById('final-score-val');
 
-        function addItem(text = null) {
-            const value = text || inputEl.value.trim();
-            if (!value) return;
+        // --- GAME STATE ---
+        let gameRunning = false;
+        let isPausedForQuestion = false;
+        let score = 0;
+        let nextQuestionThreshold = QUESTION_INTERVAL;
+        let animationId;
+        
+        // Player (Blue Square)
+        const player = { x: 380, y: 550, w: 40, h: 40, color: '#4ade80', speed: 8 };
+        
+        // Enemies (Red Circles - representing the animals/obstacles)
+        let enemies = [];
+        let frameCount = 0;
+        let enemySpeed = 3;
 
-            const li = document.createElement('li');
-            li.className = "flex items-center gap-2 p-2 bg-gray-50 rounded hover:bg-gray-100 transition";
-            li.innerHTML = `
-                <input type="checkbox" class="w-5 h-5 accent-blue-600 cursor-pointer">
-                <span class="flex-1 cursor-pointer" onclick="this.previousElementSibling.click()">${value}</span>
-            `;
+        // Inputs
+        const keys = { ArrowLeft: false, ArrowRight: false };
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            setTimeout(() => {
+                loadingOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    loadingOverlay.style.display = 'none';
+                    gameWrapper.style.display = 'block';
+                    startGame();
+                }, 500);
+            }, 1500);
+        };
+
+        window.addEventListener('keydown', e => { if(keys.hasOwnProperty(e.key)) keys[e.key] = true; });
+        window.addEventListener('keyup', e => { if(keys.hasOwnProperty(e.key)) keys[e.key] = false; });
+
+        // --- CORE FUNCTIONS ---
+        function startGame() {
+            gameRunning = true;
+            isPausedForQuestion = false;
+            loop();
+        }
+
+        function resetGame() {
+            score = 0;
+            scoreDisplay.innerText = '0';
+            nextQuestionThreshold = QUESTION_INTERVAL;
+            enemies = [];
+            player.x = canvas.width / 2 - 20;
+            frameCount = 0;
+            enemySpeed = 3;
             
-            listEl.appendChild(li);
-            if (!text) inputEl.value = ''; // Clear input if typed
-            updateCount();
+            gameOverModal.style.display = 'none';
+            questionModal.style.display = 'none';
+            startGame();
         }
 
-        function deleteSelected() {
-            const checkboxes = listEl.querySelectorAll('input[type="checkbox"]:checked');
-            checkboxes.forEach(cb => cb.parentElement.remove());
-            updateCount();
+        function triggerQuestion() {
+            isPausedForQuestion = true;
+            gameRunning = false; // Stop loop
+            
+            // Pick random question
+            const q = questionBank[Math.floor(Math.random() * questionBank.length)];
+            
+            qText.innerText = q.q;
+            qOptions.innerHTML = ''; // Clear old buttons
+
+            // Create buttons
+            q.options.forEach((opt, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'btn';
+                btn.innerText = opt;
+                btn.onclick = () => handleAnswer(index, q.correct);
+                qOptions.appendChild(btn);
+            });
+
+            questionModal.style.display = 'block';
         }
 
-        function updateCount() {
-            const count = listEl.children.length;
-            countEl.innerText = count + " mục";
+        function handleAnswer(selectedIndex, correctIndex) {
+            if (selectedIndex === correctIndex) {
+                // CORRECT: Bonus points, Hide modal, Resume
+                score += 20; 
+                scoreDisplay.innerText = score;
+                // Push the threshold so we don't ask again immediately
+                nextQuestionThreshold = (Math.floor(score / QUESTION_INTERVAL) + 1) * QUESTION_INTERVAL;
+                
+                questionModal.style.display = 'none';
+                isPausedForQuestion = false;
+                gameRunning = true;
+                loop();
+            } else {
+                // WRONG: Game Over
+                questionModal.style.display = 'none';
+                gameOver();
+            }
         }
 
-        // Helper to add ingredients from recipes (Simulated)
-        function addRecipeToShoppingList(recipeName) {
-            // Mapping recipe names to simple ingredients
-            const ingredients = {
-                'Phở Bò': ['Bánh phở', 'Thịt bò'],
-                'Bánh Mì Chảo': ['Bánh mì', 'Pate', 'Trứng'],
-                'Gỏi Cuốn': ['Bánh tráng', 'Tôm', 'Thịt heo']
-            };
+        function gameOver() {
+            gameRunning = false;
+            cancelAnimationFrame(animationId);
+            finalScoreVal.innerText = score;
+            gameOverModal.style.display = 'block';
+        }
 
-            const itemsToAdd = ingredients[recipeName] || [recipeName];
-            itemsToAdd.forEach(item => addItem(item));
-            alert(`Đã thêm nguyên liệu cho món: ${recipeName}`);
+        function update() {
+            if (isPausedForQuestion) return;
+
+            // 1. Move Player
+            if (keys.ArrowLeft && player.x > 0) player.x -= player.speed;
+            if (keys.ArrowRight && player.x < canvas.width - player.w) player.x += player.speed;
+
+            // 2. Spawn Enemies
+            frameCount++;
+            let spawnRate = Math.max(20, 60 - Math.floor(score / 50) * 5);
+            if (frameCount % spawnRate === 0) {
+                const size = Math.random() * 30 + 20;
+                enemies.push({ 
+                    x: Math.random() * (canvas.width - size), 
+                    y: -size, 
+                    w: size, h: size 
+                });
+            }
+
+            // 3. Update Enemies
+            for (let i = 0; i < enemies.length; i++) {
+                let e = enemies[i];
+                e.y += (enemySpeed + (score / 150));
+
+                // Collision
+                if (player.x < e.x + e.w && player.x + player.w > e.x &&
+                    player.y < e.y + e.h && player.h + player.y > e.y) {
+                    gameOver();
+                    return;
+                }
+
+                // Scoring
+                if (e.y > canvas.height) {
+                    enemies.splice(i, 1);
+                    i--;
+                    score += 10;
+                    scoreDisplay.innerText = score;
+
+                    // Check for Question Phase
+                    if (score >= nextQuestionThreshold) {
+                        triggerQuestion();
+                        return; // Stop update to prevent movement during pause
+                    }
+                }
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Player
+            ctx.fillStyle = player.color;
+            ctx.fillRect(player.x, player.y, player.w, player.h);
+
+            // Draw Enemies
+            ctx.fillStyle = '#ef4444'; // Red
+            enemies.forEach(e => {
+                ctx.beginPath();
+                ctx.arc(e.x + e.w/2, e.y + e.h/2, e.w/2, 0, Math.PI*2);
+                ctx.fill();
+            });
+        }
+
+        function loop() {
+            if (!gameRunning) return;
+            update();
+            draw();
+            animationId = requestAnimationFrame(loop);
         }
     </script>
 </body>
