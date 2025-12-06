@@ -153,7 +153,419 @@
   </style>
 </head>
 <body>
+<script src="https://cdn.tailwindcss.com"></script>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/lucide-react@latest/dist/umd/lucide-react.js"></script>
 
+<script>
+    // This prevents Tailwind from resetting your existing website's fonts/headers
+    tailwind.config = {
+        corePlugins: { preflight: false }
+    }
+</script>
+
+<style>
+    /* Game Container - Makes it look like a nice app card */
+    #esl-game-wrapper {
+        font-family: ui-sans-serif, system-ui, sans-serif; /* Modern font */
+        background-color: #f8fafc; /* Light grey background */
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 20px;
+        margin: 40px auto; /* Centers the game */
+        max-width: 800px;  /* Keeps it readable width */
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Reset styles just for the game so it looks right */
+    #esl-game-wrapper *, #esl-game-wrapper *::before, #esl-game-wrapper *::after {
+        box-sizing: border-box;
+    }
+    
+    /* Animations */
+    @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
+    .animate-pop { animation: pop 0.3s ease-in-out; }
+    
+    @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+    .animate-shake { animation: shake 0.4s ease-in-out; }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+</style>
+
+<div id="esl-game-wrapper">
+    <div id="root">Loading Game...</div>
+</div>
+
+<script type="text/babel">
+    const { useState, useEffect } = React;
+    const { 
+        Bug, Bird, Cat, Dog, Hexagon, 
+        Map: MapIcon, Library, Palette, Utensils, 
+        Dumbbell, Music, Flag, CheckCircle, XCircle, 
+        ArrowRight, RefreshCw, Trophy, AlertCircle 
+    } = lucideReact;
+
+    /* --- DATA --- */
+    const LOCATIONS = [
+        { id: 'art', label: 'Art Room', icon: <Palette className="w-8 h-8" /> },
+        { id: 'lib', label: 'Library', icon: <Library className="w-8 h-8" /> },
+        { id: 'can', label: 'Canteen', icon: <Utensils className="w-8 h-8" /> },
+        { id: 'gym', label: 'Gym', icon: <Dumbbell className="w-8 h-8" /> },
+        { id: 'mus', label: 'Music Room', icon: <Music className="w-8 h-8" /> },
+        { id: 'fld', label: 'Football Field', icon: <Flag className="w-8 h-8" /> },
+    ];
+
+    const STAGES = [
+        {
+            animal: 'Spider', icon: <Bug className="w-6 h-6" />, type: 'HANGMAN',
+            intro: "To catch the fly, I need a Spider! Solve these words to find one.",
+            questions: [
+                { answer: "ORGANISING", hint: "Planning/arranging" },
+                { answer: "DECORATE", hint: "Making the room look nice" },
+                { answer: "BALLOONS", hint: "Floating party items" },
+                { answer: "SUMMER", hint: "The season of the event" },
+                { answer: "AMAZING", hint: "Adjective for 'very good'" }
+            ]
+        },
+        {
+            animal: 'Bird', icon: <Bird className="w-6 h-6" />, type: 'CLOZE',
+            intro: "To catch the spider, I need a Bird! Choose the correct prepositions.",
+            questions: [
+                { text: "Thanks ___ your email.", options: ["at", "for", "on"], answer: "for" },
+                { text: "Give my love ___ your parents.", options: ["to", "at", "with"], answer: "to" },
+                { text: "Lots ___ love,", options: ["of", "off", "on"], answer: "of" },
+                { text: "Say 'Hi' ___ your sister.", options: ["to", "for", "by"], answer: "to" },
+                { text: "That's all ___ me.", options: ["from", "by", "of"], answer: "from" }
+            ]
+        },
+        {
+            animal: 'Cat', icon: <Cat className="w-6 h-6" />, type: 'UNSCRAMBLE',
+            intro: "To catch the bird, I need a Cat! Put the words in the correct order.",
+            questions: [
+                { words: ["How", "are", "things?"], answer: "How are things?" },
+                { words: ["I", "hope", "to", "see", "you", "soon."], answer: "I hope to see you soon." },
+                { words: ["The", "event", "is", "next", "Saturday."], answer: "The event is next Saturday." },
+                { words: ["It", "is", "going", "to", "be", "amazing."], answer: "It is going to be amazing." },
+                { words: ["We", "are", "selling", "pizza", "and", "ice cream."], answer: "We are selling pizza and ice cream." }
+            ]
+        },
+        {
+            animal: 'Dog', icon: <Dog className="w-6 h-6" />, type: 'ORDERING',
+            intro: "To catch the cat, I need a Dog! Arrange the sentence chunks logically.",
+            questions: [
+                { chunks: ["your email.", "Hi Sam,", "Thanks for"], answer: "Hi Sam, Thanks for your email." },
+                { chunks: ["exciting news.", "because I have", "I am writing"], answer: "I am writing because I have exciting news." },
+                { chunks: ["and dancing.", "students singing", "We have ten"], answer: "We have ten students singing and dancing." },
+                { chunks: ["watch the show?", "like to come", "Would you"], answer: "Would you like to come watch the show?" },
+                { chunks: ["Best wishes.", "for now,", "That's all"], answer: "That's all for now, Best wishes." }
+            ]
+        },
+        {
+            animal: 'Goat', icon: <Hexagon className="w-6 h-6" />, type: 'MULTIPLE_CHOICE',
+            intro: "To catch the dog, I need a Goat! Select the best phrase for the context.",
+            questions: [
+                { prompt: "You want to ask about their life.", options: ["How are things?", "Who are you?"], answer: "How are things?" },
+                { prompt: "You want to mention the time.", options: ["The event is next Saturday.", "The event is going to be amazing."], answer: "The event is next Saturday." },
+                { prompt: "You want to give them a ticket.", options: ["I can get you a free ticket.", "Buy a ticket now."], answer: "I can get you a free ticket." },
+                { prompt: "You want to say you are finished writing.", options: ["That's all from me.", "I am stopping."], answer: "That's all from me." },
+                { prompt: "You want to sign off warmly.", options: ["Best wishes,", "Goodbye sir,"], answer: "Best wishes," }
+            ]
+        }
+    ];
+
+    const WINNING_EMAIL = `
+Hi Sam,
+
+Thanks for your email. How are things?
+I am writing because I have exciting news.
+
+The event is next Saturday. We have ten students singing and dancing.
+It is going to be amazing. We are selling pizza and ice cream.
+
+I can get you a free ticket. Would you like to come watch the show?
+
+That's all for now. Give my love to your parents.
+
+Best wishes,
+[Your Name]
+    `;
+
+    /* --- COMPONENTS --- */
+
+    function OldLadySchoolGame() {
+        const [view, setView] = useState('intro');
+        const [stageIndex, setStageIndex] = useState(0); 
+        const [questionIndex, setQuestionIndex] = useState(0); 
+        const [inventory, setInventory] = useState([]);
+        const [currentLocation, setCurrentLocation] = useState(null);
+        
+        const handleStartGame = () => setView('map');
+        const handleLocationClick = (loc) => {
+            setCurrentLocation(loc);
+            setQuestionIndex(0);
+            setView('game');
+        };
+        const handleStageComplete = () => {
+            const collectedAnimal = STAGES[stageIndex].animal;
+            const newInventory = [...inventory, collectedAnimal];
+            setInventory(newInventory);
+            if (stageIndex < STAGES.length - 1) {
+                setStageIndex(stageIndex + 1);
+                setView('map');
+            } else {
+                setView('logicTrap');
+            }
+        };
+        const handleLogicTrapSuccess = () => setView('victory');
+
+        return (
+            <div className="flex flex-col items-center p-2 text-slate-800 w-full">
+                {/* HEADER */}
+                <header className="w-full bg-white shadow-sm rounded-xl p-3 mb-6 flex justify-between items-center border-b-4 border-slate-300">
+                    <div className="bg-yellow-400 p-2 rounded-full shadow-sm">
+                        <span className="font-bold text-yellow-900 text-xs md:text-sm">$1B REWARD</span>
+                    </div>
+                    <div className="flex gap-2 flex-wrap justify-end">
+                        {inventory.map((anim, i) => (
+                            <div key={i} className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold border border-green-300">
+                                {anim}
+                            </div>
+                        ))}
+                    </div>
+                </header>
+
+                <main className="w-full flex-grow">
+                    {view === 'intro' && <IntroScreen onStart={handleStartGame} />}
+                    {view === 'map' && <MapScreen onLocationSelect={handleLocationClick} stageIndex={stageIndex} />}
+                    {view === 'game' && (
+                    <GameEngine 
+                        stageData={STAGES[stageIndex]} 
+                        questionIndex={questionIndex}
+                        setQuestionIndex={setQuestionIndex}
+                        onStageComplete={handleStageComplete}
+                        currentLocation={currentLocation}
+                    />
+                    )}
+                    {view === 'logicTrap' && <LogicTrap inventory={inventory} onSuccess={handleLogicTrapSuccess} />}
+                    {view === 'victory' && <VictoryScreen />}
+                </main>
+            </div>
+        );
+    }
+
+    function IntroScreen({ onStart }) {
+        return (
+            <div className="bg-white p-6 rounded-2xl shadow text-center border-2 border-slate-200">
+                <div className="mb-4 flex justify-center"><div className="w-20 h-20 bg-purple-100 rounded-full flex items-center justify-center"><span className="text-4xl">👵</span></div></div>
+                <h1 className="text-2xl font-extrabold text-slate-900 mb-2">The Old Lady's School Search</h1>
+                <p className="text-base text-slate-600 mb-6">I swallowed a fly! Oh my, oh my! <br/>Help me find animals to catch it.</p>
+                <button onClick={onStart} className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-8 rounded-full text-lg transition-all shadow-lg transform hover:scale-105">Start Searching</button>
+            </div>
+        );
+    }
+
+    function MapScreen({ onLocationSelect, stageIndex }) {
+        const currentTarget = STAGES[stageIndex];
+        return (
+            <div className="bg-white p-4 rounded-2xl shadow border-2 border-slate-200">
+                <div className="text-center mb-4">
+                    <h2 className="text-lg font-bold text-slate-700">Where should we look?</h2>
+                    <div className="flex items-center justify-center gap-2 mt-2 text-purple-600 bg-purple-50 py-2 rounded-lg text-sm">
+                        <span>Hunting for:</span> {currentTarget.icon} <span className="font-bold">{currentTarget.animal}</span>
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                    {LOCATIONS.map((loc) => (
+                    <button key={loc.id} onClick={() => onLocationSelect(loc)} className="flex flex-col items-center justify-center p-4 bg-slate-50 hover:bg-blue-50 border-2 border-slate-200 hover:border-blue-400 rounded-xl transition-all gap-2 group">
+                        <div className="text-slate-500 group-hover:text-blue-500 transition-colors">{loc.icon}</div>
+                        <span className="font-bold text-sm text-slate-700">{loc.label}</span>
+                    </button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    function VictoryScreen() {
+        return (
+            <div className="bg-white p-6 rounded-2xl shadow border-4 border-yellow-400 text-center animate-fade-in">
+                <div className="flex justify-center mb-4"><Trophy className="w-16 h-16 text-yellow-500" /></div>
+                <h2 className="text-2xl font-bold text-slate-800 mb-2">CONGRATULATIONS!</h2>
+                <div className="bg-slate-50 p-4 rounded-lg text-left border border-slate-200 font-mono text-xs md:text-sm shadow-inner mb-6 overflow-auto max-h-60">
+                    <pre className="whitespace-pre-wrap font-sans text-slate-700">{WINNING_EMAIL}</pre>
+                </div>
+                <div className="bg-green-100 p-2 rounded text-green-800 font-bold">Reward: $1,000,000,000</div>
+            </div>
+        );
+    }
+
+    function LogicTrap({ inventory, onSuccess }) {
+        const [sequence, setSequence] = useState([]);
+        const [error, setError] = useState(false);
+        const correctOrder = inventory; 
+        const handleSelect = (animal) => {
+            setError(false);
+            const newSeq = [...sequence, animal];
+            setSequence(newSeq);
+            const currentIndex = newSeq.length - 1;
+            if (newSeq[currentIndex] !== correctOrder[currentIndex]) {
+                setError(true);
+                setTimeout(() => setSequence([]), 1000); 
+            } else if (newSeq.length === correctOrder.length) {
+                setTimeout(onSuccess, 500);
+            }
+        };
+        return (
+            <div className="bg-white p-6 rounded-2xl shadow text-center">
+                <h2 className="text-xl font-bold text-red-600 mb-2">Wait! The Cow is stuck!</h2>
+                <p className="text-slate-600 text-sm mb-6">To return to the Old Lady, click the animals in the <strong>exact order</strong> you found them.</p>
+                <div className="flex justify-center gap-2 mb-6 h-10">
+                    {sequence.map((anim, i) => <span key={i} className="px-2 py-1 bg-blue-100 text-blue-800 text-sm rounded font-bold border border-blue-300 animate-pop">{anim}</span>)}
+                </div>
+                {error && <div className="mb-4 text-red-500 font-bold text-sm flex items-center justify-center gap-2"><AlertCircle size={16} /> Wrong order! Resetting...</div>}
+                <div className="flex flex-wrap justify-center gap-2">
+                    {[...new Set(inventory)].sort().map((anim) => (
+                    <button key={anim} disabled={sequence.includes(anim) || error} onClick={() => handleSelect(anim)} className="px-3 py-2 bg-slate-100 hover:bg-slate-200 border-2 border-slate-300 rounded-lg text-sm font-bold disabled:opacity-50 transition-colors">{anim}</button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    function GameEngine({ stageData, questionIndex, setQuestionIndex, onStageComplete, currentLocation }) {
+        const [status, setStatus] = useState('playing'); 
+        const handleCorrect = () => {
+            setStatus('correct');
+            setTimeout(() => {
+                setStatus('playing');
+                if (questionIndex < 4) setQuestionIndex(prev => prev + 1);
+                else onStageComplete();
+            }, 1500);
+        };
+        const handleWrong = () => {
+            setStatus('wrong');
+            setTimeout(() => setStatus('playing'), 1000);
+        };
+        const currentQuestion = stageData.questions[questionIndex];
+        const bgClass = status === 'correct' ? 'bg-green-50 border-green-400' : status === 'wrong' ? 'bg-red-50 border-red-400' : 'bg-white border-slate-200';
+
+        return (
+            <div className={`p-4 md:p-6 rounded-2xl shadow border-4 transition-colors duration-300 ${bgClass} relative overflow-hidden`}>
+                <div className="flex justify-between items-center mb-4 text-xs font-bold text-slate-500">
+                    <div className="flex items-center gap-1">{currentLocation?.label} <ArrowRight size={12} /> {questionIndex + 1}/5</div>
+                    <div className="flex items-center gap-1 text-purple-600">Target: {stageData.animal}</div>
+                </div>
+                <div className="w-full bg-slate-200 h-2 rounded-full mb-6 overflow-hidden"><div className="bg-green-500 h-full transition-all duration-500" style={{ width: `${((questionIndex) / 5) * 100}%` }}/></div>
+                <h3 className="text-base text-slate-700 mb-6 font-medium text-center italic">{stageData.intro}</h3>
+                <div className="mt-4">
+                    {stageData.type === 'HANGMAN' && <HangmanGame word={currentQuestion.answer} hint={currentQuestion.hint} onSuccess={handleCorrect} status={status} />}
+                    {stageData.type === 'CLOZE' && <ClozeGame data={currentQuestion} onSuccess={handleCorrect} onFail={handleWrong} status={status} />}
+                    {stageData.type === 'UNSCRAMBLE' && <UnscrambleGame data={currentQuestion} onSuccess={handleCorrect} status={status} />}
+                    {stageData.type === 'ORDERING' && <OrderingGame data={currentQuestion} onSuccess={handleCorrect} status={status} />}
+                    {stageData.type === 'MULTIPLE_CHOICE' && <MultipleChoiceGame data={currentQuestion} onSuccess={handleCorrect} onFail={handleWrong} status={status} />}
+                </div>
+                {status === 'correct' && <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm rounded-xl"><CheckCircle className="w-16 h-16 text-green-600 animate-bounce" /></div>}
+                {status === 'wrong' && <div className="absolute inset-0 z-50 flex items-center justify-center bg-white/50 backdrop-blur-sm rounded-xl"><XCircle className="w-16 h-16 text-red-600 animate-shake" /></div>}
+            </div>
+        );
+    }
+
+    /* --- MINIGAMES (Simplified for Embed) --- */
+    function HangmanGame({ word, hint, onSuccess, status }) {
+        const [guessed, setGuessed] = useState([]);
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        useEffect(() => setGuessed([]), [word]);
+        const handleGuess = (letter) => {
+            const newGuessed = [...guessed, letter];
+            setGuessed(newGuessed);
+            if (word.split('').every(char => newGuessed.includes(char) || char === ' ')) onSuccess();
+        };
+        return (
+            <div className="flex flex-col items-center">
+                <div className="bg-blue-50 px-3 py-1 rounded text-blue-700 text-sm font-bold mb-4">Hint: {hint}</div>
+                <div className="flex gap-1 mb-6 flex-wrap justify-center">{word.split('').map((char, i) => <div key={i} className="w-8 h-10 border-b-4 border-slate-800 flex items-center justify-center text-xl font-bold uppercase text-slate-800">{guessed.includes(char) || char === ' ' ? char : ''}</div>)}</div>
+                <div className="flex flex-wrap justify-center gap-1 max-w-xs">{letters.map(letter => <button key={letter} disabled={guessed.includes(letter) || status !== 'playing'} onClick={() => handleGuess(letter)} className="w-7 h-9 bg-slate-200 hover:bg-slate-300 disabled:bg-slate-100 disabled:text-slate-300 rounded font-bold text-slate-700 text-sm transition-colors">{letter}</button>)}</div>
+            </div>
+        );
+    }
+    function ClozeGame({ data, onSuccess, onFail, status }) {
+        const parts = data.text.split("___");
+        return (
+            <div className="flex flex-col items-center gap-4">
+                <div className="text-xl font-medium text-slate-800 text-center leading-loose">{parts[0]}<span className="inline-block px-3 py-1 mx-1 bg-slate-200 border-b-4 border-slate-400 rounded min-w-[60px]">?</span>{parts[1]}</div>
+                <div className="flex gap-2 flex-wrap justify-center">{data.options.map(opt => <button key={opt} disabled={status !== 'playing'} onClick={() => opt === data.answer ? onSuccess() : onFail()} className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition-transform active:scale-95">{opt}</button>)}</div>
+            </div>
+        );
+    }
+    function UnscrambleGame({ data, onSuccess, status }) {
+        const [currentOrder, setCurrentOrder] = useState([]);
+        const [shuffledPool, setShuffledPool] = useState([]);
+        useEffect(() => { setShuffledPool([...data.words].sort(() => Math.random() - 0.5)); setCurrentOrder([]); }, [data]);
+        const handlePoolClick = (word, index) => {
+            const newPool = [...shuffledPool];
+            newPool.splice(index, 1);
+            setShuffledPool(newPool);
+            setCurrentOrder([...currentOrder, word]);
+        };
+        const handleOrderClick = (word, index) => {
+            const newOrder = [...currentOrder];
+            newOrder.splice(index, 1);
+            setCurrentOrder(newOrder);
+            setShuffledPool([...shuffledPool, word]);
+        };
+        useEffect(() => { if (shuffledPool.length === 0 && currentOrder.length > 0 && currentOrder.join(' ') === data.answer) onSuccess(); }, [currentOrder, shuffledPool]);
+        return (
+            <div className="flex flex-col items-center gap-4">
+                <div className="min-h-[60px] w-full bg-slate-100 border-2 border-dashed border-slate-300 rounded-xl p-3 flex flex-wrap gap-2 justify-center items-center">
+                    {currentOrder.length === 0 && <span className="text-slate-400 text-sm">Tap words to build sentence</span>}
+                    {currentOrder.map((word, i) => <button key={i} onClick={() => handleOrderClick(word, i)} className="px-2 py-1 bg-white border border-blue-300 text-blue-800 font-bold rounded shadow-sm text-sm">{word}</button>)}
+                </div>
+                <div className="flex flex-wrap gap-2 justify-center">{shuffledPool.map((word, i) => <button key={i} disabled={status !== 'playing'} onClick={() => handlePoolClick(word, i)} className="px-3 py-2 bg-blue-600 text-white font-bold rounded shadow hover:bg-blue-700 text-sm transition-colors">{word}</button>)}</div>
+                <button onClick={() => { setCurrentOrder([]); setShuffledPool([...data.words]); }} className="text-slate-500 text-xs flex items-center gap-1 hover:text-slate-800"><RefreshCw size={12} /> Reset</button>
+            </div>
+        );
+    }
+    function OrderingGame({ data, onSuccess, status }) {
+        const [currentOrder, setCurrentOrder] = useState([]);
+        const [shuffledPool, setShuffledPool] = useState([]);
+        useEffect(() => { setShuffledPool([...data.chunks].sort(() => Math.random() - 0.5)); setCurrentOrder([]); }, [data]);
+        const handlePoolClick = (chunk, index) => {
+            const newPool = [...shuffledPool];
+            newPool.splice(index, 1);
+            setShuffledPool(newPool);
+            const newOrder = [...currentOrder, chunk];
+            setCurrentOrder(newOrder);
+            if (newPool.length === 0) {
+                if (newOrder.join(' ') === data.answer) onSuccess();
+                else setTimeout(() => { setCurrentOrder([]); setShuffledPool([...data.chunks]); }, 500);
+            }
+        };
+        return (
+            <div className="flex flex-col items-center gap-4">
+                <div className="w-full bg-slate-50 p-3 rounded-xl border border-slate-200 min-h-[80px] flex flex-col gap-2 justify-center">
+                    {currentOrder.map((chunk, i) => <div key={i} className="w-full bg-blue-100 text-blue-800 p-2 rounded text-center text-sm font-medium border border-blue-200">{chunk}</div>)}
+                    {currentOrder.length === 0 && <span className="text-center text-slate-400 text-sm">Tap chunks to order</span>}
+                </div>
+                <div className="flex flex-col w-full gap-2">{shuffledPool.map((chunk, i) => <button key={i} disabled={status !== 'playing'} onClick={() => handlePoolClick(chunk, i)} className="w-full p-3 bg-white border-2 border-slate-300 rounded-lg hover:border-purple-500 hover:text-purple-700 font-bold text-slate-600 shadow-sm transition-all text-sm">{chunk}</button>)}</div>
+            </div>
+        );
+    }
+    function MultipleChoiceGame({ data, onSuccess, onFail, status }) {
+        return (
+            <div className="flex flex-col gap-4">
+                <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200 text-yellow-800 font-medium text-center text-sm">{data.prompt}</div>
+                <div className="grid gap-2">{data.options.map(opt => <button key={opt} disabled={status !== 'playing'} onClick={() => opt === data.answer ? onSuccess() : onFail()} className="p-3 bg-white border-2 border-slate-200 rounded-xl hover:bg-blue-50 hover:border-blue-500 text-left font-bold text-slate-700 transition-all flex items-center gap-2 text-sm"><div className="w-4 h-4 rounded-full border-2 border-slate-300 flex-shrink-0" />{opt}</button>)}</div>
+            </div>
+        );
+    }
+
+    // --- RENDER ---
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<OldLadySchoolGame />);
+</script>  
 <header>
   <h1>🍲 Vietnamese Recipes & Shopping List</h1>
 </header>
@@ -335,3 +747,4 @@
 
 </body>
 </html>
+
